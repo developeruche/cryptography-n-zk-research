@@ -1,0 +1,18 @@
+[submodule "ecdsa-rust"]
+	path = ecdsa-rust
+	url = https://github.com/developeruche/ecdsa-rust
+[submodule "kzg-airdrop-bn254"]
+	path = kzg-airdrop-bn254
+	url = https://github.com/developeruche/kzg-airdrop-bn254
+[submodule "kzg-commitment-rust"]
+	path = kzg-commitment-rust
+	url = https://github.com/developeruche/kzg-commitment-rust
+[submodule "light-tornodo-cash"]
+	path = light-tornodo-cash
+	url = https://github.com/developeruche/light-tornodo-cash
+[submodule "non-interactive-chaum-pedersen-lib"]
+	path = non-interactive-chaum-pedersen-lib
+	url = https://github.com/developeruche/non-interactive-chaum-pedersen-lib
+[submodule "vrf-rust-solidity"]
+	path = vrf-rust-solidity
+	url = https://github.com/developeruche/vrf-rust-solidity
