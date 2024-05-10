@@ -1,3 +1,5 @@
+use core::Signature;
+
 use sha256::digest;
 
 use lambdaworks_math::{cyclic_group::IsGroup, elliptic_curve::{short_weierstrass::curves::bls12_381::curve::BLS12381Curve, traits::IsEllipticCurve}, traits::{AsBytes, ByteConversion}, unsigned_integer::element::U256};
@@ -7,7 +9,7 @@ pub mod core;
 
 
 /// This function is used to sign a message over a generic elliptic curve and generic hash function.
-pub fn sign(private_key: U256, message: String) -> anyhow::Result<(U256, U256), anyhow::Error> {
+pub fn sign(private_key: U256, message: String) -> anyhow::Result<Signature, anyhow::Error> {
     // Generate out very secured random scalar
     let mut randomness_engine = rand::thread_rng();
     let raw_k = digest(randomness_engine.gen_range(0..100).to_string());
@@ -25,18 +27,11 @@ pub fn sign(private_key: U256, message: String) -> anyhow::Result<(U256, U256), 
     // s = k - e * private_key
     let s = k - (e * private_key);
 
-    Ok((s, e))
+    Ok(
+        Signature::new(s, e)
+    )
 }
 
-/// This function is used for verifying a signature over a message
-fn verify() {
-
-}
-
-/// This function is used to generate a new key pair
-fn new_key_pair() {
-
-}
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
@@ -44,11 +39,15 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::KeyPair;
+
     use super::*;
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        let key_pair = KeyPair::new(U256::from(123456789u128));
+        let message = "Hello, world!".to_string();
+        let signature = sign(key_pair.private_key, message.clone()).unwrap();
+        assert!(signature.verify(message, key_pair.public_key).unwrap());
     }
 }
