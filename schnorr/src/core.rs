@@ -1,4 +1,4 @@
-use lambdaworks_math::{cyclic_group::IsGroup, elliptic_curve::{short_weierstrass::curves::bls12_381::curve::BLS12381Curve, traits::IsEllipticCurve}, unsigned_integer::{element::U256}};
+pub use lambdaworks_math::{cyclic_group::IsGroup, elliptic_curve::{short_weierstrass::curves::bls12_381::curve::BLS12381Curve, traits::IsEllipticCurve}, unsigned_integer::{element::U256}};
 use lambdaworks_math::traits::{AsBytes, ByteConversion};
 
 
