@@ -1,6 +1,7 @@
 use ark_poly::{univariate::DensePolynomial, Evaluations, Polynomial};
 pub mod interface;
 pub mod univariant;
+pub mod utils;
 
 pub fn add(left: usize, right: usize) -> usize {
 
