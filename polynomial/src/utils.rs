@@ -15,9 +15,8 @@ pub fn get_langrange_basis<F: Field>(domain: &Vec<F>, y_s: &Vec<F>) -> Vec<Univa
 
             // basis_element *= "x - domain[j]" / (domain[i] - domain[j]);
             let numerator = UnivariantPolynomial::from_coefficients_vec(vec![-domain[j], F::one()]);
-            let mut  denominator = domain[i] - domain[j];
-            denominator.neg_in_place();
-            basis_element = numerator * UnivariantPolynomial::from_coefficients_vec(vec![denominator]);
+            let denominator = domain[i] - domain[j];
+            basis_element = numerator * UnivariantPolynomial::from_coefficients_vec(vec![-denominator]);
         }
 
         basis.push(basis_element * UnivariantPolynomial::from_coefficients_vec(vec![y_s[i]]));

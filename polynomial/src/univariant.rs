@@ -5,7 +5,7 @@ use ark_ff::Field;
 use crate::{interface::{PolynomialInterface, UnivariantPolynomialInterface}, utils::get_langrange_basis};
 
 
-#[derive(Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
     pub coefficients: Vec<F>,
 }
@@ -16,7 +16,11 @@ impl<F: Field> PolynomialInterface<F> for UnivariantPolynomial<F> {
 
     /// This function returns the total degree of the polynomial
     fn degree(&self) -> usize {
-        self.coefficients.len() - 1
+        if self.coefficients.is_empty() {
+            0
+        } else {
+            self.coefficients.len() - 1
+        }
     }
 
     /// This function evaluates the polynomial at a given point
@@ -155,7 +159,7 @@ impl<F: Field> Add for UnivariantPolynomial<F> {
 
     fn add(self, other: Self) -> Self {
         let result = if self.degree() >= other.degree() {
-            let mut result_coff = self.coefficients.clone();
+            let mut result_coff = Vec::new();
 
             for i in 0..self.coefficients.len() {
                 result_coff.push(self.coefficients[i] + other.coefficients.get(i).unwrap_or(&F::zero()));
@@ -163,7 +167,7 @@ impl<F: Field> Add for UnivariantPolynomial<F> {
 
             UnivariantPolynomial::from_coefficients_vec(result_coff)
         } else {
-            let mut result_coff = self.coefficients.clone();
+            let mut result_coff = Vec::new();
 
             for i in 0..other.coefficients.len() {
                 result_coff.push(other.coefficients[i] + self.coefficients.get(i).unwrap_or(&F::zero()));
@@ -191,5 +195,50 @@ impl<F: Field> AddAssign for UnivariantPolynomial<F> {
 
             self.coefficients = result_coff;
         }
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+
+
+    #[test]
+    fn test_univariant_polynomial_addtion() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
+        let poly3 = poly1.clone() + poly2.clone();
+
+        assert_eq!(poly3.coefficients, vec![Fr::from(2), Fr::from(4), Fr::from(6)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_addtion_assign() {
+        let mut poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
+        poly1 += poly2.clone();
+
+        assert_eq!(poly1.coefficients, vec![Fr::from(2), Fr::from(4), Fr::from(6)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_multiplication() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(3), Fr::from(2)]);
+
+        let poly3 = poly1.clone() * poly2.clone();
+        assert_eq!(poly3.coefficients, vec![Fr::from(3), Fr::from(11), Fr::from(12), Fr::from(4)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_interpolation() {
+        let point_ys = vec![Fr::from(0), Fr::from(4), Fr::from(16)];
+        let domain = vec![Fr::from(0), Fr::from(2), Fr::from(4)];
+
+        let poly = UnivariantPolynomial::interpolate(point_ys, domain);
+        assert_eq!(poly.coefficients, vec![Fr::from(0), Fr::from(0), Fr::from(1)]);
     }
 }
