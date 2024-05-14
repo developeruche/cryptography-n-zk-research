@@ -13,6 +13,9 @@ pub trait PolynomialInterface<F: Field> {
 
     /// Evaluates `self` at the given `point` in `Self::Point`.
     fn evaluate(&self, point: &Self::Point) -> F;
+
+    /// Checks if the polynomial is zero
+    fn is_zero(&self) -> bool;
 }
 
 

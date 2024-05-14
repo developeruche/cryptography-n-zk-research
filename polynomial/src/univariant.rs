@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul};
 
 use ark_ff::Field;
 
@@ -35,6 +35,10 @@ impl<F: Field> PolynomialInterface<F> for UnivariantPolynomial<F> {
 
         sum
     }
+
+    fn is_zero(&self) -> bool {
+        self.coefficients.is_empty()
+    }
 }
 
 
@@ -62,13 +66,10 @@ impl<F: Field> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
     /// params: point_ys: Vec<F> - a list of y values
     /// params: domain: Vec<F> - a list of x values
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self {
-        let mut coefficients = UnivariantPolynomial::default();
+        let langrange_poly_vec = get_langrange_basis(&domain, &point_ys);
+        let langrange_poly = langrange_poly_vec.iter().fold(UnivariantPolynomial::default(), |acc, x| acc + x.clone());
 
-        // Get the langrange basis
-        let langrange_basis = get_langrange_basis(&domain);
-        coefficients = point_ys.iter().zip(langrange_basis.iter()).map(|(y, basis)| y * basis);
-
-        coefficients
+        langrange_poly
     }
 }
 
@@ -99,24 +100,55 @@ impl<F: Field> UnivariantPolynomial<F> {
     }
 }
 
-// impl<F: Field> Mul for UnivariantPolynomial<F> {
-//     type Output = Self;
+impl<F: Field> Mul for UnivariantPolynomial<F> {
+    type Output = Self;
 
-//     fn mul(self, other: Self) -> Self {
-//         let mut result = UnivariantPolynomial::default();
+    fn mul(self, other: Self) -> Self {
+        // check for zero polynomials
+        if self.is_zero() || other.is_zero() {
+            return UnivariantPolynomial::new(vec![]);
+        }
 
-//         for i in 0..self.coefficients.len() {
-//             for j in 0..other.coefficients.len() {
-//                 let mut new_coefficient = self.coefficients[i] * other.coefficients[j];
-//                 let mut new_degree = i + j;
+        // Create a new polynomial with the degree of the two polynomials
+        let poly_product_degree = self.degree() + other.degree();
 
-//                 result.coefficients[new_degree] += new_coefficient;
-//             }
-//         }
+        // during poly mul we would need d + 1 element to represent a polynomial of degree d
+        let mut poly_product_coefficients = vec![F::zero(); poly_product_degree + 1];
 
-//         result
-//     }
-// }
+        for i in 0..=self.degree() {
+            for j in 0..=other.degree() {
+                poly_product_coefficients[i + j] += self.coefficients[i] * other.coefficients[j];
+            }
+        }
+
+        UnivariantPolynomial::new(poly_product_coefficients)
+    }
+}
+
+impl<F: Field> Mul for &UnivariantPolynomial<F> {
+    type Output = UnivariantPolynomial<F>;
+
+    fn mul(self, other: Self) -> Self::Output {
+        // check for zero polynomials
+        if self.is_zero() || other.is_zero() {
+            return UnivariantPolynomial::new(vec![]);
+        }
+
+        // Create a new polynomial with the degree of the two polynomials
+        let poly_product_degree = self.degree() + other.degree();
+
+        // during poly mul we would need d + 1 element to represent a polynomial of degree d
+        let mut poly_product_coefficients = vec![F::zero(); poly_product_degree + 1];
+
+        for i in 0..=self.degree() {
+            for j in 0..=other.degree() {
+                poly_product_coefficients[i + j] += self.coefficients[i] * other.coefficients[j];
+            }
+        }
+
+        UnivariantPolynomial::new(poly_product_coefficients)
+    }
+}
 
 impl<F: Field> Add for UnivariantPolynomial<F> {
     type Output = Self;
@@ -141,5 +173,23 @@ impl<F: Field> Add for UnivariantPolynomial<F> {
         };
 
         result
+    }
+}
+
+impl<F: Field> AddAssign for UnivariantPolynomial<F> {
+    fn add_assign(&mut self, rhs: Self) {
+        if self.degree() >= rhs.degree() {
+            for i in 0..self.coefficients.len() {
+                self.coefficients[i] += rhs.coefficients.get(i).unwrap_or(&F::zero());
+            }
+        } else {
+            let mut result_coff = self.coefficients.clone();
+
+            for i in 0..rhs.coefficients.len() {
+                result_coff.push(rhs.coefficients[i] + self.coefficients.get(i).unwrap_or(&F::zero()));
+            }
+
+            self.coefficients = result_coff;
+        }
     }
 }
