@@ -1,0 +1,8 @@
+[package]
+name = "bls-multi-sign-threshold-wallet"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+polynomial = {path = "../polynomial"}
+rand = "0.8.5"

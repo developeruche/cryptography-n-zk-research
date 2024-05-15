@@ -1,12 +1,13 @@
 use std::ops::{Add, AddAssign, Mul};
-
 use ark_ff::Field;
-
 use crate::{interface::{PolynomialInterface, UnivariantPolynomialInterface}, utils::get_langrange_basis};
+pub use ark_test_curves;
+
 
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
+    /// This is the co-coefficients of the polynomial
     pub coefficients: Vec<F>,
 }
 
@@ -65,7 +66,6 @@ impl<F: Field> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
     /// params: point_ys: Vec<F> - a list of y values
     /// params: domain: Vec<F> - a list of x values
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self {
-        println!("inner0 :: domain {:?} -- y {:?}", domain.clone(), point_ys.clone());
         let langrange_poly_vec = get_langrange_basis(&domain, &point_ys);
         let langrange_poly = langrange_poly_vec.iter().fold(UnivariantPolynomial::new(vec![]), |acc, x| acc + x.clone());
 
