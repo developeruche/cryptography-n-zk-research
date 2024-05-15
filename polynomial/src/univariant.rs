@@ -29,15 +29,10 @@ impl<F: Field> PolynomialInterface<F> for UnivariantPolynomial<F> {
     /// evaluate(2) = 1 + 3*2 + 2*2^2 = 1 + 6 + 8 = 15
     /// evaluate(2) = 15
     fn evaluate(&self, x: &F) -> F {
-        let mut sum = self.coefficients[0].clone();
-        let mut varaiable = x.clone();
-
-        for i in 1..self.coefficients.len() {
-            sum += self.coefficients[i] * varaiable;
-            varaiable *= varaiable;
-        }
-
-        sum
+        self.coefficients
+            .iter()
+            .rev()
+            .fold(F::zero(), |acc, coeff| acc * x + coeff)
     }
 
     fn is_zero(&self) -> bool {
@@ -70,8 +65,9 @@ impl<F: Field> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
     /// params: point_ys: Vec<F> - a list of y values
     /// params: domain: Vec<F> - a list of x values
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self {
+        println!("inner0 :: domain {:?} -- y {:?}", domain.clone(), point_ys.clone());
         let langrange_poly_vec = get_langrange_basis(&domain, &point_ys);
-        let langrange_poly = langrange_poly_vec.iter().fold(UnivariantPolynomial::default(), |acc, x| acc + x.clone());
+        let langrange_poly = langrange_poly_vec.iter().fold(UnivariantPolynomial::new(vec![]), |acc, x| acc + x.clone());
 
         langrange_poly
     }
@@ -243,11 +239,42 @@ mod tests {
     }
 
     #[test]
-    fn test_univariant_polynomial_interpolation() {
+    fn test_univariant_polynomial_interpolation_1() {
         let point_ys = vec![Fr::from(0), Fr::from(4), Fr::from(16)];
         let domain = vec![Fr::from(0), Fr::from(2), Fr::from(4)];
 
         let poly = UnivariantPolynomial::interpolate(point_ys, domain);
         assert_eq!(poly.coefficients, vec![Fr::from(0), Fr::from(0), Fr::from(1)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_interpolation_2() {
+        let point_ys = vec![Fr::from(5), Fr::from(7), Fr::from(13)];
+        let domain = vec![Fr::from(0), Fr::from(1), Fr::from(2)];
+
+        let poly = UnivariantPolynomial::interpolate(point_ys, domain);
+        assert_eq!(poly.coefficients, vec![Fr::from(5), Fr::from(0), Fr::from(2)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_interpolation_3() {
+        // fq_from_vec(vec![0, 1, 3, 4, 5, 8]),
+        // fq_from_vec(vec![12, 48, 3150, 11772, 33452, 315020]),
+        let point_ys = vec![Fr::from(12), Fr::from(48), Fr::from(3150), Fr::from(11772), Fr::from(33452), Fr::from(315020)];
+        let domain = vec![Fr::from(0), Fr::from(1), Fr::from(3), Fr::from(4), Fr::from(5), Fr::from(8)];
+
+        let poly = UnivariantPolynomial::interpolate(point_ys, domain);
+        let eval = poly.evaluate(&Fr::from(3));
+        println!("{:?}", eval);
+        assert_eq!(poly.coefficients, vec![Fr::from(12), Fr::from(8), Fr::from(1), Fr::from(7), Fr::from(12), Fr::from(8)]);
+    }
+
+    #[test]
+    fn test_univariant_polynomial_interpolation_4() {
+        let point_ys = vec![Fr::from(565), Fr::from(1631), Fr::from(3537), Fr::from(-7)];
+        let domain = vec![Fr::from(5), Fr::from(7), Fr::from(9), Fr::from(1)];
+
+        let poly = UnivariantPolynomial::interpolate(point_ys, domain);
+        assert_eq!(poly.coefficients, vec![Fr::from(0), Fr::from(-12), Fr::from(0), Fr::from(5)]);
     }
 }

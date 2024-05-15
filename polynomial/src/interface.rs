@@ -27,5 +27,5 @@ pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
     /// This function creates a new polynomial from a list of coefficients vector
     fn from_coefficients_vec(coeffs: Vec<F>) -> Self;
     /// This function is used to create a new univariate polynomial using an interpolation
-    fn interpolate(point_xs: Vec<F>, domain: Vec<F>) -> Self;
+    fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self;
 }

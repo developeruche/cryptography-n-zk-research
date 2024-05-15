@@ -5,6 +5,10 @@ use crate::{interface::UnivariantPolynomialInterface, univariant::UnivariantPoly
 pub fn get_langrange_basis<F: Field>(domain: &Vec<F>, y_s: &Vec<F>) -> Vec<UnivariantPolynomial<F>> {
     let mut basis = Vec::new();
 
+    if domain.len() != y_s.len() {
+        panic!("The length of domain and y_s should be the same: {}, {}", domain.len(), y_s.len());
+    }
+
     for i in 0..domain.len() {
         let mut basis_element = UnivariantPolynomial::new(vec![F::one()]);
 
