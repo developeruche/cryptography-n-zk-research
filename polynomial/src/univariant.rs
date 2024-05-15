@@ -234,6 +234,15 @@ mod tests {
     }
 
     #[test]
+    fn test_univariant_polynomial_multiplication_scalar() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(3)]);
+
+        let poly3 = poly1.clone() * poly2.clone();
+        assert_eq!(poly3.coefficients, vec![Fr::from(3), Fr::from(9), Fr::from(6)]);
+    }
+
+    #[test]
     fn test_univariant_polynomial_interpolation() {
         let point_ys = vec![Fr::from(0), Fr::from(4), Fr::from(16)];
         let domain = vec![Fr::from(0), Fr::from(2), Fr::from(4)];
