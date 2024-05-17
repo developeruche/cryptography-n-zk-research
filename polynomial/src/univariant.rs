@@ -199,6 +199,7 @@ impl<F: Field> AddAssign for UnivariantPolynomial<F> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ark_poly::{evaluations::multivariate::multilinear, multivariate};
     use ark_test_curves::bls12_381::Fr;
 
 
@@ -276,5 +277,7 @@ mod tests {
 
         let poly = UnivariantPolynomial::interpolate(point_ys, domain);
         assert_eq!(poly.coefficients, vec![Fr::from(0), Fr::from(-12), Fr::from(0), Fr::from(5)]);
+
+        let multi_poly = multilinear::
     }
 }
