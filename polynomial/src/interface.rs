@@ -28,9 +28,11 @@ pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self;
 }
 
-pub trait MultivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
+pub trait MultivariantPolynomialInterface<F: Field> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;
     /// This function creates a new polynomial from a list of evaluations
     fn partial_evaluation(&self, evaluation_point: F) -> Self;
+    /// This function is used to evaluate the polynomial at a given point
+    fn evaluate(&self, point: &Vec<F>) -> Option<F>;
 }

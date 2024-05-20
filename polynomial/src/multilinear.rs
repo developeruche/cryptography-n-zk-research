@@ -27,27 +27,6 @@ impl<F: Field> Multilinear<F> {
     }
 }
 
-/// Implement the PolynomialInterface for Multilinear
-impl<F: Field> PolynomialInterface<F> for Multilinear<F> {
-    /// The type of evaluation points for this polynomial.
-    type Point = Vec<F>;
-
-    /// Return the total degree of the polynomial
-    fn degree(&self) -> usize {
-        // I have not been able to figure out how to calculate the degree of a multilinear polynomial... YET!
-        unimplemented!()
-    }
-
-    /// Evaluates `self` at the given `point` in `Self::Point`. this is done using partial evaluations
-    fn evaluate(&self, point: &Self::Point) -> F {
-        unimplemented!()
-    }
-
-    /// Checks if the polynomial is zero
-    fn is_zero(&self) -> bool {
-        self.evaluations.is_empty()
-    }
-}
 
 impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
@@ -69,6 +48,19 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
 
         Self::new(new_evaluations, self.num_vars - 1)
     }
+
+    /// Evaluates `self` at the given `point` in `Self::Point`. this is done using partial evaluations
+    fn evaluate(&self, point: &Vec<F>) -> Option<F> {
+        let mut eval_result = None;
+        let mut eval_polynomial = self.clone();
+
+        for i in 0..point.len() {
+            eval_polynomial = eval_polynomial.partial_evaluation(point[i]);
+            eval_result = Some(eval_polynomial.evaluations[0]);
+        }
+
+        eval_result
+    }
 }
 
 
@@ -89,5 +81,17 @@ mod tests {
         let expected_evaluations = vec![Fr::from(-2), Fr::from(21)];
         assert_eq!(new_polynomial.evaluations, expected_evaluations);
         assert_eq!(new_polynomial.num_vars, 1);
+    }
+
+    #[test]
+    fn test_evaluate() {
+        let evaluations = vec![Fr::from(3), Fr::from(1), Fr::from(2), Fr::from(5)];
+        let num_vars = 2;
+        let polynomial = Multilinear::new(evaluations, num_vars);
+
+        let point = vec![Fr::from(5), Fr::from(6)];
+        let eval_result = polynomial.evaluate(&point);
+
+        assert_eq!(eval_result, Some(Fr::from(136)));
     }
 }
