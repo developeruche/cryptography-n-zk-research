@@ -1,6 +1,6 @@
 use ark_ff::Field;
 
-use crate::interface::{MultivariantPolynomialInterface, PolynomialInterface};
+use crate::{interface::{MultivariantPolynomialInterface, PolynomialInterface}, utils::{multilinear_evalutation_equation, round_pairing_index}};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
@@ -56,7 +56,38 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     }
 
     /// This function creates a new polynomial from a list of evaluations
-    fn partial_evaluations(evaluations: Vec<F>, num_vars: usize) -> Self {
-        unimplemented!()
+    fn partial_evaluation(&self, evaluation_point: F) -> Self {
+        let round_pairing_indices = round_pairing_index(self.evaluations.len());
+
+        let mut new_evaluations = Vec::new();
+        for round_pair in round_pairing_indices {
+            let y_1 = self.evaluations[round_pair.0];
+            let y_2 = self.evaluations[round_pair.1];
+            let new_y = multilinear_evalutation_equation(evaluation_point, y_1, y_2);
+            new_evaluations.push(new_y);
+        }
+
+        Self::new(new_evaluations, self.num_vars - 1)
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+
+    #[test]
+    fn test_partial_evaluation() {
+        let evaluations = vec![Fr::from(3), Fr::from(1), Fr::from(2), Fr::from(5)];
+        let num_vars = 2;
+        let polynomial = Multilinear::new(evaluations, num_vars);
+
+        let evaluation_point = Fr::from(5);
+        let new_polynomial = polynomial.partial_evaluation(evaluation_point);
+
+        let expected_evaluations = vec![Fr::from(-2), Fr::from(21)];
+        assert_eq!(new_polynomial.evaluations, expected_evaluations);
+        assert_eq!(new_polynomial.num_vars, 1);
     }
 }
