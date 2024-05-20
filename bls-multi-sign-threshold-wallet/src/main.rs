@@ -1,4 +1,9 @@
-use polynomial::{ark_ff::Field, interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial, ark_test_curves::bls12_381::Fr};
+use polynomial::{
+    ark_ff::Field,
+    ark_test_curves::bls12_381::Fr,
+    interface::{PolynomialInterface, UnivariantPolynomialInterface},
+    univariant::UnivariantPolynomial,
+};
 // use polynomial::univariant::
 
 fn main() {
@@ -22,19 +27,21 @@ fn main() {
     assert!(secret == recovered_secret);
 }
 
-
-
-pub fn shamir_secret_sharing<F: Field>(threshold: usize, members: usize, secret: F) -> (Vec<F>, Vec<F>) {
+pub fn shamir_secret_sharing<F: Field>(
+    threshold: usize,
+    members: usize,
+    secret: F,
+) -> (Vec<F>, Vec<F>) {
     let mut rng = rand::thread_rng();
     let mut domain = Vec::with_capacity(threshold + 1);
     let mut y_s = Vec::with_capacity(threshold + 1);
 
     for i in 0..threshold {
-      domain.push(F::from(i as u32));
+        domain.push(F::from(i as u32));
     }
 
     for _ in 0..threshold {
-      y_s.push(F::rand(&mut rng));
+        y_s.push(F::rand(&mut rng));
     }
 
     y_s[0] = secret;
@@ -42,22 +49,21 @@ pub fn shamir_secret_sharing<F: Field>(threshold: usize, members: usize, secret:
     let poly = UnivariantPolynomial::interpolate(y_s, domain);
 
     if poly.degree() != threshold - 1 {
-      panic!("Polynomial degree is not correct");
+        panic!("Polynomial degree is not correct");
     }
 
     let mut shares_y = Vec::with_capacity(members);
     let mut shares_x = Vec::with_capacity(members);
 
     for i in 0..members {
-      let x = F::from(i as u32);
-      let y = poly.evaluate(&x);
-      shares_x.push(x);
-      shares_y.push(y);
+        let x = F::from(i as u32);
+        let y = poly.evaluate(&x);
+        shares_x.push(x);
+        shares_y.push(y);
     }
 
     (shares_x, shares_y)
 }
-
 
 pub fn recover_secret<F: Field>(shares_x: Vec<F>, shares_y: Vec<F>) -> F {
     let poly = UnivariantPolynomial::interpolate(shares_y.clone(), shares_x.clone());

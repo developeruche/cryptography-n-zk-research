@@ -1,6 +1,5 @@
 use ark_ff::Field;
 
-
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field
 pub trait PolynomialInterface<F: Field> {
@@ -17,7 +16,6 @@ pub trait PolynomialInterface<F: Field> {
     /// Checks if the polynomial is zero
     fn is_zero(&self) -> bool;
 }
-
 
 pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
     /// This function returs an array of co-efficents of this polynomial
