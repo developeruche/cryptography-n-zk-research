@@ -14,6 +14,16 @@ pub struct Multilinear<F> {
 }
 
 
+impl <F: Field> Multilinear<F> {
+    /// This function creates a new multilinear polynomial from a list of evaluations
+    pub fn new(evaluations: Vec<F>, num_vars: usize) -> Self {
+        // SANITY_CHECK: Ensure that the number of evaluations is equal to the number of variables raised to power of 2
+        assert_eq!(evaluations.len(), 1 << num_vars, "Number of evaluations must be equal to 2^num_vars");
+        Self { num_vars, evaluations }
+    }
+}
+
+
 
 /// Implement the PolynomialInterface for Multilinear
 impl <F: Field> PolynomialInterface<F> for Multilinear<F> {
@@ -22,6 +32,7 @@ impl <F: Field> PolynomialInterface<F> for Multilinear<F> {
 
     /// Return the total degree of the polynomial
     fn degree(&self) -> usize {
+        // I have not been able to figure out how to calculate the degree of a multilinear polynomial... YET!
         unimplemented!()
     }
 
@@ -32,19 +43,14 @@ impl <F: Field> PolynomialInterface<F> for Multilinear<F> {
 
     /// Checks if the polynomial is zero
     fn is_zero(&self) -> bool {
-        unimplemented!()
+        self.evaluations.is_empty()
     }
 }
 
 impl <F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize {
-        unimplemented!()
-    }
-
-    /// This function returns the evaluations of the polynomial at the different points
-    fn evaluations(&self) -> &[F] {
-        unimplemented!()
+        self.num_vars
     }
 
     /// This function creates a new polynomial from a list of evaluations

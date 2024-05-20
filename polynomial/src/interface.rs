@@ -33,8 +33,6 @@ pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
 pub trait MultivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;
-    /// This function returns the evaluations of the polynomial at the different points
-    fn evaluations(&self) -> &[F];
     /// This function creates a new polynomial from a list of evaluations
     fn partial_evaluations(evaluations: Vec<F>, num_vars: usize) -> Self;
 }
