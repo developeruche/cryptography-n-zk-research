@@ -48,7 +48,7 @@ pub fn multilinear_evalutation_equation<F: Field>(x: F, y_1: F, y_2: F) -> F {
 }
 
 /// returns a vector of (y_1, y_2)
-pub fn round_pairing_index(len: usize) ->Vec<(usize, usize)> {
+pub fn round_pairing_index(len: usize) -> Vec<(usize, usize)> {
     let mut result = Vec::new();
     for y_1 in 0..len / 2 {
         result.push((y_1, (len / 2) + y_1));
@@ -56,7 +56,6 @@ pub fn round_pairing_index(len: usize) ->Vec<(usize, usize)> {
 
     result
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,9 @@
 use ark_ff::Field;
 
-use crate::{interface::{MultivariantPolynomialInterface, PolynomialInterface}, utils::{multilinear_evalutation_equation, round_pairing_index}};
+use crate::{
+    interface::{MultivariantPolynomialInterface, PolynomialInterface},
+    utils::{multilinear_evalutation_equation, round_pairing_index},
+};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
@@ -26,7 +29,6 @@ impl<F: Field> Multilinear<F> {
         }
     }
 }
-
 
 impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
@@ -62,7 +64,6 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
         eval_result
     }
 }
-
 
 #[cfg(test)]
 mod tests {
