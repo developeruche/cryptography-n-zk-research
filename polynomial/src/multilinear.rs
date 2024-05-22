@@ -95,4 +95,18 @@ mod tests {
 
         assert_eq!(eval_result, Some(Fr::from(136)));
     }
+
+    #[test]
+    fn test_partial_evaluation_2() {
+        let evaluations = vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2), Fr::from(2), Fr::from(2), Fr::from(2), Fr::from(4)];
+        let num_vars = 3;
+        let polynomial = Multilinear::new(evaluations, num_vars);
+
+        // [y, z] -> poly(x)
+        // How can we achieve [x, z] -> poly(y)
+        let point = vec![Fr::from(2), Fr::from(1)];
+        let eval_result = polynomial.evaluate(&point);
+
+        println!("Currrent Eval: {:?}", eval_result);
+    }
 }
