@@ -38,7 +38,7 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
 
     /// This function creates a new polynomial from a list of evaluations
     fn partial_evaluation(&self, evaluation_point: F) -> Self {
-        let round_pairing_indices = round_pairing_index(self.evaluations.len());
+        let round_pairing_indices = round_pairing_index(self.evaluations.len(), 0);
 
         let mut new_evaluations = Vec::new();
         for round_pair in round_pairing_indices {
