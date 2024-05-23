@@ -1,7 +1,7 @@
 use ark_ff::Field;
 
 use crate::{
-    interface::{MultivariantPolynomialInterface, PolynomialInterface},
+    interface::MultivariantPolynomialInterface,
     utils::{multilinear_evalutation_equation, round_pairing_index},
 };
 
@@ -37,8 +37,8 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     }
 
     /// This function creates a new polynomial from a list of evaluations
-    fn partial_evaluation(&self, evaluation_point: F) -> Self {
-        let round_pairing_indices = round_pairing_index(self.evaluations.len(), 0);
+    fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self {
+        let round_pairing_indices = round_pairing_index(self.evaluations.len(), variable_index);
 
         let mut new_evaluations = Vec::new();
         for round_pair in round_pairing_indices {
@@ -57,7 +57,7 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
         let mut eval_polynomial = self.clone();
 
         for i in 0..point.len() {
-            eval_polynomial = eval_polynomial.partial_evaluation(point[i]);
+            eval_polynomial = eval_polynomial.partial_evaluation(point[i], 0);
             eval_result = Some(eval_polynomial.evaluations[0]);
         }
 
@@ -77,7 +77,7 @@ mod tests {
         let polynomial = Multilinear::new(evaluations, num_vars);
 
         let evaluation_point = Fr::from(5);
-        let new_polynomial = polynomial.partial_evaluation(evaluation_point);
+        let new_polynomial = polynomial.partial_evaluation(evaluation_point, 0);
 
         let expected_evaluations = vec![Fr::from(-2), Fr::from(21)];
         assert_eq!(new_polynomial.evaluations, expected_evaluations);
@@ -98,15 +98,15 @@ mod tests {
 
     #[test]
     fn test_partial_evaluation_2() {
-        let evaluations = vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2), Fr::from(2), Fr::from(2), Fr::from(2), Fr::from(4)];
+        let evaluations = vec![Fr::from(3), Fr::from(9), Fr::from(7), Fr::from(13), Fr::from(6), Fr::from(12), Fr::from(10), Fr::from(18)];
         let num_vars = 3;
         let polynomial = Multilinear::new(evaluations, num_vars);
 
-        // [y, z] -> poly(x)
-        // How can we achieve [x, z] -> poly(y)
-        let point = vec![Fr::from(2), Fr::from(1)];
+        let point = vec![Fr::from(2), Fr::from(3), Fr::from(1)];
         let eval_result = polynomial.evaluate(&point);
 
-        println!("Currrent Eval: {:?}", eval_result);
+        assert_eq!(eval_result, Some(Fr::from(39)));
+
+        let new_polynomial = polynomial.partial_evaluation(Fr::from(2), 0);
     }
 }

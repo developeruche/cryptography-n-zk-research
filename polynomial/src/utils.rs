@@ -64,8 +64,7 @@ pub fn round_pairing_index_ext(len: usize, log_iterations: usize) -> Vec<(usize,
 
     println!("Current iter: {:?}", iterations);
 
-    for i in 0..iterations {
-        println!("Each iter input: {:?} - {:?}", len / iterations, result.len() * 2);
+    for _ in 0..iterations {
         let round = round_pairing_index(len / iterations, result.len() * 2);
         result.extend(round);
     }
