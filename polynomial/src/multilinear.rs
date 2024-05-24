@@ -2,7 +2,7 @@ use ark_ff::Field;
 
 use crate::{
     interface::MultivariantPolynomialInterface,
-    utils::{multilinear_evalutation_equation, round_pairing_index, round_pairing_index_ext},
+    utils::{multilinear_evalutation_equation, round_pairing_index_ext},
 };
 
 /// A multilinear polynomial over a field.

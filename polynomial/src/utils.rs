@@ -1,6 +1,6 @@
 use ark_ff::Field;
-
 use crate::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
+
 
 pub fn get_langrange_basis<F: Field>(
     domain: &Vec<F>,
