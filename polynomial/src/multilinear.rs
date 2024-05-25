@@ -1,3 +1,4 @@
+use std::ops::{Add, AddAssign};
 use ark_ff::Field;
 
 use crate::{
@@ -79,6 +80,40 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
         eval_result
     }
 }
+
+impl<F: Field> Add for Multilinear<F> {
+    type Output = Self;
+    
+    
+    fn add(self, other: Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
+        if self.num_vars != other.num_vars {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+        
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(self.evaluations[i] + other.evaluations[i]);
+        }
+        
+        Self::new(new_evaluations, self.num_vars)
+    }
+}
+
+
+impl<F: Field> AddAssign for Multilinear<F> {
+    fn add_assign(&mut self, other: Self) {
+        // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
+        if self.num_vars != other.num_vars {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+        
+        for i in 0..self.evaluations.len() {
+            self.evaluations[i] += other.evaluations[i];
+        }
+    }
+}
+    
 
 #[cfg(test)]
 mod tests {
