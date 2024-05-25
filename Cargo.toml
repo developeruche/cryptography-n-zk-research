@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "polynomial",
-    "bls-multi-sign-threshold-wallet", "fiat_shamir",
+    "bls-multi-sign-threshold-wallet", 
+    "fiat_shamir",
 ]
