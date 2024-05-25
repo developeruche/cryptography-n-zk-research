@@ -198,7 +198,6 @@ impl<F: Field> AddAssign for UnivariantPolynomial<F> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ark_poly::{evaluations::multivariate::multilinear, multivariate};
     use ark_test_curves::bls12_381::Fr;
 
     #[test]
