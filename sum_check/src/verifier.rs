@@ -1,11 +1,6 @@
+use crate::{data_structure::SumCheckProof, interface::VerifierInterface};
 use ark_ff::Field;
 use fiat_shamir::FiatShamirTranscript;
-use crate::{data_structure::SumCheckProof, interface::VerifierInterface};
-
-
-
-
-
 
 #[derive(Clone, Default, Debug)]
 pub struct Verifier<F: Field> {
@@ -13,8 +8,6 @@ pub struct Verifier<F: Field> {
     pub transcript: FiatShamirTranscript,
     phantom: std::marker::PhantomData<F>,
 }
-
-
 
 impl<F: Field> Verifier<F> {
     /// This function creates a new verifier instance
@@ -25,7 +18,6 @@ impl<F: Field> Verifier<F> {
         }
     }
 }
-
 
 impl<F: Field> VerifierInterface<F> for Verifier<F> {
     /// This function verifies the sum check proof
