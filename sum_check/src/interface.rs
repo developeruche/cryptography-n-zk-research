@@ -1,8 +1,6 @@
+use crate::data_structure::SumCheckProof;
 use ark_ff::Field;
 use polynomial::multilinear::Multilinear;
-use crate::data_structure::SumCheckProof;
-
-
 
 /// This trait is used to define the prover interface
 pub trait ProverInterface<F: Field> {
@@ -15,7 +13,6 @@ pub trait ProverInterface<F: Field> {
     /// This function computes sum check proof
     fn sum_check_proof(&self) -> SumCheckProof<F>;
 }
-
 
 /// The verifier interface is used to verify the sum check proof
 pub trait VerifierInterface<F: Field> {

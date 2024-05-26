@@ -1,6 +1,5 @@
-use ark_ff::Field;
 use crate::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
-
+use ark_ff::Field;
 
 pub fn get_langrange_basis<F: Field>(
     domain: &Vec<F>,
@@ -118,27 +117,75 @@ mod tests {
     fn test_round_pairing_index_ext_16_0() {
         let len = 16;
         let result = round_pairing_index_ext(len, 0);
-        assert_eq!(result, vec![(0, 8), (1, 9), (2, 10), (3, 11), (4, 12), (5, 13), (6, 14), (7, 15)]);
+        assert_eq!(
+            result,
+            vec![
+                (0, 8),
+                (1, 9),
+                (2, 10),
+                (3, 11),
+                (4, 12),
+                (5, 13),
+                (6, 14),
+                (7, 15)
+            ]
+        );
     }
 
     #[test]
     fn test_round_pairing_index_ext_16_1() {
         let len = 16;
         let result = round_pairing_index_ext(len, 1);
-        assert_eq!(result, vec![(0, 4), (1, 5), (2, 6), (3, 7), (8, 12), (9, 13), (10, 14), (11, 15)]);
+        assert_eq!(
+            result,
+            vec![
+                (0, 4),
+                (1, 5),
+                (2, 6),
+                (3, 7),
+                (8, 12),
+                (9, 13),
+                (10, 14),
+                (11, 15)
+            ]
+        );
     }
 
     #[test]
     fn test_round_pairing_index_ext_16_2() {
         let len = 16;
         let result = round_pairing_index_ext(len, 2);
-        assert_eq!(result, vec![(0, 2), (1, 3), (4, 6), (5, 7), (8, 10), (9, 11), (12, 14), (13, 15)]);
+        assert_eq!(
+            result,
+            vec![
+                (0, 2),
+                (1, 3),
+                (4, 6),
+                (5, 7),
+                (8, 10),
+                (9, 11),
+                (12, 14),
+                (13, 15)
+            ]
+        );
     }
 
     #[test]
     fn test_round_pairing_index_ext_16_3() {
         let len = 16;
         let result = round_pairing_index_ext(len, 3);
-        assert_eq!(result, vec![(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (12, 13), (14, 15)]);
+        assert_eq!(
+            result,
+            vec![
+                (0, 1),
+                (2, 3),
+                (4, 5),
+                (6, 7),
+                (8, 9),
+                (10, 11),
+                (12, 13),
+                (14, 15)
+            ]
+        );
     }
 }

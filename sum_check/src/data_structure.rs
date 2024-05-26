@@ -1,8 +1,6 @@
 use ark_ff::Field;
 use polynomial::multilinear::Multilinear;
 
-
-
 /// This struct is used to store the sum check proof
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SumCheckProof<F: Field> {

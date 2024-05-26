@@ -1,5 +1,5 @@
-use std::ops::{Add, AddAssign};
 use ark_ff::Field;
+use std::ops::{Add, AddAssign};
 
 use crate::{
     interface::MultivariantPolynomialInterface,
@@ -57,11 +57,16 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
         let mut eval_polynomial = self.clone();
 
         if evaluation_points.len() != variable_indices.len() {
-            panic!("The length of evaluation_points and variable_indices should be the same: {}, {}", evaluation_points.len(), variable_indices.len());
+            panic!(
+                "The length of evaluation_points and variable_indices should be the same: {}, {}",
+                evaluation_points.len(),
+                variable_indices.len()
+            );
         }
 
         for i in 0..evaluation_points.len() {
-            eval_polynomial = eval_polynomial.partial_evaluation(evaluation_points[i], variable_indices[i]);
+            eval_polynomial =
+                eval_polynomial.partial_evaluation(evaluation_points[i], variable_indices[i]);
         }
 
         eval_polynomial
@@ -83,23 +88,21 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
 
 impl<F: Field> Add for Multilinear<F> {
     type Output = Self;
-    
-    
+
     fn add(self, other: Self) -> Self {
         let mut new_evaluations = Vec::new();
         // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
         if self.num_vars != other.num_vars {
             panic!("The number of variables in the two polynomials must be the same");
         }
-        
+
         for i in 0..self.evaluations.len() {
             new_evaluations.push(self.evaluations[i] + other.evaluations[i]);
         }
-        
+
         Self::new(new_evaluations, self.num_vars)
     }
 }
-
 
 impl<F: Field> AddAssign for Multilinear<F> {
     fn add_assign(&mut self, other: Self) {
@@ -107,13 +110,12 @@ impl<F: Field> AddAssign for Multilinear<F> {
         if self.num_vars != other.num_vars {
             panic!("The number of variables in the two polynomials must be the same");
         }
-        
+
         for i in 0..self.evaluations.len() {
             self.evaluations[i] += other.evaluations[i];
         }
     }
 }
-    
 
 #[cfg(test)]
 mod tests {
@@ -148,7 +150,16 @@ mod tests {
 
     #[test]
     fn test_partial_evaluation_2() {
-        let evaluations = vec![Fr::from(3), Fr::from(9), Fr::from(7), Fr::from(13), Fr::from(6), Fr::from(12), Fr::from(10), Fr::from(18)];
+        let evaluations = vec![
+            Fr::from(3),
+            Fr::from(9),
+            Fr::from(7),
+            Fr::from(13),
+            Fr::from(6),
+            Fr::from(12),
+            Fr::from(10),
+            Fr::from(18),
+        ];
         let num_vars = 3;
         // 2xyz + 3x + 4y + 6z + 3
         let polynomial = Multilinear::new(evaluations, num_vars);
@@ -159,10 +170,10 @@ mod tests {
         assert_eq!(eval_result, Some(Fr::from(39)));
 
         // testing partial evaluations with multiple points
-        let new_polynomial_eval = polynomial.partial_evaluations(vec![Fr::from(2), Fr::from(3), Fr::from(1)], vec![0, 0, 0]);
+        let new_polynomial_eval = polynomial
+            .partial_evaluations(vec![Fr::from(2), Fr::from(3), Fr::from(1)], vec![0, 0, 0]);
         let x_eval_result = new_polynomial_eval.evaluations[0];
         assert_eq!(x_eval_result, Fr::from(39));
-
 
         // obtain: f(2,y,z) = 4yz + 4y + 6z + 9 at y = 3, z = 2 = 57
         let new_polynomial_x_1 = polynomial.partial_evaluation(Fr::from(2), 0);
@@ -183,19 +194,22 @@ mod tests {
         assert_eq!(z_1_eval_result, Some(Fr::from(38)));
 
         // obtain: f(2,3,z) = 18z + 21  at y = 3,  = 75
-        let new_polynomial_x_y = polynomial.partial_evaluations(vec![Fr::from(2), Fr::from(3)], vec![0, 0]);
+        let new_polynomial_x_y =
+            polynomial.partial_evaluations(vec![Fr::from(2), Fr::from(3)], vec![0, 0]);
         // 18z + 21
         let x_y_eval_result = new_polynomial_x_y.evaluate(&vec![Fr::from(3)]);
         assert_eq!(x_y_eval_result, Some(Fr::from(75)));
 
         // obtain: f(2,y,1) = 8y + 15  at y = 3, = 39
-        let new_polynomial_x_z = polynomial.partial_evaluations(vec![Fr::from(2), Fr::from(1)], vec![0, 1]);
+        let new_polynomial_x_z =
+            polynomial.partial_evaluations(vec![Fr::from(2), Fr::from(1)], vec![0, 1]);
         // 8y + 15
         let x_z_eval_result = new_polynomial_x_z.evaluate(&vec![Fr::from(3)]);
         assert_eq!(x_z_eval_result, Some(Fr::from(39)));
 
         // obtain: f(x,3,1) = 9x + 21  at y = 3, = 48
-        let new_polynomial_y_z = polynomial.partial_evaluations(vec![Fr::from(3), Fr::from(1)], vec![1, 1]);
+        let new_polynomial_y_z =
+            polynomial.partial_evaluations(vec![Fr::from(3), Fr::from(1)], vec![1, 1]);
         // 9x + 21
         let y_z_eval_result = new_polynomial_y_z.evaluate(&vec![Fr::from(3)]);
         assert_eq!(y_z_eval_result, Some(Fr::from(48)));
