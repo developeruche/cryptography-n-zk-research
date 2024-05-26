@@ -399,6 +399,11 @@ dependencies = [
 [[package]]
 name = "sum_check"
 version = "0.1.0"
+dependencies = [
+ "ark-ff",
+ "ark-test-curves",
+ "polynomial",
+]
 
 [[package]]
 name = "syn"
