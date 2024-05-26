@@ -4,6 +4,7 @@ use polynomial::multilinear::Multilinear;
 
 
 /// This struct is used to store the sum check proof
+#[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SumCheckProof<F: Field> {
     /// This vector stores the round polynomials
     pub round_poly: Vec<Multilinear<F>>,

@@ -2,7 +2,7 @@ pub mod interface;
 use sha3::{Digest, Keccak256};
 use interface::TranscriptInterface;
 
-
+#[derive(Clone, Default, Debug)]
 pub struct FiatShamirTranscript {
     hasher: Keccak256,
 }

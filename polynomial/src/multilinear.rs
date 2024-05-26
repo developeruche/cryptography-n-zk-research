@@ -10,9 +10,9 @@ use crate::{
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct Multilinear<F> {
     /// The number of variables in the polynomial.
-    num_vars: usize,
+    pub num_vars: usize,
     /// The evaluations of the polynomial at the different points.
-    evaluations: Vec<F>,
+    pub evaluations: Vec<F>,
 }
 
 impl<F: Field> Multilinear<F> {
