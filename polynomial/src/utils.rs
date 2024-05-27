@@ -61,8 +61,6 @@ pub fn round_pairing_index_ext(len: usize, log_iterations: usize) -> Vec<(usize,
     let mut result = Vec::new();
     let iterations = 1 << log_iterations;
 
-    println!("Current iter: {:?}", iterations);
-
     for _ in 0..iterations {
         let round = round_pairing_index(len / iterations, result.len() * 2);
         result.extend(round);
@@ -71,8 +69,72 @@ pub fn round_pairing_index_ext(len: usize, log_iterations: usize) -> Vec<(usize,
     result
 }
 
+
+/// This function is used to compute the boolean hypercube of length n
+/// 
+/// param n: The length of the boolean hypercube
+/// return: A vector of vectors that represents the boolean hypercube
+pub fn boolean_hypercube<F: Field>(n: usize) -> Vec<Vec<F>> {
+    let mut result = Vec::new();
+    for i in 0..1u128 << n {
+        let mut current = Vec::new();
+        for j in 0..n {
+            if (i >> j) & 1 == 1 {
+                current.push(F::one());
+            } else {
+                current.push(F::zero());
+            }
+        }
+        current.reverse();
+        result.push(current);
+    }
+
+    result
+}
+
+
+pub fn boolean_hypercube_2(n: usize) -> Vec<Vec<u8>> {
+    let mut result = Vec::new();
+    for i in 0..1u128 << n {
+        result.push(return_binary(i));
+    }
+
+    result
+}
+
+
+/// This is a function for doubling the evauation points,
+/// this is used for MLE addtion when the evauation length is not same
+pub fn double_elements<T>(arr: &[T], times: usize) -> Vec<T>
+where
+    T: Clone,
+{
+    let mut doubled_list = Vec::with_capacity(arr.len() * times);
+    
+    for element in arr.iter() {
+        for _ in 0..1 << times {
+            doubled_list.push(element.clone());
+        }
+    }
+    
+    doubled_list
+}
+
+pub fn return_binary(mut num: u128) -> Vec<u8> {
+  let mut binary: Vec<u8> = Vec::new();
+  while num > 0 {
+    binary.push((num % 2) as u8);
+    num /= 2;
+  }
+  binary.reverse();
+  binary
+}
+
+
 #[cfg(test)]
 mod tests {
+    use std::time::Instant;
+
     use super::*;
     use ark_test_curves::bls12_381::Fr;
 
@@ -187,5 +249,21 @@ mod tests {
                 (14, 15)
             ]
         );
+    }
+    
+    #[test]
+    fn test_boolean_hypercube() {
+        let now = Instant::now();
+        let result = boolean_hypercube::<Fr>(3);
+        println!("Time taken Hypercube 1: {:?}", now.elapsed());
+        println!("Result: {:?}", result);
+    }
+    
+    #[test]
+    #[ignore]
+    fn test_boolean_hypercube_2() {
+        let now = Instant::now();
+        let result = boolean_hypercube_2(4);
+        println!("Time taken for hypercube 2: {:?}", now.elapsed());
     }
 }

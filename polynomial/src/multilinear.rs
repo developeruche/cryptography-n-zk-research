@@ -1,5 +1,5 @@
 use ark_ff::Field;
-use std::ops::{Add, AddAssign};
+use std::{iter::Sum, ops::{Add, AddAssign}};
 
 use crate::{
     interface::MultivariantPolynomialInterface,
@@ -28,6 +28,21 @@ impl<F: Field> Multilinear<F> {
             num_vars,
             evaluations,
         }
+    }
+    
+    /// This function returns the additive identity of the polynomial
+    pub fn zero(num_vars: usize) -> Self {
+        Self::new(vec![F::zero(); 1 << num_vars], num_vars)
+    }
+    
+    /// This function returns the additive identity of this polynomial (self)
+    pub fn self_zero(&self) -> Self {
+        Self::zero(self.num_vars)
+    }
+    
+    /// This function is used to check if the polynomial is zero
+    pub fn is_zero(&self) -> bool {
+        self.evaluations.iter().all(|x| x.is_zero())
     }
 }
 
@@ -116,6 +131,7 @@ impl<F: Field> AddAssign for Multilinear<F> {
         }
     }
 }
+
 
 #[cfg(test)]
 mod tests {
