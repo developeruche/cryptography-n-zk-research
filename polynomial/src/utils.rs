@@ -69,9 +69,8 @@ pub fn round_pairing_index_ext(len: usize, log_iterations: usize) -> Vec<(usize,
     result
 }
 
-
 /// This function is used to compute the boolean hypercube of length n
-/// 
+///
 /// param n: The length of the boolean hypercube
 /// return: A vector of vectors that represents the boolean hypercube
 pub fn boolean_hypercube<F: Field>(n: usize) -> Vec<Vec<F>> {
@@ -92,7 +91,6 @@ pub fn boolean_hypercube<F: Field>(n: usize) -> Vec<Vec<F>> {
     result
 }
 
-
 pub fn boolean_hypercube_2(n: usize) -> Vec<Vec<u8>> {
     let mut result = Vec::new();
     for i in 0..1u128 << n {
@@ -102,7 +100,6 @@ pub fn boolean_hypercube_2(n: usize) -> Vec<Vec<u8>> {
     result
 }
 
-
 /// This is a function for doubling the evauation points,
 /// this is used for MLE addtion when the evauation length is not same
 pub fn double_elements<T>(arr: &[T], times: usize) -> Vec<T>
@@ -110,26 +107,25 @@ where
     T: Clone,
 {
     let mut doubled_list = Vec::with_capacity(arr.len() * times);
-    
+
     for element in arr.iter() {
         for _ in 0..1 << times {
             doubled_list.push(element.clone());
         }
     }
-    
+
     doubled_list
 }
 
 pub fn return_binary(mut num: u128) -> Vec<u8> {
-  let mut binary: Vec<u8> = Vec::new();
-  while num > 0 {
-    binary.push((num % 2) as u8);
-    num /= 2;
-  }
-  binary.reverse();
-  binary
+    let mut binary: Vec<u8> = Vec::new();
+    while num > 0 {
+        binary.push((num % 2) as u8);
+        num /= 2;
+    }
+    binary.reverse();
+    binary
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -250,7 +246,7 @@ mod tests {
             ]
         );
     }
-    
+
     #[test]
     fn test_boolean_hypercube() {
         let now = Instant::now();
@@ -258,7 +254,7 @@ mod tests {
         println!("Time taken Hypercube 1: {:?}", now.elapsed());
         println!("Result: {:?}", result);
     }
-    
+
     #[test]
     #[ignore]
     fn test_boolean_hypercube_2() {

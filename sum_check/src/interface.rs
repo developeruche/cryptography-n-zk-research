@@ -1,6 +1,5 @@
 use crate::data_structure::SumCheckProof;
 use ark_ff::Field;
-use polynomial::multilinear::Multilinear;
 
 /// This trait is used to define the prover interface
 pub trait ProverInterface<F: Field> {
@@ -8,10 +7,8 @@ pub trait ProverInterface<F: Field> {
     fn calculate_sum(&mut self);
     /// This function returns the round zero computed polynomial
     fn compute_round_zero_poly(&mut self);
-    /// This function returns poly cimouted in round j
-    fn compute_round_j_poly(&mut self, j: usize) -> Multilinear<F>;
     /// This function computes sum check proof
-    fn sum_check_proof(&self) -> SumCheckProof<F>;
+    fn sum_check_proof(&mut self) -> SumCheckProof<F>;
 }
 
 /// The verifier interface is used to verify the sum check proof
