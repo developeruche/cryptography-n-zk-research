@@ -285,6 +285,7 @@ mod tests {
             let pre_eval = proof.round_poly[i - 1].evaluate(&vec![Fr::from(1)]).unwrap();
             
             println!("{:?} - {:?}", sum, pre_eval);
+            
             assert_eq!(sum, pre_eval);
         }
     }
