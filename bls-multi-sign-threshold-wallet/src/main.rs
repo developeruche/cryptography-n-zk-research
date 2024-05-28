@@ -1,5 +1,5 @@
 use polynomial::{
-    ark_ff::Field,
+    ark_ff::PrimeField,
     ark_test_curves::bls12_381::Fr,
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
     univariant::UnivariantPolynomial,
@@ -27,7 +27,7 @@ fn main() {
     assert!(secret == recovered_secret);
 }
 
-pub fn shamir_secret_sharing<F: Field>(
+pub fn shamir_secret_sharing<F: PrimeField>(
     threshold: usize,
     members: usize,
     secret: F,
@@ -65,7 +65,7 @@ pub fn shamir_secret_sharing<F: Field>(
     (shares_x, shares_y)
 }
 
-pub fn recover_secret<F: Field>(shares_x: Vec<F>, shares_y: Vec<F>) -> F {
+pub fn recover_secret<F: PrimeField>(shares_x: Vec<F>, shares_y: Vec<F>) -> F {
     let poly = UnivariantPolynomial::interpolate(shares_y.clone(), shares_x.clone());
     let secret = poly.evaluate(&F::zero());
     secret

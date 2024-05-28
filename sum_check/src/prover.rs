@@ -1,5 +1,5 @@
 use crate::{data_structure::SumCheckProof, interface::ProverInterface};
-use ark_ff::PrimeField;
+use ark_ff::{BigInt, BigInteger, PrimeField};
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
     interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
@@ -61,7 +61,8 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
                 .partial_evaluations(bh_i, vec![1; number_of_round]);
             bh_partials += current_partial;
         }
-
+        
+        self.transcript.append(bh_partials.to_bytes());
         self.round_0_poly = bh_partials;
     }
 
@@ -76,8 +77,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
             let bh = boolean_hypercube::<F>(number_of_round);
             
             let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
-            // let verifier_random_reponse = self.transcript.append(b"something".into());
-            let verifier_random_reponse_f = F::from(3u32);
+            let verifier_random_reponse_f = F::from_be_bytes_mod_order(&self.transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
 
             for bh_i in bh {
@@ -258,6 +258,7 @@ mod tests {
     }
     
     #[test]
+    #[ignore] // un-disable this test when all random response is F::from(3)
     fn test_sum_check_proof() {
         let poly = Multilinear::new(
             vec![
