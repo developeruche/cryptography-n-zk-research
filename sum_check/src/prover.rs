@@ -71,12 +71,13 @@ impl<F: Field> ProverInterface<F> for Prover<F> {
         self.compute_round_zero_poly();
         let mut all_random_reponse = Vec::new();
         
-        for i in 2..self.poly.num_vars {
-            let number_of_round = self.poly.num_vars - i;
+        for i in 1..self.poly.num_vars {
+            let number_of_round = self.poly.num_vars - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
+            
             let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
-            let verifier_random_reponse = self.transcript.append(b"something".into());
-            let verifier_random_reponse_f = F::one();
+            // let verifier_random_reponse = self.transcript.append(b"something".into());
+            let verifier_random_reponse_f = F::from(3u32);
             all_random_reponse.push(verifier_random_reponse_f);
 
             for bh_i in bh {
@@ -87,11 +88,15 @@ impl<F: Field> ProverInterface<F> for Prover<F> {
                 let suffix_eval_index = vec![1; bh_len];
                 eval_index.extend(suffix_eval_index);
                 
+                
                 let current_partial = self
                     .poly
                     .partial_evaluations(eval_vector, eval_index);
+        
+                
                 bh_partials += current_partial;
             }
+            
 
             self.round_poly.push(bh_partials);
         }
@@ -258,31 +263,35 @@ mod tests {
             vec![
                 Fr::from(0),
                 Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(1),
-                Fr::from(1),
-                Fr::from(1),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(0),
+                Fr::from(2),
+                Fr::from(7),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(6),
+                Fr::from(11),
             ],
-            4,
+            3,
         );
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
         let proof = prover.sum_check_proof();
         
+        let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
+            + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+        assert_eq!(sum, Fr::from(32));
+    
+        
+        let test_eval_round_0 = proof.round_0_poly.evaluate(&vec![Fr::from(3)]).unwrap();
+        let test_eval_round_1 = prover.round_poly[0].evaluate(&vec![Fr::from(1)]).unwrap()
+            + prover.round_poly[0].evaluate(&vec![Fr::from(0)]).unwrap();
+        
+        assert_eq!(test_eval_round_0, test_eval_round_1);
+        
+        
         for i in 1..proof.round_poly.len() {
             let sum = proof.round_poly[i].evaluate(&vec![Fr::from(1)]).unwrap()
                 + proof.round_poly[i].evaluate(&vec![Fr::from(0)]).unwrap();
-            let pre_eval = proof.round_poly[i - 1].evaluate(&vec![Fr::from(1)]).unwrap();
+            let pre_eval = proof.round_poly[i - 1].evaluate(&vec![Fr::from(3)]).unwrap();
             
             println!("{:?} - {:?}", sum, pre_eval);
             
