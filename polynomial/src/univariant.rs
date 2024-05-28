@@ -2,7 +2,7 @@ use crate::{
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
     utils::get_langrange_basis,
 };
-use ark_ff::Field;
+use ark_ff::PrimeField;
 pub use ark_test_curves;
 use std::ops::{Add, AddAssign, Mul};
 
@@ -12,7 +12,7 @@ pub struct UnivariantPolynomial<F> {
     pub coefficients: Vec<F>,
 }
 
-impl<F: Field> PolynomialInterface<F> for UnivariantPolynomial<F> {
+impl<F: PrimeField> PolynomialInterface<F> for UnivariantPolynomial<F> {
     type Point = F;
 
     /// This function returns the total degree of the polynomial
@@ -41,7 +41,7 @@ impl<F: Field> PolynomialInterface<F> for UnivariantPolynomial<F> {
     }
 }
 
-impl<F: Field> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
+impl<F: PrimeField> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
     /// This function creates a new polynomial from a list of coefficients vector
     fn from_coefficients_vec(coeffs: Vec<F>) -> Self {
         UnivariantPolynomial {
@@ -75,7 +75,7 @@ impl<F: Field> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F> {
 }
 
 /// Implement the `Display` trait for `Polynomial` so that we can print it out.
-impl<F: Field> std::fmt::Display for UnivariantPolynomial<F> {
+impl<F: PrimeField> std::fmt::Display for UnivariantPolynomial<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut result = String::new();
 
@@ -91,14 +91,14 @@ impl<F: Field> std::fmt::Display for UnivariantPolynomial<F> {
     }
 }
 
-impl<F: Field> UnivariantPolynomial<F> {
+impl<F: PrimeField> UnivariantPolynomial<F> {
     /// This function creates a new polynomial from a list of coefficients
     pub fn new(coefficients: Vec<F>) -> Self {
         UnivariantPolynomial { coefficients }
     }
 }
 
-impl<F: Field> Mul for UnivariantPolynomial<F> {
+impl<F: PrimeField> Mul for UnivariantPolynomial<F> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -123,7 +123,7 @@ impl<F: Field> Mul for UnivariantPolynomial<F> {
     }
 }
 
-impl<F: Field> Mul for &UnivariantPolynomial<F> {
+impl<F: PrimeField> Mul for &UnivariantPolynomial<F> {
     type Output = UnivariantPolynomial<F>;
 
     fn mul(self, other: Self) -> Self::Output {
@@ -148,7 +148,7 @@ impl<F: Field> Mul for &UnivariantPolynomial<F> {
     }
 }
 
-impl<F: Field> Add for UnivariantPolynomial<F> {
+impl<F: PrimeField> Add for UnivariantPolynomial<F> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -176,7 +176,7 @@ impl<F: Field> Add for UnivariantPolynomial<F> {
     }
 }
 
-impl<F: Field> AddAssign for UnivariantPolynomial<F> {
+impl<F: PrimeField> AddAssign for UnivariantPolynomial<F> {
     fn add_assign(&mut self, rhs: Self) {
         if self.degree() >= rhs.degree() {
             for i in 0..self.coefficients.len() {

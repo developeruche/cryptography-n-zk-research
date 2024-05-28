@@ -1,4 +1,6 @@
-use ark_ff::Field;
+use ark_ff::{BigInteger, Field, PrimeField};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, CanonicalSerializeHashExt};
+use digest::{consts::U32, generic_array::GenericArray, Digest, OutputSizeUser};
 use std::{
     iter::Sum,
     ops::{Add, AddAssign},
@@ -10,15 +12,15 @@ use crate::{
 };
 
 /// A multilinear polynomial over a field.
-#[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-pub struct Multilinear<F> {
+#[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
+pub struct Multilinear<F: PrimeField> {
     /// The number of variables in the polynomial.
     pub num_vars: usize,
     /// The evaluations of the polynomial at the different points.
     pub evaluations: Vec<F>,
 }
 
-impl<F: Field> Multilinear<F> {
+impl<F: PrimeField> Multilinear<F> {
     /// This function creates a new multilinear polynomial from a list of evaluations
     pub fn new(evaluations: Vec<F>, num_vars: usize) -> Self {
         // SANITY_CHECK: Ensure that the number of evaluations is equal to the number of variables raised to power of 2
@@ -47,9 +49,21 @@ impl<F: Field> Multilinear<F> {
     pub fn is_zero(&self) -> bool {
         self.evaluations.iter().all(|x| x.is_zero())
     }
+    
+    /// This function is used to return the bytes representation of the polynomial
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut m_ploy_bytes = Vec::new();
+        
+        for eval in &self.evaluations {
+            let big_int = eval.into_bigint().to_bytes_be();
+            m_ploy_bytes.extend_from_slice(&big_int);
+        }
+        
+        m_ploy_bytes
+    }
 }
 
-impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
+impl<F: PrimeField> MultivariantPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize {
         self.num_vars
@@ -104,7 +118,7 @@ impl<F: Field> MultivariantPolynomialInterface<F> for Multilinear<F> {
     }
 }
 
-impl<F: Field> Add for Multilinear<F> {
+impl<F: PrimeField> Add for Multilinear<F> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -122,7 +136,7 @@ impl<F: Field> Add for Multilinear<F> {
     }
 }
 
-impl<F: Field> AddAssign for Multilinear<F> {
+impl<F: PrimeField> AddAssign for Multilinear<F> {
     fn add_assign(&mut self, other: Self) {
         // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
         if self.num_vars != other.num_vars {

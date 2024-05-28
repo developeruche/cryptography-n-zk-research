@@ -314,7 +314,9 @@ version = "0.1.0"
 dependencies = [
  "ark-ff",
  "ark-poly",
+ "ark-serialize",
  "ark-test-curves",
+ "digest",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 use crate::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
-use ark_ff::Field;
+use ark_ff::PrimeField;
 
-pub fn get_langrange_basis<F: Field>(
+pub fn get_langrange_basis<F: PrimeField>(
     domain: &Vec<F>,
     y_s: &Vec<F>,
 ) -> Vec<UnivariantPolynomial<F>> {
@@ -42,7 +42,7 @@ pub fn get_langrange_basis<F: Field>(
 /// This function is a helper function used to evaluate a multilinear polynomial at a given point
 /// This is how the equation looks like:
 /// y = x * y_2 + (1 - x) * y_1 where x is a field element
-pub fn multilinear_evalutation_equation<F: Field>(x: F, y_1: F, y_2: F) -> F {
+pub fn multilinear_evalutation_equation<F: PrimeField>(x: F, y_1: F, y_2: F) -> F {
     x * y_2 + (F::one() - x) * y_1
 }
 
@@ -73,7 +73,7 @@ pub fn round_pairing_index_ext(len: usize, log_iterations: usize) -> Vec<(usize,
 ///
 /// param n: The length of the boolean hypercube
 /// return: A vector of vectors that represents the boolean hypercube
-pub fn boolean_hypercube<F: Field>(n: usize) -> Vec<Vec<F>> {
+pub fn boolean_hypercube<F: PrimeField>(n: usize) -> Vec<Vec<F>> {
     let mut result = Vec::new();
     for i in 0..1u128 << n {
         let mut current = Vec::new();

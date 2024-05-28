@@ -1,8 +1,8 @@
-use ark_ff::Field;
+use ark_ff::PrimeField;
 
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field
-pub trait PolynomialInterface<F: Field> {
+pub trait PolynomialInterface<F: PrimeField> {
     /// The type of evaluation points for this polynomial.
     /// this could be a set of real numbers or roots of unity depending on the intrepolation logic
     type Point;
@@ -17,7 +17,7 @@ pub trait PolynomialInterface<F: Field> {
     fn is_zero(&self) -> bool;
 }
 
-pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
+pub trait UnivariantPolynomialInterface<F: PrimeField>: PolynomialInterface<F> {
     /// This function returs an array of co-efficents of this polynomial
     fn coefficients(&self) -> &[F];
     /// This function createsa new polynomial from a list of coefficients slice
@@ -28,7 +28,7 @@ pub trait UnivariantPolynomialInterface<F: Field>: PolynomialInterface<F> {
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self;
 }
 
-pub trait MultivariantPolynomialInterface<F: Field> {
+pub trait MultivariantPolynomialInterface<F: PrimeField> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;
     /// This function creates a new polynomial from a list of evaluations

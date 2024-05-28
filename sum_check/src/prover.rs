@@ -1,12 +1,12 @@
 use crate::{data_structure::SumCheckProof, interface::ProverInterface};
-use ark_ff::Field;
+use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
     interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
 #[derive(Clone, Default, Debug)]
-pub struct Prover<F: Field> {
+pub struct Prover<F: PrimeField> {
     /// This is the polynomial to calculate the sum check proof
     pub poly: Multilinear<F>,
     /// This struct is used to store the sum check proof
@@ -19,7 +19,7 @@ pub struct Prover<F: Field> {
     pub transcript: FiatShamirTranscript,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: PrimeField> Prover<F> {
     /// This function creates a new prover instance
     pub fn new(poly: Multilinear<F>) -> Self {
         Self {
@@ -43,7 +43,7 @@ impl<F: Field> Prover<F> {
     }
 }
 
-impl<F: Field> ProverInterface<F> for Prover<F> {
+impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
     fn calculate_sum(&mut self) {
         self.sum = self.poly.evaluations.iter().sum();

@@ -7,3 +7,5 @@ edition = "2021"
 ark-poly = "0.4.2"
 ark-ff = "0.4.2"
 ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381"]}
+ark-serialize = "0.4.2"
+digest = "0.10.7"
