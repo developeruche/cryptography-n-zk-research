@@ -314,7 +314,9 @@ version = "0.1.0"
 dependencies = [
  "ark-ff",
  "ark-poly",
+ "ark-serialize",
  "ark-test-curves",
+ "digest",
 ]
 
 [[package]]
@@ -394,6 +396,16 @@ checksum = "75872d278a8f37ef87fa0ddbda7802605cb18344497949862c0d4dcb291eba60"
 dependencies = [
  "digest",
  "keccak",
+]
+
+[[package]]
+name = "sum_check"
+version = "0.1.0"
+dependencies = [
+ "ark-ff",
+ "ark-test-curves",
+ "fiat_shamir",
+ "polynomial",
 ]
 
 [[package]]
