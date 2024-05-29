@@ -6,6 +6,7 @@ use ark_ff::PrimeField;
 pub use ark_test_curves;
 use std::ops::{Add, AddAssign, Mul};
 
+
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
     /// This is the co-coefficients of the polynomial

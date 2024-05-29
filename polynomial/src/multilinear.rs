@@ -1,15 +1,12 @@
-use ark_ff::{BigInt, BigInteger, Field, PrimeField};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, CanonicalSerializeHashExt};
-use digest::{consts::U32, generic_array::GenericArray, Digest, OutputSizeUser};
-use std::{
-    iter::Sum,
-    ops::{Add, AddAssign},
-};
-
+use ark_ff::{BigInteger, PrimeField};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use std::ops::{Add, AddAssign};
 use crate::{
     interface::MultivariantPolynomialInterface,
     utils::{multilinear_evalutation_equation, round_pairing_index_ext},
 };
+
+
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
