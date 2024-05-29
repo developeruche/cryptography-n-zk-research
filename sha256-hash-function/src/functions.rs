@@ -23,3 +23,10 @@ pub fn choice(x: u32, y: u32, z: u32) -> u32 {
 pub fn maj(x: u32, y: u32, z: u32) -> u32 {
     (x & y) ^ (x & z) ^ (y & z)
 }
+
+pub fn compute_message_shedule_extension(wi_2: u32, wi_7: u32, wi_15: u32, wi_16: u32) -> u32 {
+    sigma_1(wi_2)
+        .wrapping_add(wi_7)
+        .wrapping_add(sigma_1(wi_15))
+        .wrapping_add(wi_16)
+}

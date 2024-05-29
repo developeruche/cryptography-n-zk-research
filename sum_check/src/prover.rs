@@ -317,7 +317,7 @@ mod tests {
 
         assert!(verifer.verify(&proof));
     }
-    
+
     #[test]
     fn test_sum_check_proof_2() {
         let poly = Multilinear::new(
