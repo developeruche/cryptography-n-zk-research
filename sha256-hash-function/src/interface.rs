@@ -26,7 +26,7 @@ impl PreProcessorInterface for PreProcessor {
             let mut w_i: [u32; 64] = [0; 64];
             
             for (i, x) in self.blob.iter().enumerate() {
-                w_i[i] = u32::from_be_bytes(bytes)
+                // w_i[i] = u32::from_be_bytes(bytes)
             }
         } else {
             
