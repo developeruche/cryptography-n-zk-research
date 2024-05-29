@@ -50,6 +50,7 @@ The variation of polynomial built in here are;
 ## Schnorr Digital Signature
 
 ## SHA256 hash function
+In the realm of cybersecurity, ensuring data integrity and authenticity is paramount. Cryptographic hash functions play a vital role in achieving this objective. One of the most widely employed and trusted algorithms in this domain is SHA-256 (Secure Hash Algorithm 256-bit). This introduction will delve into the concept of SHA-256, outlining its functionalities, key characteristics, and the prevalent applications that leverage its capabilities.
 
 ## Verifiable Random Function (VRF)
 
