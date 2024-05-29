@@ -55,5 +55,9 @@ The variation of polynomial built in here are;
 
 ## BLS Multi Sign Threshold Wallet (Powered by Shimir secret sharing protocol)
 
+## Sum Check Protocol
+
+Suppose we are given a v-variate polynomial g defined over a finite field F. The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
+
 
 NOTE: THIS IS NOT TO BE USED IN PRODUCTION. THIS IS A RESEARCH PROJECT.
