@@ -259,7 +259,7 @@ mod tests {
     #[ignore]
     fn test_boolean_hypercube_2() {
         let now = Instant::now();
-        let result = boolean_hypercube_2(4);
+        let _ = boolean_hypercube_2(4);
         println!("Time taken for hypercube 2: {:?}", now.elapsed());
     }
 }
