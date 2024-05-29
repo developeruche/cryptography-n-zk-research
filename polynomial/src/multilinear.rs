@@ -1,12 +1,10 @@
-use ark_ff::{BigInteger, PrimeField};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::ops::{Add, AddAssign};
 use crate::{
     interface::MultivariantPolynomialInterface,
     utils::{multilinear_evalutation_equation, round_pairing_index_ext},
 };
-
-
+use ark_ff::{BigInteger, PrimeField};
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use std::ops::{Add, AddAssign};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
@@ -46,16 +44,16 @@ impl<F: PrimeField> Multilinear<F> {
     pub fn is_zero(&self) -> bool {
         self.evaluations.iter().all(|x| x.is_zero())
     }
-    
+
     /// This function is used to return the bytes representation of the polynomial
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut m_ploy_bytes = Vec::new();
-        
+
         for eval in &self.evaluations {
             let big_int = eval.into_bigint().to_bytes_be();
             m_ploy_bytes.extend_from_slice(&big_int);
         }
-        
+
         m_ploy_bytes
     }
 }

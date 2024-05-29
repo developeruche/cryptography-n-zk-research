@@ -5,7 +5,6 @@ use polynomial::{
     interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
-
 #[derive(Clone, Default, Debug)]
 pub struct Prover<F: PrimeField> {
     /// This is the polynomial to calculate the sum check proof
@@ -62,21 +61,20 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
                 .partial_evaluations(bh_i, vec![1; number_of_round]);
             bh_partials += current_partial;
         }
-        
+
         self.transcript.append(bh_partials.to_bytes());
         self.round_0_poly = bh_partials;
     }
-
 
     /// This function computes sum check proof
     fn sum_check_proof(&mut self) -> SumCheckProof<F> {
         self.compute_round_zero_poly();
         let mut all_random_reponse = Vec::new();
-        
+
         for i in 1..self.poly.num_vars {
             let number_of_round = self.poly.num_vars - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
-            
+
             let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
             let verifier_random_reponse_f = F::from_be_bytes_mod_order(&self.transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
@@ -88,21 +86,15 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
                 let mut eval_index = vec![0; all_random_reponse.len()];
                 let suffix_eval_index = vec![1; bh_len];
                 eval_index.extend(suffix_eval_index);
-                
-                
-                let current_partial = self
-                    .poly
-                    .partial_evaluations(eval_vector, eval_index);
-        
-                
+
+                let current_partial = self.poly.partial_evaluations(eval_vector, eval_index);
+
                 bh_partials += current_partial;
             }
-            
+
             self.transcript.append(bh_partials.to_bytes());
             self.round_poly.push(bh_partials);
         }
-        
-
 
         SumCheckProof {
             polynomial: self.poly.clone(),
@@ -229,7 +221,7 @@ mod tests {
             + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
         assert_eq!(sum, Fr::from(31));
     }
-    
+
     #[test]
     fn test_compute_round_zero_poly_5() {
         let poly = Multilinear::new(
@@ -259,7 +251,7 @@ mod tests {
             + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
         assert_eq!(sum, Fr::from(3));
     }
-    
+
     #[test]
     #[ignore] // un-disable this test when all random response is F::from(3)
     fn test_sum_check_proof_ignored() {
@@ -279,30 +271,30 @@ mod tests {
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
         let proof = prover.sum_check_proof();
-        
+
         let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
             + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
         assert_eq!(sum, Fr::from(32));
-    
-        
+
         let test_eval_round_0 = proof.round_0_poly.evaluate(&vec![Fr::from(3)]).unwrap();
         let test_eval_round_1 = prover.round_poly[0].evaluate(&vec![Fr::from(1)]).unwrap()
             + prover.round_poly[0].evaluate(&vec![Fr::from(0)]).unwrap();
-        
+
         assert_eq!(test_eval_round_0, test_eval_round_1);
-        
-        
+
         for i in 1..proof.round_poly.len() {
             let sum = proof.round_poly[i].evaluate(&vec![Fr::from(1)]).unwrap()
                 + proof.round_poly[i].evaluate(&vec![Fr::from(0)]).unwrap();
-            let pre_eval = proof.round_poly[i - 1].evaluate(&vec![Fr::from(3)]).unwrap();
-            
+            let pre_eval = proof.round_poly[i - 1]
+                .evaluate(&vec![Fr::from(3)])
+                .unwrap();
+
             println!("{:?} - {:?}", sum, pre_eval);
-            
+
             assert_eq!(sum, pre_eval);
         }
     }
-    
+
     #[test]
     fn test_sum_check_proof() {
         let poly = Multilinear::new(
@@ -322,9 +314,7 @@ mod tests {
         prover.calculate_sum();
         let proof = prover.sum_check_proof();
         let mut verifer = Verifier::new();
-        
-        
-        
+
         assert!(verifer.verify(&proof));
     }
 }
