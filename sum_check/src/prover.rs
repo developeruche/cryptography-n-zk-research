@@ -97,7 +97,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
                 bh_partials += current_partial;
             }
             
-
+            self.transcript.append(bh_partials.to_bytes());
             self.round_poly.push(bh_partials);
         }
         
@@ -114,6 +114,8 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
 
 #[cfg(test)]
 mod tests {
+    use crate::{interface::VerifierInterface, verifier::Verifier};
+
     use super::*;
     use ark_test_curves::bls12_381::Fr;
 
@@ -259,7 +261,7 @@ mod tests {
     
     #[test]
     #[ignore] // un-disable this test when all random response is F::from(3)
-    fn test_sum_check_proof() {
+    fn test_sum_check_proof_ignored() {
         let poly = Multilinear::new(
             vec![
                 Fr::from(0),
@@ -298,5 +300,30 @@ mod tests {
             
             assert_eq!(sum, pre_eval);
         }
+    }
+    
+    #[test]
+    fn test_sum_check_proof() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(2),
+                Fr::from(7),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(6),
+                Fr::from(11),
+            ],
+            3,
+        );
+        let mut prover = Prover::new(poly);
+        prover.calculate_sum();
+        let proof = prover.sum_check_proof();
+        let mut verifer = Verifier::new();
+        
+        
+        
+        assert!(verifer.verify(&proof));
     }
 }

@@ -14,5 +14,5 @@ pub trait ProverInterface<F: PrimeField> {
 /// The verifier interface is used to verify the sum check proof
 pub trait VerifierInterface<F: PrimeField> {
     /// This function verifies the sum check proof
-    fn verify(&self, proof: &SumCheckProof<F>) -> bool;
+    fn verify(&mut self, proof: &SumCheckProof<F>) -> bool;
 }

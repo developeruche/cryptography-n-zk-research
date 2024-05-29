@@ -1,4 +1,4 @@
-use ark_ff::{BigInteger, Field, PrimeField};
+use ark_ff::{BigInt, BigInteger, Field, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, CanonicalSerializeHashExt};
 use digest::{consts::U32, generic_array::GenericArray, Digest, OutputSizeUser};
 use std::{
