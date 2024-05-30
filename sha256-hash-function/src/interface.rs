@@ -1,3 +1,7 @@
+use std::iter::repeat;
+
+use crate::functions::{convert_to_u32, split_u64_to_u32};
+
 pub struct Block {
     pub w: [u32; 64]
 }
@@ -9,7 +13,7 @@ pub struct PreProcessor {
 
 pub trait PreProcessorInterface {
     /// This takes in the data to be hashed and arrange it as a preprocessed vector of 512bit
-    fn compute_blocks(&self) -> Vec<Block>;
+    fn compute_blocks(&mut self) -> Vec<Block>;
 }
 
 pub trait BlockInterface {
@@ -19,15 +23,22 @@ pub trait BlockInterface {
 
 
 impl PreProcessorInterface for PreProcessor {
-    fn compute_blocks(&self) -> Vec<Block> {
-        let blocks = Vec::new();
+    fn compute_blocks(&mut self) -> Vec<Block> {
+        let mut blocks = Vec::new();
         
         if self.blob.len() <= 112 {
-            let mut w_i: [u32; 64] = [0; 64];
+            let len_initial = self.blob.len() as u64;
+            let len_initial_2_u32 = split_u64_to_u32(len_initial);
+            let padding_lenght = 112 - len_initial;
+            self.blob.extend(repeat(0u8).take(padding_lenght as usize));
+            let mut blob_u32 = convert_to_u32(self.blob.clone());
+            blob_u32.extend(len_initial_2_u32);
             
-            for (i, x) in self.blob.iter().enumerate() {
-                // w_i[i] = u32::from_be_bytes(bytes)
-            }
+            let block: Block = Block {
+                w: blob_u32.try_into().unwrap()
+            };
+            
+            blocks.push(block);
         } else {
             
         }

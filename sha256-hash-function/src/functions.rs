@@ -30,3 +30,28 @@ pub fn compute_message_shedule_extension(wi_2: u32, wi_7: u32, wi_15: u32, wi_16
         .wrapping_add(sigma_1(wi_15))
         .wrapping_add(wi_16)
 }
+
+
+
+pub fn convert_to_u32(padded_vec: Vec<u8>) -> Vec<u32> {
+  if padded_vec.len() != 112 {
+    panic!("Input vector must be of length 112");
+  }
+
+  let mut u32_vec = Vec::new();
+  for i in (0..padded_vec.len()).step_by(4) {
+    // Safe since the check ensures length is a multiple of 4
+    let u32_element = unsafe {
+      // Convert a slice of 4 bytes to u32 (assuming native endianness)
+      *(padded_vec.as_ptr().add(i) as *const u32)
+    };
+    u32_vec.push(u32_element);
+  }
+  u32_vec
+}
+
+pub fn split_u64_to_u32(value: u64) -> Vec<u32> {
+  let upper_32 = (value >> 32) as u32;  // Right shift by 32 to get upper bits and cast to u32
+  let lower_32 = (value & 0xffffffff) as u32;  // Bitwise AND with all ones to get lower bits and cast to u32
+  vec![upper_32, lower_32]
+}
