@@ -348,4 +348,38 @@ mod tests {
 
         assert!(verifer.verify(&proof));
     }
+    
+    #[test]
+    fn test_sum_check_proof_3() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(1),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(7),
+                Fr::from(2),
+                Fr::from(4),
+                Fr::from(6),
+                Fr::from(8),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(7),
+                Fr::from(9),
+                Fr::from(4),
+                Fr::from(6),
+                Fr::from(8),
+                Fr::from(10),
+            ],
+            4,
+        );
+        let mut prover = Prover::new(poly);
+        prover.calculate_sum();
+        
+        println!("Sum: {:?}", prover.sum);
+        
+        let proof = prover.sum_check_proof();
+        let mut verifer = Verifier::new();
+
+        assert!(verifer.verify(&proof));
+    }
 }
