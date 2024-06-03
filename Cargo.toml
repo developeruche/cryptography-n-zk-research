@@ -3,5 +3,5 @@ members = [
     "polynomial",
     "bls-multi-sign-threshold-wallet", 
     "fiat_shamir", 
-    "sum_check",
+    "sum_check", "gkr",
 ]
