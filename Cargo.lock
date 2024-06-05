@@ -236,6 +236,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gkr"
+version = "0.1.0"
+dependencies = [
+ "ark-ff",
+ "ark-test-curves",
+ "fiat_shamir",
+ "polynomial",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
