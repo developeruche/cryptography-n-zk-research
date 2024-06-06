@@ -28,7 +28,7 @@ pub trait UnivariantPolynomialInterface<F: PrimeField>: PolynomialInterface<F> {
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self;
 }
 
-pub trait MultivariantPolynomialInterface<F: PrimeField> {
+pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;
     /// This function creates a new polynomial from a list of evaluations

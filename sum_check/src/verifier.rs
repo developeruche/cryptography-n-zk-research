@@ -1,7 +1,7 @@
 use crate::{data_structure::SumCheckProof, interface::VerifierInterface};
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
-use polynomial::interface::MultivariantPolynomialInterface;
+use polynomial::interface::MultilinearPolynomialInterface;
 
 #[derive(Clone, Default, Debug)]
 pub struct Verifier<F: PrimeField> {

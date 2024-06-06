@@ -1,5 +1,5 @@
 use crate::{
-    interface::MultivariantPolynomialInterface,
+    interface::MultilinearPolynomialInterface,
     utils::{multilinear_evalutation_equation, round_pairing_index_ext},
 };
 use ark_ff::{BigInteger, PrimeField};
@@ -58,7 +58,7 @@ impl<F: PrimeField> Multilinear<F> {
     }
 }
 
-impl<F: PrimeField> MultivariantPolynomialInterface<F> for Multilinear<F> {
+impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize {
         self.num_vars

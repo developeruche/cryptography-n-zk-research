@@ -2,7 +2,7 @@ use crate::{data_structure::SumCheckProof, interface::ProverInterface};
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
-    interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
+    interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
 #[derive(Clone, Default, Debug)]
