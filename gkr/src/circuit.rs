@@ -1,6 +1,4 @@
 use std::ops::{Add, Mul};
-
-use ark_ff::PrimeField;
 use crate::{interfaces::CircuitInterface, primitives::{Circuit, CircuitEvaluation, GateType}};
 
 
@@ -26,7 +24,6 @@ impl CircuitInterface for Circuit {
                     GateType::Mul => current_input[e.inputs[0]] * current_input[e.inputs[1]],
                 })
                 .collect();
-        
             layers.push(temp_layer);
             current_input = &layers[layers.len() - 1];
         }
@@ -44,10 +41,10 @@ impl CircuitInterface for Circuit {
 
 #[cfg(test)]
 mod tests {
-    use crate::primitives::{CircuitLayer, Gate};
-
     use super::*;
+    use crate::primitives::{CircuitLayer, Gate};
     use ark_test_curves::bls12_381::Fr;
+    
     
     // sample circuit evaluation
     //      100(*)    - layer 0
@@ -63,19 +60,15 @@ mod tests {
                 Gate::new(GateType::Mul, [0, 1])
             ]
         );
-        
         let layer_1 = CircuitLayer::new(
             vec![
                 Gate::new(GateType::Add, [0, 1]),
                 Gate::new(GateType::Mul, [2, 3])
             ]
         );
-        
         let circuit = Circuit::new(vec![layer_0, layer_1]);
-        
         let input = [Fr::from(2u32), Fr::from(3u32), Fr::from(4u32), Fr::from(5u32)];
         let evaluation = circuit.evaluate(&input);
-        
         let expected_output = vec![
             vec![Fr::from(100u32)],
             vec![Fr::from(5u32), Fr::from(20u32)],
@@ -113,6 +106,45 @@ mod tests {
             vec![Fr::from(36u32), Fr::from(6u32)],
             vec![Fr::from(9u32), Fr::from(4u32), Fr::from(6u32), Fr::from(1u32)],
             vec![Fr::from(3u32), Fr::from(2u32), Fr::from(3u32), Fr::from(1u32)]
+        ];
+        
+        assert_eq!(evaluation.layers, expected_output);
+    }
+    
+    
+    #[test]
+    fn test_circuit_evaluation_3() {
+        let layer_0 = CircuitLayer::new(
+            vec![
+                Gate::new(GateType::Add, [0, 1])
+            ]
+        );
+        
+        let layer_1 = CircuitLayer::new(
+            vec![
+                Gate::new(GateType::Add, [0, 1]),
+                Gate::new(GateType::Mul, [2, 3])
+            ]
+        );
+        
+        let layer_2 = CircuitLayer::new(
+            vec![
+                Gate::new(GateType::Add, [0, 1]),
+                Gate::new(GateType::Mul, [2, 3]),
+                Gate::new(GateType::Mul, [4, 5]),
+                Gate::new(GateType::Mul, [6, 7]),
+            ]
+        );
+        
+        let circuit = Circuit::new(vec![layer_0, layer_1, layer_2]);
+        
+        let evaluation = circuit.evaluate(&[Fr::from(2u32), Fr::from(3u32), Fr::from(1u32), Fr::from(4u32), Fr::from(1u32), Fr::from(2u32), Fr::from(3u32), Fr::from(4u32)]);
+        
+        let expected_output = vec![
+            vec![Fr::from(33u32)],
+            vec![Fr::from(9u32), Fr::from(24u32)],
+            vec![Fr::from(5u32), Fr::from(4u32), Fr::from(2u32), Fr::from(12u32)],
+            vec![Fr::from(2u32), Fr::from(3u32), Fr::from(1u32), Fr::from(4u32), Fr::from(1u32), Fr::from(2u32), Fr::from(3u32), Fr::from(4u32)]
         ];
         
         assert_eq!(evaluation.layers, expected_output);
