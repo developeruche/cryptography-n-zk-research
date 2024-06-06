@@ -243,6 +243,7 @@ dependencies = [
  "ark-test-curves",
  "fiat_shamir",
  "polynomial",
+ "sum_check",
 ]
 
 [[package]]
