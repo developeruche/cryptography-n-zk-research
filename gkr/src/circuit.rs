@@ -1,6 +1,9 @@
+use ark_ff::PrimeField;
+use polynomial::multilinear::Multilinear;
+
 use crate::{
     interfaces::CircuitInterface,
-    primitives::{Circuit, CircuitEvaluation, GateType},
+    primitives::{Circuit, CircuitEvaluation, GateType}, utils::{compute_mle_num_var_from_layer_index, get_gate_properties, usize_vec_to_mle},
 };
 use std::ops::{Add, Mul};
 
@@ -28,6 +31,35 @@ impl CircuitInterface for Circuit {
 
         layers.reverse();
         CircuitEvaluation { layers }
+    }
+
+    fn get_add_n_mul_mle<F: PrimeField>(&self, layer_index: usize) -> (Multilinear<F>, Multilinear<F>) {
+        // check if this layer is in this circuit 
+        if layer_index >= self.layers.len() {
+            panic!("Layer index out of bounds");
+        }
+        
+        let mle_num_of_vars = compute_mle_num_var_from_layer_index(layer_index);
+        let mut add_usize_vec = Vec::new();
+        let mut mul_usize_vec = Vec::new();
+        
+        for (i, gate) in self.layers[layer_index].layer.iter().enumerate() {
+            match gate.g_type {
+                GateType::Add => {
+                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1]);
+                    add_usize_vec.push(gate_property);
+                },
+                GateType::Mul => {
+                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1]);
+                    mul_usize_vec.push(gate_property);
+                },
+            }
+        }
+        
+        let add_mle = usize_vec_to_mle::<F>(&add_usize_vec, mle_num_of_vars);
+        let mul_mle = usize_vec_to_mle::<F>(&mul_usize_vec, mle_num_of_vars);
+        
+        (add_mle, mul_mle)
     }
 }
 

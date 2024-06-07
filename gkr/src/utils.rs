@@ -2,7 +2,7 @@ use ark_ff::PrimeField;
 use polynomial::multilinear::Multilinear;
 
 /// This function is used to convert a vector of usize to a multilinear extension
-/// param vec: This is the vector of usize
+/// param vec: This is the vector of usize, indicating the variables that are set to ONE
 /// param max_size: This is the maximum size of the multilinear extension
 pub fn usize_vec_to_mle<F: PrimeField>(vec: &[usize], num_var: usize) -> Multilinear<F> {
     let mut mle = Multilinear::zero(num_var);
@@ -14,16 +14,15 @@ pub fn usize_vec_to_mle<F: PrimeField>(vec: &[usize], num_var: usize) -> Multili
     mle
 }
 
-pub fn get_gate_properties(a: usize, b: usize, c: usize, layer_index: usize) -> (usize, usize) {
+pub fn get_gate_properties(a: usize, b: usize, c: usize) -> usize {
     let a_bin = format!("{:b}", a);
     let b_bin = format!("{:b}", b);
     let c_bin = format!("{:b}", c);
     
     let abc_bin_string = a_bin + &b_bin + &c_bin;
     let abc_decimal = usize::from_str_radix(&abc_bin_string, 2).unwrap();
-    let num_var = compute_mle_num_var_from_layer_index(layer_index);
     
-    (abc_decimal, num_var)
+    abc_decimal
 }
 
 pub fn compute_mle_num_var_from_layer_index(layer_index: usize) -> usize {
@@ -268,5 +267,10 @@ mod tests {
         
         let num_vars = compute_mle_num_var_from_layer_index(2);
         assert_eq!(num_vars, 8);
+    }
+    
+    #[test]
+    fn test_get_gate_properties() {
+        
     }
 }
