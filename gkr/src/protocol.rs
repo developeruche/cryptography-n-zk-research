@@ -15,16 +15,15 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
         // let w_0_mle = Multilinear::new(evals.layers[0], evals.layers[0].len());
         // transcript.append(w_0_mle.to_bytes());
-        
+
         // let n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
         // let claim = w_0_mle.evaluate(&n_r).unwrap();
-        
-        
+
         // // starting the GKR round reductions powered by sumcheck
         // for l_index in 1..evals.layers.len() {
-            
+
         // }
-        
+
         todo!()
     }
 

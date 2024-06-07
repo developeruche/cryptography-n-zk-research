@@ -42,5 +42,5 @@ impl TranscriptInterface for FiatShamirTranscript {
             response.push(F::from_be_bytes_mod_order(&self.sample()));
         }
         response
-    }    
+    }
 }

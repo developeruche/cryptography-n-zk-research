@@ -10,9 +10,12 @@ pub trait CircuitInterface {
     fn evaluate<F>(&self, input: &[F]) -> CircuitEvaluation<F>
     where
         F: Add<Output = F> + Mul<Output = F> + Copy;
-    
+
     /// This function returns the addition mle for a indicated layer
-    fn get_add_n_mul_mle<F: PrimeField>(&self, layer_index: usize) -> (Multilinear<F>, Multilinear<F>);
+    fn get_add_n_mul_mle<F: PrimeField>(
+        &self,
+        layer_index: usize,
+    ) -> (Multilinear<F>, Multilinear<F>);
 }
 
 /// This is the interface for the GKR protocol
