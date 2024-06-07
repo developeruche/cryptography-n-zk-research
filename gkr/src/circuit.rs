@@ -283,14 +283,111 @@ mod tests {
         assert_eq!(mul_mle.num_vars, 5);
         // evaulating the add mle at the correct binary combination should give a one
         assert_eq!(
-            add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(1u32)]),
+            add_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(1u32))
+        );
+        // evaulating the add mle at the correct binary combination should give a one
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
             Some(Fr::from(1u32))
         );
 
-        // // evaulating the add mle at the correct binary combination should give a zero
-        // assert_eq!(add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
-        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
-        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
-        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(1u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
+        // evaulating the mul mle at the correct binary combination should give a zero
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        
+        
+        
+        // evaulating the add mle at the correct binary combination should give a zero
+        assert_eq!(
+            add_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            add_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            add_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
+        assert_eq!(
+            add_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(0u32))
+        );
     }
 }
