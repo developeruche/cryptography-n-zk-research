@@ -50,15 +50,18 @@ impl CircuitInterface for Circuit {
         for (i, gate) in self.layers[layer_index].layer.iter().enumerate() {
             match gate.g_type {
                 GateType::Add => {
-                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1]);
+                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
                     add_usize_vec.push(gate_property);
                 }
                 GateType::Mul => {
-                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1]);
+                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
                     mul_usize_vec.push(gate_property);
                 }
             }
         }
+        
+        println!("add usize: {:?}", add_usize_vec.clone());
+        println!("mul usize: {:?}", mul_usize_vec.clone());
 
         let add_mle = usize_vec_to_mle::<F>(&add_usize_vec, mle_num_of_vars);
         let mul_mle = usize_vec_to_mle::<F>(&mul_usize_vec, mle_num_of_vars);
@@ -389,5 +392,97 @@ mod tests {
             ]),
             Some(Fr::from(0u32))
         );
+    }
+    
+    
+    
+    
+    #[test]
+    fn test_get_add_n_mul_mle_layer_2() {
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
+
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+
+        let layer_2 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+            Gate::new(GateType::Mul, [4, 5]),
+            Gate::new(GateType::Mul, [6, 7]),
+        ]);
+
+        let circuit = Circuit::new(vec![layer_0, layer_1, layer_2]);
+
+        let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<Fr>(2);
+
+        // there is one mul gate in layer 0, the mul mle should be non-zero
+        assert_eq!(mul_mle.is_zero(), false);
+        // there is only one add gate in layer 0, the add mle should be a non-zero value
+        assert_eq!(add_mle.is_zero(), false);
+        // this num of var for the mle should be 5
+        assert_eq!(add_mle.num_vars, 8);
+        // this num of var for the mle should be 5
+        assert_eq!(mul_mle.num_vars, 8);
+        
+        
+        
+        // evaulating the add mle at the correct binary combination should give a one
+        assert_eq!(
+            add_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(1u32))
+        );
+        
+        
+        // evaulating the mul mle at the correct binary combination should give a one
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(1u32))
+        );
+        // assert_eq!(
+        //     mul_mle.evaluate(&vec![
+        //         Fr::from(1),
+        //         Fr::from(0),
+        //         Fr::from(1),
+        //         Fr::from(0),
+        //         Fr::from(0),
+        //         Fr::from(1),
+        //         Fr::from(0),
+        //         Fr::from(1)
+        //     ]),
+        //     Some(Fr::from(1u32))
+        // );
+        // assert_eq!(
+        //     mul_mle.evaluate(&vec![
+        //         Fr::from(1),
+        //         Fr::from(1),
+        //         Fr::from(1),
+        //         Fr::from(1),
+        //         Fr::from(0),
+        //         Fr::from(1),
+        //         Fr::from(1),
+        //         Fr::from(1)
+        //     ]),
+        //     Some(Fr::from(1u32))
+        // );
     }
 }

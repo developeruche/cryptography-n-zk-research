@@ -14,14 +14,19 @@ pub fn usize_vec_to_mle<F: PrimeField>(vec: &[usize], num_var: usize) -> Multili
     mle
 }
 
-pub fn get_gate_properties(a: usize, b: usize, c: usize) -> usize {
-    let a_bin = format!("{:b}", a);
-    let b_bin = format!("{:b}", b);
-    let c_bin = format!("{:b}", c);
+pub fn get_gate_properties(a: usize, b: usize, c: usize, layer_index: usize) -> usize {
+    let mut a_bin = format!("{:b}", a);
+    let mut b_bin = format!("{:b}", b);
+    let mut c_bin = format!("{:b}", c);
+    
+    pad_left(&mut a_bin, layer_index);
+    pad_left(&mut b_bin, layer_index + 1);
+    pad_left(&mut c_bin, layer_index + 1);
 
     let abc_bin_string = a_bin + &b_bin + &c_bin;
     let abc_decimal = usize::from_str_radix(&abc_bin_string, 2).unwrap();
-
+    
+    println!("abc_bin_string: :: {a} :: {b} :: {c} {:?} -- {:?}", abc_bin_string, abc_decimal);
     abc_decimal
 }
 
@@ -34,6 +39,12 @@ pub fn compute_mle_num_var_from_layer_index(layer_index: usize) -> usize {
     let b_n_c_len = a_len + 1;
 
     a_len + (2 * b_n_c_len)
+}
+
+pub fn pad_left(text: &mut String, target_len: usize) {
+  let padding_len = target_len.saturating_sub(text.len());
+  let padding = String::from("0").repeat(padding_len);
+  text.insert_str(0, &padding);
 }
 
 #[cfg(test)]
