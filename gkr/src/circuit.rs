@@ -1,5 +1,5 @@
 use ark_ff::PrimeField;
-use polynomial::multilinear::Multilinear;
+use polynomial::{multilinear::Multilinear, interface::MultilinearPolynomialInterface};
 
 use crate::{
     interfaces::CircuitInterface,
@@ -198,5 +198,81 @@ mod tests {
         ];
 
         assert_eq!(evaluation.layers, expected_output);
+    }
+    
+    
+    #[test]
+    fn test_get_add_n_mul_mle_layer_0() {
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
+
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+
+        let layer_2 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+            Gate::new(GateType::Mul, [4, 5]),
+            Gate::new(GateType::Mul, [6, 7]),
+        ]);
+
+        let circuit = Circuit::new(vec![layer_0, layer_1, layer_2]);
+        
+        let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<Fr>(0);
+        
+        // there is no mul gate in layer 0, the mul mle should be zero
+        assert_eq!(mul_mle.is_zero(), true);
+        // there is only one add gate in layer 0, the add mle should be a non-zero value
+        assert_eq!(add_mle.is_zero(), false);
+        // evaulating the add mle at the correct binary combination should give a one 
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(1u32)]), Some(Fr::from(1u32)));
+        
+        
+        // evaulating the add mle at the correct binary combination should give a zero
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(1u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
+    }
+    
+    #[test]
+    fn test_get_add_n_mul_mle_layer_1() {
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
+
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+
+        let layer_2 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+            Gate::new(GateType::Mul, [4, 5]),
+            Gate::new(GateType::Mul, [6, 7]),
+        ]);
+
+        let circuit = Circuit::new(vec![layer_0, layer_1, layer_2]);
+        
+        let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<Fr>(1);
+        
+        // there is one mul gate in layer 0, the mul mle should be non-zero
+        assert_eq!(mul_mle.is_zero(), false);
+        // there is only one add gate in layer 0, the add mle should be a non-zero value
+        assert_eq!(add_mle.is_zero(), false);
+        // this num of var for the mle should be 5
+        assert_eq!(add_mle.num_vars, 5);
+        // this num of var for the mle should be 5
+        assert_eq!(mul_mle.num_vars, 5);
+        // evaulating the add mle at the correct binary combination should give a one 
+        assert_eq!(add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(1u32)]), Some(Fr::from(1u32)));
+        
+        
+        // // evaulating the add mle at the correct binary combination should give a zero
+        // assert_eq!(add_mle.evaluate(&vec![Fr::from(0u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
+        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(0u32)]), Some(Fr::from(0u32)));
+        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(0u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
+        // assert_eq!(add_mle.evaluate(&vec![Fr::from(1u32), Fr::from(1u32), Fr::from(1u32)]), Some(Fr::from(0u32)));
+        
     }
 }
