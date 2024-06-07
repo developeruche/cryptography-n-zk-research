@@ -14,6 +14,31 @@ pub fn usize_vec_to_mle<F: PrimeField>(vec: &[usize], num_var: usize) -> Multili
     mle
 }
 
+pub fn get_gate_properties(a: usize, b: usize, c: usize, layer_index: usize) -> (usize, usize) {
+    let a_bin = format!("{:b}", a);
+    let b_bin = format!("{:b}", b);
+    let c_bin = format!("{:b}", c);
+    
+    let abc_bin_string = a_bin + &b_bin + &c_bin;
+    let abc_decimal = usize::from_str_radix(&abc_bin_string, 2).unwrap();
+    let num_var = compute_mle_num_var_from_layer_index(layer_index);
+    
+    (abc_decimal, num_var)
+}
+
+pub fn compute_mle_num_var_from_layer_index(layer_index: usize) -> usize {
+    if layer_index == 0 {
+        return 3;
+    }
+    
+    let a_len = layer_index;
+    let b_n_c_len = a_len + 1;
+    
+    a_len + (2 * b_n_c_len)
+}
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,5 +256,17 @@ mod tests {
         assert_eq!(eval_1_0, Some(Fr::from(1u32)));
         assert_eq!(eval_1_1, Some(Fr::from(1u32)));
         assert_eq!(eval_1_2, Some(Fr::from(1u32)));
+    }
+    
+    #[test]
+    fn test_compute_mle_num_var_from_layer_index() {
+        let num_vars = compute_mle_num_var_from_layer_index(0);
+        assert_eq!(num_vars, 3);
+        
+        let num_vars = compute_mle_num_var_from_layer_index(1);
+        assert_eq!(num_vars, 5);
+        
+        let num_vars = compute_mle_num_var_from_layer_index(2);
+        assert_eq!(num_vars, 8);
     }
 }

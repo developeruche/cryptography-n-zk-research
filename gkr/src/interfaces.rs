@@ -9,6 +9,9 @@ pub trait CircuitInterface {
     fn evaluate<F>(&self, input: &[F]) -> CircuitEvaluation<F>
     where
         F: Add<Output = F> + Mul<Output = F> + Copy;
+    
+    // This function returns the addition mle for a indicated layer
+    
 }
 
 /// This is the interface for the GKR protocol
