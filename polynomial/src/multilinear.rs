@@ -369,4 +369,36 @@ mod tests {
         
         // f(x,y) = 4xy + 3x + 4y + 3
     }
+    
+    #[test]
+    fn test_mul_distinct() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+        let poly_1 = Multilinear::new(vec![Fr::from(4), Fr::from(5), Fr::from(4), Fr::from(5), Fr::from(6), Fr::from(7), Fr::from(9), Fr::from(10)], 3);
+        // f(x) = 2x + 9
+        let poly_2 = Multilinear::new(vec![Fr::from(9), Fr::from(11)], 1);
+        
+        let result = poly_1.mul_distinct(&poly_2);
+        
+        let resulting_evaluations = vec![
+            Fr::from(36),
+            Fr::from(44),
+            Fr::from(45),
+            Fr::from(55),
+            Fr::from(36),
+            Fr::from(44),
+            Fr::from(45),
+            Fr::from(55),
+            Fr::from(54),
+            Fr::from(66),
+            Fr::from(63),
+            Fr::from(77),
+            Fr::from(81),
+            Fr::from(99),
+            Fr::from(90),
+            Fr::from(110),
+        ];
+        
+        assert_eq!(result.num_vars, 4);
+        assert_eq!(result.evaluations, resulting_evaluations);
+    }
 }
