@@ -280,4 +280,53 @@ mod tests {
         let y_z_eval_result = new_polynomial_y_z.evaluate(&vec![Fr::from(3)]);
         assert_eq!(y_z_eval_result, Some(Fr::from(48)));
     }
+    
+    #[test]
+    fn test_extend_with_new_variables() {
+        // 2xy + 4x + 2y + 5
+        let poly = Multilinear::new(vec![Fr::from(5), Fr::from(7), Fr::from(9), Fr::from(13)], 2);
+        let new_poly = poly.extend_with_new_variables(1);
+        let resulting_evaluations = vec![
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(13),
+            Fr::from(13),
+        ];
+        
+        assert_eq!(new_poly.num_vars, 3);
+        assert_eq!(new_poly.evaluations, resulting_evaluations);
+    }
+    
+    #[test]
+    fn test_extend_with_new_variables_0() {
+        // 2xy + 4x + 2y + 5
+        let poly = Multilinear::new(vec![Fr::from(5), Fr::from(7), Fr::from(9), Fr::from(13)], 2);
+        let new_poly = poly.extend_with_new_variables(2);
+        
+        let resulting_evaluations = vec![
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(13),
+            Fr::from(13),
+            Fr::from(13),
+            Fr::from(13),
+        ];
+        
+        assert_eq!(new_poly.num_vars, 4);
+        assert_eq!(new_poly.evaluations, resulting_evaluations);
+    }
 }
