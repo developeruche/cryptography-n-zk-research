@@ -458,31 +458,31 @@ mod tests {
             ]),
             Some(Fr::from(1u32))
         );
-        // assert_eq!(
-        //     mul_mle.evaluate(&vec![
-        //         Fr::from(1),
-        //         Fr::from(0),
-        //         Fr::from(1),
-        //         Fr::from(0),
-        //         Fr::from(0),
-        //         Fr::from(1),
-        //         Fr::from(0),
-        //         Fr::from(1)
-        //     ]),
-        //     Some(Fr::from(1u32))
-        // );
-        // assert_eq!(
-        //     mul_mle.evaluate(&vec![
-        //         Fr::from(1),
-        //         Fr::from(1),
-        //         Fr::from(1),
-        //         Fr::from(1),
-        //         Fr::from(0),
-        //         Fr::from(1),
-        //         Fr::from(1),
-        //         Fr::from(1)
-        //     ]),
-        //     Some(Fr::from(1u32))
-        // );
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(1u32))
+        );
+        assert_eq!(
+            mul_mle.evaluate(&vec![
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(1),
+                Fr::from(1)
+            ]),
+            Some(Fr::from(1u32))
+        );
     }
 }

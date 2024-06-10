@@ -111,7 +111,47 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
 
         eval_result
     }
+
+    fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
+        let repeat_length = 1 << num_of_new_variables;
+        let mut new_evaluations = Vec::new();
+        
+        for eval in &self.evaluations {
+            for _ in 0..repeat_length {
+                new_evaluations.push(*eval);
+            }
+        }
+        
+        Self::new(new_evaluations, self.num_vars + num_of_new_variables)
+    }
+
+    fn add_distinct(&self, rhs: &Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        let repeat_sequence = rhs.evaluations.len();
+        
+        for i in 0..self.evaluations.len() {
+            for j in 0..repeat_sequence {
+                new_evaluations.push(self.evaluations[i] + rhs.evaluations[j]);
+            }
+        }
+        
+        Self::new(new_evaluations, self.num_vars + rhs.num_vars)
+    }
+
+    fn mul_distinct(&self, rhs: &Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        let repeat_sequence = rhs.evaluations.len();
+        
+        for i in 0..self.evaluations.len() {
+            for j in 0..repeat_sequence {
+                new_evaluations.push(self.evaluations[i] * rhs.evaluations[j]);
+            }
+        }
+        
+        Self::new(new_evaluations, self.num_vars + rhs.num_vars)
+    }
 }
+
 
 impl<F: PrimeField> Add for Multilinear<F> {
     type Output = Self;
