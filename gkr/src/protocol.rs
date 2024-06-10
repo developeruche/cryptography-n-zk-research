@@ -26,7 +26,6 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(l_index - 1);
             let log_2_num_vars = (evals.layers[l_index].len() as f64).log2().ceil() as usize;
             let w_i_mle = Multilinear::new(evals.layers[l_index], log_2_num_vars);
-
         }
 
         todo!()

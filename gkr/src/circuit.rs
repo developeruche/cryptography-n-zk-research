@@ -50,16 +50,18 @@ impl CircuitInterface for Circuit {
         for (i, gate) in self.layers[layer_index].layer.iter().enumerate() {
             match gate.g_type {
                 GateType::Add => {
-                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
+                    let gate_property =
+                        get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
                     add_usize_vec.push(gate_property);
                 }
                 GateType::Mul => {
-                    let gate_property = get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
+                    let gate_property =
+                        get_gate_properties(i, gate.inputs[0], gate.inputs[1], layer_index);
                     mul_usize_vec.push(gate_property);
                 }
             }
         }
-        
+
         println!("add usize: {:?}", add_usize_vec.clone());
         println!("mul usize: {:?}", mul_usize_vec.clone());
 
@@ -348,9 +350,7 @@ mod tests {
             ]),
             Some(Fr::from(0u32))
         );
-        
-        
-        
+
         // evaulating the add mle at the correct binary combination should give a zero
         assert_eq!(
             add_mle.evaluate(&vec![
@@ -393,10 +393,7 @@ mod tests {
             Some(Fr::from(0u32))
         );
     }
-    
-    
-    
-    
+
     #[test]
     fn test_get_add_n_mul_mle_layer_2() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
@@ -425,9 +422,7 @@ mod tests {
         assert_eq!(add_mle.num_vars, 8);
         // this num of var for the mle should be 5
         assert_eq!(mul_mle.num_vars, 8);
-        
-        
-        
+
         // evaulating the add mle at the correct binary combination should give a one
         assert_eq!(
             add_mle.evaluate(&vec![
@@ -442,8 +437,7 @@ mod tests {
             ]),
             Some(Fr::from(1u32))
         );
-        
-        
+
         // evaulating the mul mle at the correct binary combination should give a one
         assert_eq!(
             mul_mle.evaluate(&vec![
