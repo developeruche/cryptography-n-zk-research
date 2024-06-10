@@ -329,4 +329,44 @@ mod tests {
         assert_eq!(new_poly.num_vars, 4);
         assert_eq!(new_poly.evaluations, resulting_evaluations);
     }
+    
+    #[test]
+    fn test_add_distinct() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+        let poly_1 = Multilinear::new(vec![Fr::from(4), Fr::from(5), Fr::from(4), Fr::from(5), Fr::from(6), Fr::from(7), Fr::from(9), Fr::from(10)], 3);
+        // f(x) = 2x + 9
+        let poly_2 = Multilinear::new(vec![Fr::from(9), Fr::from(11)], 1);
+        
+        let result = poly_1.add_distinct(&poly_2);
+        
+        let resulting_evaluations = vec![
+            Fr::from(13),
+            Fr::from(15),
+            Fr::from(14),
+            Fr::from(16),
+            Fr::from(13),
+            Fr::from(15),
+            Fr::from(14),
+            Fr::from(16),
+            Fr::from(15),
+            Fr::from(17),
+            Fr::from(16),
+            Fr::from(18),
+            Fr::from(18),
+            Fr::from(20),
+            Fr::from(19),
+            Fr::from(21),
+        ];
+        
+        assert_eq!(result.num_vars, 4);
+        assert_eq!(result.evaluations, resulting_evaluations);
+    }
+    
+    #[test]
+    fn test_add_distinct_0() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+        
+        
+        // f(x,y) = 4xy + 3x + 4y + 3
+    }
 }
