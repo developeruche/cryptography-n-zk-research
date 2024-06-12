@@ -1,4 +1,5 @@
 pub mod binary;
 pub mod arithmetic;
-pub mod interface;
+pub mod interfaces;
 pub mod primitives;
+pub mod utils;

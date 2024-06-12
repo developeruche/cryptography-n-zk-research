@@ -166,6 +166,7 @@ version = "0.1.0"
 dependencies = [
  "ark-ff",
  "ark-test-curves",
+ "polynomial",
 ]
 
 [[package]]
@@ -249,6 +250,7 @@ version = "0.1.0"
 dependencies = [
  "ark-ff",
  "ark-test-curves",
+ "circuits",
  "fiat_shamir",
  "polynomial",
  "sum_check",

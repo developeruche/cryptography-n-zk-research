@@ -9,3 +9,4 @@ ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls
 polynomial = {path = "../polynomial"}
 fiat_shamir = {path = "../fiat_shamir"}
 sum_check = {path = "../sum_check"}
+circuits = {path = "../circuits"}
