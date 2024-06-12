@@ -4,5 +4,6 @@ members = [
     "bls-multi-sign-threshold-wallet", 
     "fiat_shamir", 
     "sum_check", 
-    "gkr",
+    "gkr", 
+    "circuits",
 ]
