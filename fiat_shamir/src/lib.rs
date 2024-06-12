@@ -27,4 +27,20 @@ impl TranscriptInterface for FiatShamirTranscript {
         self.hasher.update(&response);
         response.into()
     }
+
+    fn sample_n(&mut self, n: usize) -> Vec<[u8; 32]> {
+        let mut response = Vec::new();
+        for _ in 0..n {
+            response.push(self.sample());
+        }
+        response
+    }
+
+    fn sample_n_as_field_elements<F: ark_ff::prelude::PrimeField>(&mut self, n: usize) -> Vec<F> {
+        let mut response = Vec::new();
+        for _ in 0..n {
+            response.push(F::from_be_bytes_mod_order(&self.sample()));
+        }
+        response
+    }
 }

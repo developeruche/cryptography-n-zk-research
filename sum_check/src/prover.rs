@@ -2,7 +2,7 @@ use crate::{data_structure::SumCheckProof, interface::ProverInterface};
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
-    interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
+    interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
 #[derive(Clone, Default, Debug)]
@@ -317,7 +317,7 @@ mod tests {
 
         assert!(verifer.verify(&proof));
     }
-    
+
     #[test]
     fn test_sum_check_proof_2() {
         let poly = Multilinear::new(
@@ -348,7 +348,7 @@ mod tests {
 
         assert!(verifer.verify(&proof));
     }
-    
+
     #[test]
     fn test_sum_check_proof_3() {
         let poly = Multilinear::new(
@@ -374,9 +374,9 @@ mod tests {
         );
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
-        
+
         println!("Sum: {:?}", prover.sum);
-        
+
         let proof = prover.sum_check_proof();
         let mut verifer = Verifier::new();
 
