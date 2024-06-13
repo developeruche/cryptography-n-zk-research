@@ -2,7 +2,6 @@ use ark_ff::PrimeField;
 use polynomial::{multilinear::Multilinear, univariant::UnivariantPolynomial};
 use sum_check::data_structure::SumCheckProof;
 
-
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct W<F: PrimeField> {
     /// This is the addition multilinear extension
@@ -24,8 +23,6 @@ pub struct GKRProof<F: PrimeField> {
     /// This is the list of q polynomials
     pub q_polynomials: Vec<UnivariantPolynomial<F>>,
 }
-
-
 
 impl<F: PrimeField> W<F> {
     pub fn new(

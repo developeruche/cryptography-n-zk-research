@@ -1,12 +1,7 @@
-use std::ops::{Add, Mul};
 use crate::primitives::CircuitEvaluation;
 use ark_ff::PrimeField;
 use polynomial::multilinear::Multilinear;
-
-
-
-
-
+use std::ops::{Add, Mul};
 
 /// This is the interface for the circuit
 pub trait CircuitInterface {
