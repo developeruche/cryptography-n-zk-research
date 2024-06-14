@@ -19,7 +19,7 @@ In the context of the Groth16 proving system, bilinear pairings are used to cons
 
 **Example Use in Groth16:**
 
-- **Setup Phase:** During the setup phase, a trusted party generates public parameters that include elements in $G_1$​, $G_2$​, and $G_T$_​.
+- **Setup Phase:** During the setup phase, a trusted party generates public parameters that include elements in $G_1$​, $G_2$​, and $G_T$.
 - **Proving Phase:** The prover uses these parameters to create a proof that certain computations were performed correctly. This involves operations in $G1$​ and $G2$.
 - **Verification Phase:** The verifier checks the proof by performing pairing operations $e$ and ensures that certain equations hold in $G_T$​. The bilinear nature of the pairing allows these checks to be performed efficiently.
 
