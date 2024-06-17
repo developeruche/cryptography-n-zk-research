@@ -76,7 +76,7 @@ impl<F: Field> Witness<F> {
             auxiliary_input,
         }
     }
-    
+
     pub fn render(&self) -> Vec<F> {
         let mut ren = self.public_input.clone();
         ren.extend(self.auxiliary_input.clone());
@@ -93,15 +93,14 @@ impl<F: Field> TrustedSetup<F> {
     }
 }
 
-
 impl<F: Field> QAP<F> {
-    pub fn new(cx: UnivariantPolynomial<F>, ax: UnivariantPolynomial<F>, bx: UnivariantPolynomial<F>, t: UnivariantPolynomial<F>, h: UnivariantPolynomial<F>) -> Self {
-        Self {
-            cx,
-            ax,
-            bx,
-            t,
-            h,
-        }
+    pub fn new(
+        cx: UnivariantPolynomial<F>,
+        ax: UnivariantPolynomial<F>,
+        bx: UnivariantPolynomial<F>,
+        t: UnivariantPolynomial<F>,
+        h: UnivariantPolynomial<F>,
+    ) -> Self {
+        Self { cx, ax, bx, t, h }
     }
 }

@@ -4,20 +4,16 @@ use crate::{
 };
 use ark_ff::PrimeField;
 
-
-
 pub struct PreProcessor<F: PrimeField> {
     pub r1cs: R1CS<F>,
     pub witness: Witness<F>,
 }
-
 
 impl<F: PrimeField> PreProcessor<F> {
     pub fn new(r1cs: R1CS<F>, witness: Witness<F>) -> Self {
         Self { r1cs, witness }
     }
 }
-
 
 impl<F: PrimeField> R1CSProcessingInterface<F> for R1CS<F> {
     fn to_qap_poly_coefficients(&self) -> QAPPolysCoefficients<F> {
@@ -59,13 +55,8 @@ impl<F: PrimeField> R1CSProcessingInterface<F> for R1CS<F> {
     }
 }
 
-
-
-
-
 impl<F: PrimeField> PreProcessorInterface<F> for PreProcessor<F> {
     fn preprocess(&self) -> QAP<F> {
         let qap_poly_coefficients = self.r1cs.to_qap_poly_coefficients();
-        
     }
 }
