@@ -1,8 +1,6 @@
 use ark_ff::PrimeField;
 use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
 
-
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
@@ -118,11 +116,23 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     pub fn new(a: Vec<Vec<F>>, b: Vec<Vec<F>>, c: Vec<Vec<F>>) -> Self {
         Self { a, b, c }
     }
-    
+
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
-        let a = self.a.iter().map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone())).collect();
-        let b = self.b.iter().map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone())).collect();
-        let c = self.c.iter().map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone())).collect();
-        QAPPolys { a, b, c }        
+        let a = self
+            .a
+            .iter()
+            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .collect();
+        let b = self
+            .b
+            .iter()
+            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .collect();
+        let c = self
+            .c
+            .iter()
+            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .collect();
+        QAPPolys { a, b, c }
     }
-} 
+}
