@@ -58,7 +58,7 @@ impl<F: PrimeField> R1CSProcessingInterface<F> for R1CS<F> {
 impl<F: PrimeField> PreProcessorInterface<F> for PreProcessor<F> {
     fn preprocess(&self) -> QAP<F> {
         let qap_poly_coefficients = self.r1cs.to_qap_poly_coefficients();
-        
+
         todo!()
     }
 }
