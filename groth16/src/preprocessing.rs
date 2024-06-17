@@ -60,28 +60,23 @@ impl<F: PrimeField> R1CSProcessingInterface<F> for R1CS<F> {
 impl<F: PrimeField> QAPPolysCoefficientsInterface<F> for QAPPolysCoefficients<F> {
     fn to_qap_polynomials(&self, witness: Vec<F>) -> QAP<F> {
         let polys = self.into_poly_rep();
-        
         let cx = polys.c.iter()
             .zip(witness.iter())
                     .map(|(p, w)| p.clone() * w.clone())
                     .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
-        
         let ax = polys.a.iter()
             .zip(witness.iter())
                     .map(|(p, w)| p.clone() * w.clone())
                     .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
-        
         let bx = polys.b.iter()
             .zip(witness.iter())
                     .map(|(p, w)| p.clone() * w.clone())
                     .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
-        
         let t = generate_t_poly::<F>(witness.len());
-        
         let h = ((ax * bx) - cx) / t;
         
         
-        todo!()
+        QAP::new(cx, ax, bx, t, h)
     }
 }
 
