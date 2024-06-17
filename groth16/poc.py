@@ -116,12 +116,15 @@ First step is converting each column of the matrices into polynomial using Lagra
 We call those polynomials U_polys, V_polys and W_polys.
 """
 
-def interpolate_column_galois(col):
-    xs = GF(np.array(range(1, len(col) + 1)))
-    print(xs, col)
-    return galois.lagrange_poly(xs, col)
+# def interpolate_column_galois(col):
+#     xs = GF(np.array(range(1, len(col) + 1)))
+#     poly_ =  galois.lagrange_poly(xs, col)
+#     print("0..............................0")
+#     print(xs, col)
+#     print(poly_)
+#     return poly_
 
-U_polys = np.apply_along_axis(interpolate_column_galois, 0, L_galois)
+# U_polys = np.apply_along_axis(interpolate_column_galois, 0, L_galois)
 # V_polys = np.apply_along_axis(interpolate_column_galois, 0, R_galois)
 # W_polys = np.apply_along_axis(interpolate_column_galois, 0, O_galois)
 
@@ -136,8 +139,12 @@ def inner_product_polynomials_with_witness(polys, witness):
     sum_ = lambda x, y: x + y
     return reduce(sum_, map(mul_, polys, witness))
 
+test_array = np.array([1, 2, 3, 4, 5])
+test_array2 = np.array([1, 2, 3, 4, 5])
+
+print(inner_product_polynomials_with_witness(test_array, test_array2))
 # U * a
-sum_au = inner_product_polynomials_with_witness(U_polys, a)
+# sum_au = inner_product_polynomials_with_witness(U_polys, a)
 # # V * a
 # sum_av = inner_product_polynomials_with_witness(V_polys, a)
 # # W * a

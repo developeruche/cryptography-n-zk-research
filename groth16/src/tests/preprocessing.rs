@@ -1,7 +1,6 @@
 use crate::{
     interfaces::R1CSProcessingInterface,
-    preprocessing::PreProcessor,
-    primitives::{QAPPolysCoefficients, Witness, R1CS},
+    primitives::{QAPPolysCoefficients, R1CS},
 };
 use ark_test_curves::bls12_381::Fr;
 
