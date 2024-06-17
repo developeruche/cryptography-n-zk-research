@@ -96,6 +96,16 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
     pub fn new(coefficients: Vec<F>) -> Self {
         UnivariantPolynomial { coefficients }
     }
+    
+    /// This function returns the poly additive identity
+    pub fn zero() -> Self {
+        UnivariantPolynomial::new(vec![])
+    }
+    
+    /// This function returns the poly multiplicative identity
+    pub fn one() -> Self {
+        UnivariantPolynomial::new(vec![F::one()])
+    }
 }
 
 impl<F: PrimeField> Mul for UnivariantPolynomial<F> {
@@ -122,6 +132,25 @@ impl<F: PrimeField> Mul for UnivariantPolynomial<F> {
         UnivariantPolynomial::new(poly_product_coefficients)
     }
 }
+
+impl<F: PrimeField> Mul<F> for UnivariantPolynomial<F> {
+    type Output = Self;
+
+    fn mul(self, other: F) -> Self {
+        // check for zero polynomials
+        if self.is_zero() || other.is_zero() {
+            return UnivariantPolynomial::new(vec![]);
+        }
+
+        let mut poly_product_coefficients = self.coefficients.clone();
+        for coeff in poly_product_coefficients.iter_mut() {
+            *coeff *= other;
+        }
+
+        UnivariantPolynomial::new(poly_product_coefficients)
+    }
+}
+
 
 impl<F: PrimeField> Mul for &UnivariantPolynomial<F> {
     type Output = UnivariantPolynomial<F>;
