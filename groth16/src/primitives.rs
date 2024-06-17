@@ -1,7 +1,6 @@
 use ark_ff::Field;
 use polynomial::univariant::UnivariantPolynomial;
 
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: Field> {
     /// The public input to the circuit
@@ -13,18 +12,18 @@ pub struct Witness<F: Field> {
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct R1CS<F: Field> {
     /// This is the C matrix
-    c: Vec<Vec<F>>,
+    pub c: Vec<Vec<F>>,
     /// This is the A matrix
-    a: Vec<Vec<F>>,
+    pub a: Vec<Vec<F>>,
     /// This is the B matrix
-    b: Vec<Vec<F>>,
+    pub b: Vec<Vec<F>>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct QAPPolysCoefficients<F: Field> {
-    pub a: Vec<F>,
-    pub b: Vec<F>,
-    pub c: Vec<F>,
+    pub a: Vec<Vec<F>>,
+    pub b: Vec<Vec<F>>,
+    pub c: Vec<Vec<F>>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -50,7 +49,6 @@ pub struct ToxicWaste<F: Field> {
     tau: F,
 }
 
-
 /// This is the trusted setup
 /// handles;
 /// Circuit specific trusted setup and noc-specific trusted setup
@@ -59,7 +57,6 @@ pub struct TrustedSetup<F: Field> {
     toxic_waste: ToxicWaste<F>,
     number_of_constraints: usize,
 }
-
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetupExcecution<F: Field> {
@@ -72,9 +69,6 @@ pub struct TrustedSetupExcecution<F: Field> {
     delta_g2: F,
 }
 
-
-
-
 impl<F: Field> Witness<F> {
     pub fn render(&self) -> Vec<F> {
         let mut ren = self.public_input.clone();
@@ -84,7 +78,7 @@ impl<F: Field> Witness<F> {
 }
 
 impl<F: Field> TrustedSetup<F> {
-    fn new(&self, toxic_waste: ToxicWaste<F>, number_of_constraints: usize) -> Self {
+    pub fn new(&self, toxic_waste: ToxicWaste<F>, number_of_constraints: usize) -> Self {
         Self {
             toxic_waste,
             number_of_constraints,
