@@ -1,8 +1,9 @@
 use crate::{
-    interfaces::{PreProcessorInterface, R1CSProcessingInterface},
-    primitives::{QAPPolysCoefficients, Witness, QAP, R1CS},
+    interfaces::{PreProcessorInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface},
+    primitives::{QAPPolysCoefficients, Witness, QAP, R1CS}, utils::generate_t_poly,
 };
 use ark_ff::PrimeField;
+use polynomial::univariant::UnivariantPolynomial;
 
 pub struct PreProcessor<F: PrimeField> {
     pub r1cs: R1CS<F>,
@@ -55,10 +56,38 @@ impl<F: PrimeField> R1CSProcessingInterface<F> for R1CS<F> {
     }
 }
 
+
+impl<F: PrimeField> QAPPolysCoefficientsInterface<F> for QAPPolysCoefficients<F> {
+    fn to_qap_polynomials(&self, witness: Vec<F>) -> QAP<F> {
+        let polys = self.into_poly_rep();
+        
+        let cx = polys.c.iter()
+            .zip(witness.iter())
+                    .map(|(p, w)| p.clone() * w.clone())
+                    .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
+        
+        let ax = polys.a.iter()
+            .zip(witness.iter())
+                    .map(|(p, w)| p.clone() * w.clone())
+                    .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
+        
+        let bx = polys.b.iter()
+            .zip(witness.iter())
+                    .map(|(p, w)| p.clone() * w.clone())
+                    .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
+        
+        let t = generate_t_poly::<F>(witness.len());
+        
+        let h = ((ax * bx) - cx) / t;
+        
+        
+        todo!()
+    }
+}
+
 impl<F: PrimeField> PreProcessorInterface<F> for PreProcessor<F> {
     fn preprocess(&self) -> QAP<F> {
         let qap_poly_coefficients = self.r1cs.to_qap_poly_coefficients();
-
-        todo!()
+        qap_poly_coefficients.to_qap_polynomials(self.witness.render())
     }
 }
