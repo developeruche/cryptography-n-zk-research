@@ -24,9 +24,7 @@ fn test_to_qap_poly_coefficients() {
         ],
     };
     
-    let preprocessor = PreProcessor::new(r1cs, Witness::new(vec![], vec![]));
-    
-    let qap_poly_coefficients = preprocessor.to_qap_poly_coefficients();
+    let qap_poly_coefficients = r1cs.to_qap_poly_coefficients();
     
     let excpected_result = QAPPolysCoefficients {
         a: vec![

@@ -92,3 +92,16 @@ impl<F: Field> TrustedSetup<F> {
         }
     }
 }
+
+
+impl<F: Field> QAP<F> {
+    pub fn new(cx: UnivariantPolynomial<F>, ax: UnivariantPolynomial<F>, bx: UnivariantPolynomial<F>, t: UnivariantPolynomial<F>, h: UnivariantPolynomial<F>) -> Self {
+        Self {
+            cx,
+            ax,
+            bx,
+            t,
+            h,
+        }
+    }
+}

@@ -20,3 +20,8 @@ pub trait TrustedSetupInterface<F: PrimeField> {
     /// This function is used to run the trusted setup
     fn run_trusted_setup(&self) -> TrustedSetupExcecution<F>;
 }
+
+pub trait PreProcessorInterface<F: PrimeField> {
+    /// This function is used to preprocess the R1CS
+    fn preprocess(&self) -> QAP<F>;
+}
