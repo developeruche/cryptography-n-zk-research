@@ -70,6 +70,13 @@ pub struct TrustedSetupExcecution<F: Field> {
 }
 
 impl<F: Field> Witness<F> {
+    pub fn new(public_input: Vec<F>, auxiliary_input: Vec<F>) -> Self {
+        Self {
+            public_input,
+            auxiliary_input,
+        }
+    }
+    
     pub fn render(&self) -> Vec<F> {
         let mut ren = self.public_input.clone();
         ren.extend(self.auxiliary_input.clone());
