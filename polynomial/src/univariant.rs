@@ -4,7 +4,7 @@ use crate::{
 };
 use ark_ff::PrimeField;
 pub use ark_test_curves;
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, Neg, Rem, Sub, SubAssign};
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
@@ -317,6 +317,14 @@ impl<F: PrimeField> Div for UnivariantPolynomial<F> {
     }
 }
 
+impl<F: PrimeField> Rem for UnivariantPolynomial<F> {
+    type Output = Self;
+
+    fn rem(self, other: Self) -> Self {
+        self.divide_with_q_and_r(&other).expect("division failed").1
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -440,6 +448,43 @@ mod tests {
         assert_eq!(
             poly.coefficients,
             vec![Fr::from(0), Fr::from(-12), Fr::from(0), Fr::from(5)]
+        );
+    }
+    
+    #[test]
+    fn test_negation() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
+        let poly2 = -poly1.clone();
+
+        assert_eq!(
+            poly2.coefficients,
+            vec![Fr::from(-1), Fr::from(-3), Fr::from(-2)]
+        );
+    }
+    
+    #[test]
+    fn test_univariant_polynomial_division() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(2), Fr::from(1)]);
+
+        let poly3 = poly1.clone() / poly2.clone();
+        
+        assert_eq!(
+            poly3.coefficients,
+            vec![Fr::from(3), Fr::from(4), Fr::from(1)]
+        );
+    }
+    
+    #[test]
+    fn test_univariant_polynomial_division_2() {
+        let poly1 = UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
+        let poly2 = UnivariantPolynomial::new(vec![Fr::from(2), Fr::from(1)]);
+
+        let poly3 = poly1.clone() % poly2.clone();
+        
+        assert_eq!(
+            poly3.coefficients,
+            vec![]
         );
     }
 }
