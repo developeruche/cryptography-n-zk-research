@@ -4,7 +4,7 @@ use crate::{
 };
 use ark_ff::PrimeField;
 pub use ark_test_curves;
-use std::ops::{Add, AddAssign, Mul};
+use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
@@ -221,6 +221,29 @@ impl<F: PrimeField> AddAssign for UnivariantPolynomial<F> {
 
             self.coefficients = result_coff;
         }
+    }
+}
+
+impl<F: PrimeField> Neg for UnivariantPolynomial<F> {
+    type Output = UnivariantPolynomial<F>;
+
+    #[inline]
+    fn neg(mut self) -> UnivariantPolynomial<F> {
+        self.coefficients.iter_mut().for_each(|coeff| {
+            *coeff = -*coeff;
+        });
+        
+        self
+    }
+}
+
+
+impl<F: PrimeField> Sub for UnivariantPolynomial<F> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let negated_other = -other;
+        self + negated_other
     }
 }
 
