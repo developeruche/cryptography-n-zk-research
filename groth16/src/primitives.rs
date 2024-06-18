@@ -1,5 +1,7 @@
 use ark_ff::PrimeField;
-use polynomial::{ark_poly::domain, interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial, utils::compute_domain};
+use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial, utils::compute_domain};
+use rand::rngs::OsRng;
+
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
@@ -96,6 +98,34 @@ impl<F: PrimeField> TrustedSetup<F> {
         Self {
             toxic_waste,
             number_of_constraints,
+        }
+    }
+    
+    pub fn new_with_random(&self, number_of_constraints: usize) -> Self {
+        let toxic_waste = ToxicWaste::random();
+        Self {
+            toxic_waste,
+            number_of_constraints,
+        }
+    }
+}
+
+impl<F: PrimeField> ToxicWaste<F> {
+    pub fn random() -> Self {
+        let rand_thread = &mut OsRng;
+        
+        let alpha = F::rand(rand_thread);
+        let beta = F::rand(rand_thread);
+        let gamma = F::rand(rand_thread);
+        let delta = F::rand(rand_thread);
+        let tau = F::rand(rand_thread);
+        
+        Self {
+            alpha,
+            beta,
+            gamma,
+            delta,
+            tau,
         }
     }
 }

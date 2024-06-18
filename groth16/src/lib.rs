@@ -4,3 +4,4 @@ pub mod primitives;
 pub mod protocol;
 pub mod tests;
 pub mod utils;
+pub mod trusted_setup;
