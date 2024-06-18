@@ -127,6 +127,15 @@ pub fn return_binary(mut num: u128) -> Vec<u8> {
     binary
 }
 
+pub fn compute_domain<F: PrimeField>(n: usize) -> Vec<F> {
+    let mut domain = Vec::new();
+    for i in 0..n {
+        domain.push(F::from(i as u128));
+    }
+
+    domain
+}
+
 #[cfg(test)]
 mod tests {
     use std::time::Instant;

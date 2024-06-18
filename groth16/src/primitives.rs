@@ -1,11 +1,11 @@
 use ark_ff::PrimeField;
-use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
+use polynomial::{ark_poly::domain, interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial, utils::compute_domain};
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
     pub public_input: Vec<F>,
-    /// The auxiliary input to the circuit
+    /// The auxiliary input to the circuit (private input)
     pub auxiliary_input: Vec<F>,
 }
 
@@ -128,20 +128,23 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     }
 
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
+        let domain_lenght = self.a[0].len();
+        let domain = compute_domain(domain_lenght);
+        
         let a = self
             .a
             .iter()
-            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .map(|y| UnivariantPolynomial::interpolate(y.clone(), domain.clone()))
             .collect();
         let b = self
             .b
             .iter()
-            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .map(|y| UnivariantPolynomial::interpolate(y.clone(), domain.clone()))
             .collect();
         let c = self
             .c
             .iter()
-            .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
+            .map(|y| UnivariantPolynomial::interpolate(y.clone(), domain.clone()))
             .collect();
 
         QAPPolys { a, b, c }

@@ -1,7 +1,7 @@
 import numpy as np
 import galois
 from functools import reduce
-from py_ecc.bn128 import G1, G2, multiply, add, curve_order, Z1, pairing, neg, final_exponentiate, FQ12
+from py_ecc.bls12_381 import G1, G2, multiply, add, curve_order, Z1, pairing, neg, final_exponentiate, FQ12
 
 # curve_order = 1151
 GF = galois.GF(curve_order) # we work with bn128/bn254 curve
@@ -118,223 +118,228 @@ We call those polynomials U_polys, V_polys and W_polys.
 
 def interpolate_column_galois(col):
     xs = GF(np.array(range(1, len(col) + 1)))
+    print(f"xs: {xs}")
+    print(f"col: {col}")
     return galois.lagrange_poly(xs, col)
 
 U_polys = np.apply_along_axis(interpolate_column_galois, 0, L_galois)
-V_polys = np.apply_along_axis(interpolate_column_galois, 0, R_galois)
-W_polys = np.apply_along_axis(interpolate_column_galois, 0, O_galois)
 
-"""
-Next, we compute QAP formula (U * a)(V * a) = (W * a) + h * t
-where * can be viewed as inner product
-"""
+# print(f"U_polys: {U_polys}")
 
-def inner_product_polynomials_with_witness(polys, witness):
-    mul_ = lambda x, y: x * y
-    sum_ = lambda x, y: x + y
-    return reduce(sum_, map(mul_, polys, witness))
+# V_polys = np.apply_along_axis(interpolate_column_galois, 0, R_galois)
+# W_polys = np.apply_along_axis(interpolate_column_galois, 0, O_galois)
 
-# U * a
-sum_au = inner_product_polynomials_with_witness(U_polys, a)
-# V * a
-sum_av = inner_product_polynomials_with_witness(V_polys, a)
-# W * a
-sum_aw = inner_product_polynomials_with_witness(W_polys, a)
+# """
+# Next, we compute QAP formula (U * a)(V * a) = (W * a) + h * t
+# where * can be viewed as inner product
+# """
 
-# t(x) = (x-1)(x-2)(x-3)(x-4)(x-5)(x-6)(x-7)
-t = galois.Poly([1, curve_order - 1], field = GF)\
-  * galois.Poly([1, curve_order - 2], field = GF)\
-  * galois.Poly([1, curve_order - 3], field = GF)\
-  * galois.Poly([1, curve_order - 4], field = GF)\
-  * galois.Poly([1, curve_order - 5], field = GF)\
-  * galois.Poly([1, curve_order - 6], field = GF)\
-  * galois.Poly([1, curve_order - 7], field = GF)
+# def inner_product_polynomials_with_witness(polys, witness):
+#     mul_ = lambda x, y: x * y
+#     sum_ = lambda x, y: x + y
+#     return reduce(sum_, map(mul_, polys, witness))
 
-# t(tau)
-t_evaluated_at_tau = t(tau)
-print(f"t_evaluated_at_tau: {t_evaluated_at_tau}")
-print(f"type of t_evaluated_at_tau: {type(t_evaluated_at_tau)}")
+# # U * a
+# sum_au = inner_product_polynomials_with_witness(U_polys, a)
+# # V * a
+# sum_av = inner_product_polynomials_with_witness(V_polys, a)
+# # W * a
+# sum_aw = inner_product_polynomials_with_witness(W_polys, a)
 
-# (U * a)(V * a) = (W * a) + h * t
-# h = ((U * a)(V * a) - (W * a)) / t
-h = (sum_au * sum_av - sum_aw) // t
-HT = h * t
+# # t(x) = (x-1)(x-2)(x-3)(x-4)(x-5)(x-6)(x-7)
+# t = galois.Poly([1, curve_order - 1], field = GF)\
+#   * galois.Poly([1, curve_order - 2], field = GF)\
+#   * galois.Poly([1, curve_order - 3], field = GF)\
+#   * galois.Poly([1, curve_order - 4], field = GF)\
+#   * galois.Poly([1, curve_order - 5], field = GF)\
+#   * galois.Poly([1, curve_order - 6], field = GF)\
+#   * galois.Poly([1, curve_order - 7], field = GF)
 
-print(f"U_polys: {U_polys}")
-print(f"V_polys: {V_polys}")
-print(f"W_polys: {W_polys}")
-print(f"HT: {HT}")
+# # t(tau)
+# t_evaluated_at_tau = t(tau)
+# print(f"t_evaluated_at_tau: {t_evaluated_at_tau}")
+# print(f"type of t_evaluated_at_tau: {type(t_evaluated_at_tau)}")
 
-assert sum_au * sum_av == sum_aw + HT, "division has a remainder"
+# # (U * a)(V * a) = (W * a) + h * t
+# # h = ((U * a)(V * a) - (W * a)) / t
+# h = (sum_au * sum_av - sum_aw) // t
+# HT = h * t
 
-"""
-We can further reduce computation by only evaluating polynomial at a single point instead of
-comparing the entire polynomial. This works because of Schwartz-Zippel Lemma. In short, this
-lemma says we pick a random x from a large pool and evaluate p(x) and q(x), and if p(x) = q(x),
-we can deduce that p = q with negligible probability.
+# print(f"U_polys: {U_polys}")
+# print(f"V_polys: {V_polys}")
+# print(f"W_polys: {W_polys}")
+# print(f"HT: {HT}")
 
-Of course that random point should be a secret, so we introduce a trusted 3rd party to generate it
-and publish "powers of tau" for prover and verifer to compute. This process is called "encrypted
-polynomial evaluation" in RareSkills ZK book:
-https://www.rareskills.io/post/encrypted-polynomial-evaluation
+# assert sum_au * sum_av == sum_aw + HT, "division has a remainder"
 
-In Groth16, alpha and beta are introduced to prevent prover from forging fake proofs. We introduce
-them as randomness to the system and attacker won't able to guess. It also affects power of tau.
-See https://www.rareskills.io/post/groth16 for formula derivation.
-"""
+# """
+# We can further reduce computation by only evaluating polynomial at a single point instead of
+# comparing the entire polynomial. This works because of Schwartz-Zippel Lemma. In short, this
+# lemma says we pick a random x from a large pool and evaluate p(x) and q(x), and if p(x) = q(x),
+# we can deduce that p = q with negligible probability.
 
-# polynomial degree is 6
+# Of course that random point should be a secret, so we introduce a trusted 3rd party to generate it
+# and publish "powers of tau" for prover and verifer to compute. This process is called "encrypted
+# polynomial evaluation" in RareSkills ZK book:
+# https://www.rareskills.io/post/encrypted-polynomial-evaluation
 
-# Powers of tau for A
-def generate_powers_of_tau_G1(tau):
-    return [multiply(G1, int(tau ** i)) for i in range(t.degree)] # up to tau**6
+# In Groth16, alpha and beta are introduced to prevent prover from forging fake proofs. We introduce
+# them as randomness to the system and attacker won't able to guess. It also affects power of tau.
+# See https://www.rareskills.io/post/groth16 for formula derivation.
+# """
 
-# Shift for [A]
-alpha_G1 = multiply(G1, int(alpha))
+# # polynomial degree is 6
 
-# Powers of tau for B
-def generate_powers_of_tau_G2(tau):
-    return [multiply(G2, int(tau ** i)) for i in range(t.degree)] # up to tau**6
+# # Powers of tau for A
+# def generate_powers_of_tau_G1(tau):
+#     return [multiply(G1, int(tau ** i)) for i in range(t.degree)] # up to tau**6
 
-# Shift for [B]
-beta_G2 = multiply(G2, int(beta))
+# # Shift for [A]
+# alpha_G1 = multiply(G1, int(alpha))
 
-# Powers of tau for h(tau)t(tau)
-def generate_powers_of_tau_HT(tau):
-    before_delta_inverse = [multiply(G1, int(tau ** i * t_evaluated_at_tau)) for i in range(t.degree - 1)] # up to tau**6
-    return [multiply(entry, int(delta_inverse)) for entry in before_delta_inverse]
+# # Powers of tau for B
+# def generate_powers_of_tau_G2(tau):
+#     return [multiply(G2, int(tau ** i)) for i in range(t.degree)] # up to tau**6
 
-# [beta] as G1 point and [delta] and G1 point
-def generate_beta1_and_delta1():
-    return multiply(G1, int(beta)), multiply(G1, int(delta))
+# # Shift for [B]
+# beta_G2 = multiply(G2, int(beta))
 
-# Debug notes for generate_powers_of_tau_HT()
-print(f"tau ** 2: {tau ** 1}") # 123
-print(f"type of tau ** 2: {type(tau ** 2)}") # <class 'galois.GF(21888242871839275222246405745257275088548364400416034343698204186575808495617)'>
-print(f"type of int(tau ** 2): {type(int(tau ** 2))}") # <class 'int'>
-# Conclusion: we need multiply(G1, some_int) -> int(tau ** i * t_evaluated_at_tau)
+# # Powers of tau for h(tau)t(tau)
+# def generate_powers_of_tau_HT(tau):
+#     before_delta_inverse = [multiply(G1, int(tau ** i * t_evaluated_at_tau)) for i in range(t.degree - 1)] # up to tau**6
+#     return [multiply(entry, int(delta_inverse)) for entry in before_delta_inverse]
 
-# Compute components needed for powers of tau for C
-beta_times_U_polys = [beta * U_polys[i] for i in range(len(U_polys))]
-alpha_times_V_polys = [alpha * V_polys[i] for i in range(len(V_polys))]
+# # [beta] as G1 point and [delta] and G1 point
+# def generate_beta1_and_delta1():
+#     return multiply(G1, int(beta)), multiply(G1, int(delta))
 
-# Powers of tau for C
-C_polys = [beta_times_U_polys[i] + alpha_times_V_polys[i] + W_polys[i] for i in range(len(W_polys))]
-C_polys_tau = [C_polys[i](tau) for i in range(len(C_polys))]
-powers_of_tau_for_C = [multiply(G1, int(C_polys_tau[i])) for i in range(len(C_polys_tau))]
+# # Debug notes for generate_powers_of_tau_HT()
+# print(f"tau ** 2: {tau ** 1}") # 123
+# print(f"type of tau ** 2: {type(tau ** 2)}") # <class 'galois.GF(21888242871839275222246405745257275088548364400416034343698204186575808495617)'>
+# print(f"type of int(tau ** 2): {type(int(tau ** 2))}") # <class 'int'>
+# # Conclusion: we need multiply(G1, some_int) -> int(tau ** i * t_evaluated_at_tau)
 
-# Powers of tau for public inputs hidden by gamma
-gamma_inverse = GF(1) / gamma
-powers_of_tau_for_public_inputs = powers_of_tau_for_C[:l+1]
-powers_of_tau_for_public_inputs = [multiply(entry, int(gamma_inverse)) for entry in powers_of_tau_for_public_inputs]
+# # Compute components needed for powers of tau for C
+# beta_times_U_polys = [beta * U_polys[i] for i in range(len(U_polys))]
+# alpha_times_V_polys = [alpha * V_polys[i] for i in range(len(V_polys))]
 
-# Powers of tau for private inputs hidden by delta
-delta_inverse = GF(1) / delta
-powers_of_tau_for_private_inputs = powers_of_tau_for_C[l+1:]
-powers_of_tau_for_private_inputs = [multiply(entry, int(delta_inverse)) for entry in powers_of_tau_for_private_inputs]
+# # Powers of tau for C
+# C_polys = [beta_times_U_polys[i] + alpha_times_V_polys[i] + W_polys[i] for i in range(len(W_polys))]
+# C_polys_tau = [C_polys[i](tau) for i in range(len(C_polys))]
+# powers_of_tau_for_C = [multiply(G1, int(C_polys_tau[i])) for i in range(len(C_polys_tau))]
 
-# Gamma as G2 point
-gamma_G2 = multiply(G2, int(gamma))
+# # Powers of tau for public inputs hidden by gamma
+# gamma_inverse = GF(1) / gamma
+# powers_of_tau_for_public_inputs = powers_of_tau_for_C[:l+1]
+# powers_of_tau_for_public_inputs = [multiply(entry, int(gamma_inverse)) for entry in powers_of_tau_for_public_inputs]
 
-# Delta as G2 point
-delta_G2 = multiply(G2, int(delta))
+# # Powers of tau for private inputs hidden by delta
+# delta_inverse = GF(1) / delta
+# powers_of_tau_for_private_inputs = powers_of_tau_for_C[l+1:]
+# powers_of_tau_for_private_inputs = [multiply(entry, int(delta_inverse)) for entry in powers_of_tau_for_private_inputs]
 
-"""
-At this stage we have completed the trusted setup, and we reach to the prover steps.
+# # Gamma as G2 point
+# gamma_G2 = multiply(G2, int(gamma))
 
-Prover computes the following things:
-1. [A] as G1 point after random shift by alpha.
-2. [B] as G2 point after random shift by beta.
-3. Polynomial h(x) derived from QAP equation.
-4. [h(tau)t(tau)] as G1 point. This is computed based on powers of tau for h(tau)t(tau).
-5. [C] as G1 point. This is computed based on powers of tau for C.
+# # Delta as G2 point
+# delta_G2 = multiply(G2, int(delta))
 
-In the end, prover generates proof = ([A], [B], [C]) and sends to the verifier.
-Verifier logic is implemented in a seperate Solidity contract. The only thing that verifier does is
-checking if pairing([A], [B]) == pairing([alpha], [beta]) + pairing([C], [G2]) returns true.
+# """
+# At this stage we have completed the trusted setup, and we reach to the prover steps.
 
-Prover step also needs r and s to stop external attacker from guessing witness (bruteforce small
-sample space). r and s are again random shifts.
-"""
+# Prover computes the following things:
+# 1. [A] as G1 point after random shift by alpha.
+# 2. [B] as G2 point after random shift by beta.
+# 3. Polynomial h(x) derived from QAP equation.
+# 4. [h(tau)t(tau)] as G1 point. This is computed based on powers of tau for h(tau)t(tau).
+# 5. [C] as G1 point. This is computed based on powers of tau for C.
 
-"""
-Modification regarding gamma and delta:
+# In the end, prover generates proof = ([A], [B], [C]) and sends to the verifier.
+# Verifier logic is implemented in a seperate Solidity contract. The only thing that verifier does is
+# checking if pairing([A], [B]) == pairing([alpha], [beta]) + pairing([C], [G2]) returns true.
 
-We use l to separate public inputs and private inputs. For example, our witness vector is
-[1, x1, x2, x3, x4], the only public input here is 1, which is the 0th element. We can say l = 0.
-When computing [C], we start from l+1 = 1, skipping the first term in the inner product. This also
-affects verifier's computation, since verifier now needs to handle public input.
+# Prover step also needs r and s to stop external attacker from guessing witness (bruteforce small
+# sample space). r and s are again random shifts.
+# """
 
-Trusted setup now has to provide another two random values gamma and delta. Gamma is used to hide
-public input and delta is used to hide private input.
-"""
+# """
+# Modification regarding gamma and delta:
 
-def inner_product(ec_points, coeffs):
-    return reduce(add, (multiply(point, int(coeff)) for point, coeff in zip(ec_points, coeffs)), Z1)
+# We use l to separate public inputs and private inputs. For example, our witness vector is
+# [1, x1, x2, x3, x4], the only public input here is 1, which is the 0th element. We can say l = 0.
+# When computing [C], we start from l+1 = 1, skipping the first term in the inner product. This also
+# affects verifier's computation, since verifier now needs to handle public input.
 
-def encrypted_evaluation_G1(poly):
-    powers_of_tau = generate_powers_of_tau_G1(tau)
-    evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
+# Trusted setup now has to provide another two random values gamma and delta. Gamma is used to hide
+# public input and delta is used to hide private input.
+# """
 
-    return evaluate_on_ec
+# def inner_product(ec_points, coeffs):
+#     return reduce(add, (multiply(point, int(coeff)) for point, coeff in zip(ec_points, coeffs)), Z1)
 
-def encrypted_evaluation_G2(poly):
-    powers_of_tau = generate_powers_of_tau_G2(tau)
-    evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
+# def encrypted_evaluation_G1(poly):
+#     powers_of_tau = generate_powers_of_tau_G1(tau)
+#     evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
 
-    return evaluate_on_ec
+#     return evaluate_on_ec
 
-def encrypted_evaluation_HT(poly):
-    powers_of_tau = generate_powers_of_tau_HT(tau)
-    evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
+# def encrypted_evaluation_G2(poly):
+#     powers_of_tau = generate_powers_of_tau_G2(tau)
+#     evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
+
+#     return evaluate_on_ec
+
+# def encrypted_evaluation_HT(poly):
+#     powers_of_tau = generate_powers_of_tau_HT(tau)
+#     evaluate_on_ec = inner_product(powers_of_tau, poly.coeffs[::-1])
     
-    return evaluate_on_ec
+#     return evaluate_on_ec
 
-old_A = encrypted_evaluation_G1(sum_au)
-old_B2 = encrypted_evaluation_G2(sum_av)
-old_B1 = encrypted_evaluation_G1(sum_av)
-HT_at_tau = encrypted_evaluation_HT(h) # Info about t is embedded in powers_of_tau_HT
-# old_C needs extra attention
-old_C = inner_product(powers_of_tau_for_private_inputs, private_inputs)
+# old_A = encrypted_evaluation_G1(sum_au)
+# old_B2 = encrypted_evaluation_G2(sum_av)
+# old_B1 = encrypted_evaluation_G1(sum_av)
+# HT_at_tau = encrypted_evaluation_HT(h) # Info about t is embedded in powers_of_tau_HT
+# # old_C needs extra attention
+# old_C = inner_product(powers_of_tau_for_private_inputs, private_inputs)
 
-print(f"old_A : {old_A}")
-print(f"old_B: {old_B2}")
-print(f"old_B: {old_B1}")
-print(f"HT_evaluated_on_ec: {HT_at_tau}")
-print(f"old_C: {old_C}")
+# print(f"old_A : {old_A}")
+# print(f"old_B: {old_B2}")
+# print(f"old_B: {old_B1}")
+# print(f"HT_evaluated_on_ec: {HT_at_tau}")
+# print(f"old_C: {old_C}")
 
-# Get [beta]1 and [delta]1 from trusted setup
-beta_G1, delta_G1 = generate_beta1_and_delta1()
-# [A] as G1 point -> [old_A] shift by [alpha], then shift by r
-A1 = add(add(old_A, alpha_G1), multiply(delta_G1, int(r)))
-# [B] as G2 point -> [old_B2] shift by [beta]2, then shift by s
-B2 = add(add(old_B2, beta_G2), multiply(delta_G2, int(s)))
-# [B] as G1 point -> [old_B1] shift by [beta]1, then shift by s
-B1 = add(add(old_B1, beta_G1), multiply(delta_G1, int(s)))
-# [C] = [old_C] + h(tau)t(tau)
-last_term_of_C1 = neg(multiply(delta_G1, int(r * s))) # -rs[delta]1
-C1 = add(add(add(add(old_C, HT_at_tau), multiply(A1, int(s))), multiply(B1, int(r))), last_term_of_C1)
+# # Get [beta]1 and [delta]1 from trusted setup
+# beta_G1, delta_G1 = generate_beta1_and_delta1()
+# # [A] as G1 point -> [old_A] shift by [alpha], then shift by r
+# A1 = add(add(old_A, alpha_G1), multiply(delta_G1, int(r)))
+# # [B] as G2 point -> [old_B2] shift by [beta]2, then shift by s
+# B2 = add(add(old_B2, beta_G2), multiply(delta_G2, int(s)))
+# # [B] as G1 point -> [old_B1] shift by [beta]1, then shift by s
+# B1 = add(add(old_B1, beta_G1), multiply(delta_G1, int(s)))
+# # [C] = [old_C] + h(tau)t(tau)
+# last_term_of_C1 = neg(multiply(delta_G1, int(r * s))) # -rs[delta]1
+# C1 = add(add(add(add(old_C, HT_at_tau), multiply(A1, int(s))), multiply(B1, int(r))), last_term_of_C1)
 
-print(f"A1: {A1}")
-print(f"B2: {B2}")
-print(f"C1: {C1}")
-print(f"alpha1: {alpha_G1}")
-print(f"beta2: {beta_G2}")
-print(f"inner_product_1: {inner_product(powers_of_tau_for_public_inputs, public_inputs)}")
-print(f"gamma2: {gamma_G2}")
-print(f"delta2: {delta_G2}")
+# print(f"A1: {A1}")
+# print(f"B2: {B2}")
+# print(f"C1: {C1}")
+# print(f"alpha1: {alpha_G1}")
+# print(f"beta2: {beta_G2}")
+# print(f"inner_product_1: {inner_product(powers_of_tau_for_public_inputs, public_inputs)}")
+# print(f"gamma2: {gamma_G2}")
+# print(f"delta2: {delta_G2}")
 
-print(f"pairing(B2, A1): {pairing(B2, A1)}")
-print(f"pairing(beta_G2, alpha_G1): {pairing(beta_G2, alpha_G1)}")
-print(f"pairing(G2, C1): {pairing(G2, C1)}")
+# print(f"pairing(B2, A1): {pairing(B2, A1)}")
+# print(f"pairing(beta_G2, alpha_G1): {pairing(beta_G2, alpha_G1)}")
+# print(f"pairing(G2, C1): {pairing(G2, C1)}")
 
-proof = [A1, B2, C1]
-print(f"Proof: {proof}")
+# proof = [A1, B2, C1]
+# print(f"Proof: {proof}")
 
-# Final check
-# Code comes from Zigtur: https://github.com/zigtur/Groth16/blob/main/Groth16.ipynb
-first = pairing(B2, neg(A1))
-second = pairing(beta_G2, alpha_G1)
-third = pairing(gamma_G2, inner_product(powers_of_tau_for_public_inputs, public_inputs))
-fourth = pairing(delta_G2, C1)
-print("Pairing check:", final_exponentiate(first * second * third * fourth) == FQ12.one())
+# # Final check
+# # Code comes from Zigtur: https://github.com/zigtur/Groth16/blob/main/Groth16.ipynb
+# first = pairing(B2, neg(A1))
+# second = pairing(beta_G2, alpha_G1)
+# third = pairing(gamma_G2, inner_product(powers_of_tau_for_public_inputs, public_inputs))
+# fourth = pairing(delta_G2, C1)
+# print("Pairing check:", final_exponentiate(first * second * third * fourth) == FQ12.one())

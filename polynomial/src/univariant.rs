@@ -77,17 +77,16 @@ impl<F: PrimeField> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F>
 /// Implement the `Display` trait for `Polynomial` so that we can print it out.
 impl<F: PrimeField> std::fmt::Display for UnivariantPolynomial<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let mut result = String::new();
-
-        for (i, coefficient) in self.coefficients.iter().enumerate() {
+        for (i, coeff) in self.coefficients.iter().enumerate().filter(|(_, c)| !c.is_zero()) {
             if i == 0 {
-                result.push_str(&format!("{:?}", coefficient));
+                write!(f, "\n{:?}", coeff)?;
+            } else if i == 1 {
+                write!(f, " + \n{:?} * x", coeff)?;
             } else {
-                result.push_str(&format!(" + {:?}x^{:?}", coefficient, i));
+                write!(f, " + \n{:?} * x^{}", coeff, i)?;
             }
         }
-
-        write!(f, "{}", result)
+        Ok(())
     }
 }
 
@@ -450,7 +449,7 @@ mod tests {
             vec![Fr::from(0), Fr::from(-12), Fr::from(0), Fr::from(5)]
         );
     }
-    
+
     #[test]
     fn test_negation() {
         let poly1 = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
@@ -461,30 +460,29 @@ mod tests {
             vec![Fr::from(-1), Fr::from(-3), Fr::from(-2)]
         );
     }
-    
+
     #[test]
     fn test_univariant_polynomial_division() {
-        let poly1 = UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
+        let poly1 =
+            UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
         let poly2 = UnivariantPolynomial::new(vec![Fr::from(2), Fr::from(1)]);
 
         let poly3 = poly1.clone() / poly2.clone();
-        
+
         assert_eq!(
             poly3.coefficients,
             vec![Fr::from(3), Fr::from(4), Fr::from(1)]
         );
     }
-    
+
     #[test]
     fn test_univariant_polynomial_division_2() {
-        let poly1 = UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
+        let poly1 =
+            UnivariantPolynomial::new(vec![Fr::from(6), Fr::from(11), Fr::from(6), Fr::from(1)]);
         let poly2 = UnivariantPolynomial::new(vec![Fr::from(2), Fr::from(1)]);
 
         let poly3 = poly1.clone() % poly2.clone();
-        
-        assert_eq!(
-            poly3.coefficients,
-            vec![]
-        );
+
+        assert_eq!(poly3.coefficients, vec![]);
     }
 }
