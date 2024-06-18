@@ -133,7 +133,7 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
             .iter()
             .map(|x| UnivariantPolynomial::from_coefficients_vec(x.clone()))
             .collect();
-        
+
         QAPPolys { a, b, c }
     }
 }

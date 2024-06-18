@@ -96,57 +96,60 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
     pub fn new(coefficients: Vec<F>) -> Self {
         UnivariantPolynomial { coefficients }
     }
-    
+
     /// This function returns the poly additive identity
     pub fn zero() -> Self {
         UnivariantPolynomial::new(vec![])
     }
-    
+
     /// This function returns the poly multiplicative identity
     pub fn one() -> Self {
         UnivariantPolynomial::new(vec![F::one()])
     }
-    
+
     pub fn leading_coefficient(&self) -> Option<F> {
         self.coefficients.last().cloned()
     }
-    
+
     pub fn iter_with_index(&self) -> Vec<(usize, F)> {
         self.coefficients.iter().cloned().enumerate().collect()
     }
-    
+
     /// This function is used for poly division, returning the quotient and remainder
     pub fn divide_with_q_and_r(
-            &self,
-            divisor: &Self,
-        ) -> Option<(UnivariantPolynomial<F>, UnivariantPolynomial<F>)> {
-            if self.is_zero() {
-                Some((UnivariantPolynomial::zero(), UnivariantPolynomial::zero()))
-            } else if divisor.is_zero() {
-                panic!("Dividing by zero polynomial")
-            } else if self.degree() < divisor.degree() {
-                Some((UnivariantPolynomial::zero(), self.clone().into()))
-            } else {
-                // Now we know that self.degree() >= divisor.degree();
-                let mut quotient = vec![F::zero(); self.degree() - divisor.degree() + 1];
-                let mut remainder: UnivariantPolynomial<F> = self.clone().into();
-                // Can unwrap here because we know self is not zero.
-                let divisor_leading_inv = divisor.leading_coefficient().unwrap().inverse().unwrap();
-                while !remainder.is_zero() && remainder.degree() >= divisor.degree() {
-                    let cur_q_coeff = *remainder.coefficients.last().unwrap() * divisor_leading_inv;
-                    let cur_q_degree = remainder.degree() - divisor.degree();
-                    quotient[cur_q_degree] = cur_q_coeff;
-    
-                    for (i, div_coeff) in divisor.iter_with_index() {
-                        remainder[cur_q_degree + i] -= &(cur_q_coeff * div_coeff);
-                    }
-                    while let Some(true) = remainder.coefficients.last().map(|c| c.is_zero()) {
-                        remainder.coefficients.pop();
-                    }
+        &self,
+        divisor: &Self,
+    ) -> Option<(UnivariantPolynomial<F>, UnivariantPolynomial<F>)> {
+        if self.is_zero() {
+            Some((UnivariantPolynomial::zero(), UnivariantPolynomial::zero()))
+        } else if divisor.is_zero() {
+            panic!("Dividing by zero polynomial")
+        } else if self.degree() < divisor.degree() {
+            Some((UnivariantPolynomial::zero(), self.clone().into()))
+        } else {
+            // Now we know that self.degree() >= divisor.degree();
+            let mut quotient = vec![F::zero(); self.degree() - divisor.degree() + 1];
+            let mut remainder: UnivariantPolynomial<F> = self.clone().into();
+            // Can unwrap here because we know self is not zero.
+            let divisor_leading_inv = divisor.leading_coefficient().unwrap().inverse().unwrap();
+            while !remainder.is_zero() && remainder.degree() >= divisor.degree() {
+                let cur_q_coeff = *remainder.coefficients.last().unwrap() * divisor_leading_inv;
+                let cur_q_degree = remainder.degree() - divisor.degree();
+                quotient[cur_q_degree] = cur_q_coeff;
+
+                for (i, div_coeff) in divisor.iter_with_index() {
+                    remainder[cur_q_degree + i] -= &(cur_q_coeff * div_coeff);
                 }
-                Some((UnivariantPolynomial::from_coefficients_vec(quotient), remainder))
+                while let Some(true) = remainder.coefficients.last().map(|c| c.is_zero()) {
+                    remainder.coefficients.pop();
+                }
             }
+            Some((
+                UnivariantPolynomial::from_coefficients_vec(quotient),
+                remainder,
+            ))
         }
+    }
 }
 
 impl<F: PrimeField> Deref for UnivariantPolynomial<F> {
@@ -205,7 +208,6 @@ impl<F: PrimeField> Mul<F> for UnivariantPolynomial<F> {
         UnivariantPolynomial::new(poly_product_coefficients)
     }
 }
-
 
 impl<F: PrimeField> Mul for &UnivariantPolynomial<F> {
     type Output = UnivariantPolynomial<F>;
@@ -287,11 +289,10 @@ impl<F: PrimeField> Neg for UnivariantPolynomial<F> {
         self.coefficients.iter_mut().for_each(|coeff| {
             *coeff = -*coeff;
         });
-        
+
         self
     }
 }
-
 
 impl<F: PrimeField> Sub for UnivariantPolynomial<F> {
     type Output = Self;
@@ -302,13 +303,11 @@ impl<F: PrimeField> Sub for UnivariantPolynomial<F> {
     }
 }
 
-
 impl<F: PrimeField> SubAssign for UnivariantPolynomial<F> {
     fn sub_assign(&mut self, rhs: Self) {
         *self += -rhs;
     }
 }
-
 
 impl<F: PrimeField> Div for UnivariantPolynomial<F> {
     type Output = Self;
@@ -317,8 +316,6 @@ impl<F: PrimeField> Div for UnivariantPolynomial<F> {
         self.divide_with_q_and_r(&other).expect("division failed").0
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
