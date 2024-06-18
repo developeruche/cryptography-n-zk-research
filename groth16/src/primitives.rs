@@ -110,6 +110,16 @@ impl<F: PrimeField> QAP<F> {
     ) -> Self {
         Self { cx, ax, bx, t, h }
     }
+    
+    pub fn compute_ht(&self) -> UnivariantPolynomial<F> {
+        self.h.clone() * self.t.clone()
+    }
+    
+    pub fn qap_check(&self) -> bool {
+        let ht = self.compute_ht();
+        let lhs =  self.ax.clone() * self.bx.clone();
+        lhs == ht + self.cx.clone()
+    }
 }
 
 impl<F: PrimeField> QAPPolysCoefficients<F> {
