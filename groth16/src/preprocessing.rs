@@ -78,6 +78,7 @@ impl<F: PrimeField> QAPPolysCoefficientsInterface<F> for QAPPolysCoefficients<F>
             .zip(witness.iter())
             .map(|(p, w)| p.clone() * w.clone())
             .fold(UnivariantPolynomial::one(), |acc, x| acc + x);
+        
         let t = generate_t_poly::<F>(witness.len());
         let h = ((ax.clone() * bx.clone()) - cx.clone()) / t.clone();
 

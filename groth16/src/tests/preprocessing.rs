@@ -1,6 +1,5 @@
 use crate::{
-    interfaces::R1CSProcessingInterface,
-    primitives::{QAPPolysCoefficients, R1CS},
+    interfaces::{R1CSProcessingInterface, PreProcessorInterface}, preprocessing::PreProcessor, primitives::{QAPPolysCoefficients, Witness, R1CS}
 };
 use ark_test_curves::bls12_381::Fr;
 
@@ -390,4 +389,37 @@ fn test_to_qap_poly_coefficients_0() {
     };
 
     assert_eq!(qap_poly_coefficients, excpected_result);
+}
+
+
+#[test]
+fn to_qap_polynomials() {
+    let r1cs = R1CS::<Fr> {
+        a: vec![
+            vec![Fr::from(2u32), Fr::from(1u32)],
+            vec![Fr::from(2u32), Fr::from(5u32)],
+            vec![Fr::from(2u32), Fr::from(5u32)],
+            vec![Fr::from(2u32), Fr::from(5u32)],
+        ],
+        b: vec![
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+        ],
+        c: vec![
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+            vec![Fr::from(2u32), Fr::from(2u32)],
+        ],
+    };
+    
+    let witness = Witness::new(vec![Fr::from(2u32),], vec![Fr::from(1u32)]);
+    
+    let preprocessor = PreProcessor::new(r1cs, witness);
+    let qap = preprocessor.preprocess();
+    let check = qap.qap_check();
+    
+    assert_eq!(check, true);
 }
