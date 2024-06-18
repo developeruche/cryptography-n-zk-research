@@ -25,7 +25,7 @@ pub fn get_gate_properties(a: usize, b: usize, c: usize, layer_index: usize) -> 
 
     let abc_bin_string = a_bin + &b_bin + &c_bin;
     let abc_decimal = usize::from_str_radix(&abc_bin_string, 2).unwrap();
-    
+
     abc_decimal
 }
 

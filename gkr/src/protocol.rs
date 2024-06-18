@@ -1,14 +1,13 @@
-use circuits::{interfaces::GKRProtocolCircuitInterface, primitives::{Circuit, CircuitEvaluation}};
+use crate::{interfaces::GKRProtocolInterface, primitives::GKRProof};
 use ark_ff::PrimeField;
+use circuits::{
+    interfaces::GKRProtocolCircuitInterface,
+    primitives::{Circuit, CircuitEvaluation},
+};
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
-use crate::{interfaces::GKRProtocolInterface, primitives::GKRProof};
-
-
 
 pub struct GKRProtocol;
-
-
 
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
     fn prove(circuit: &Circuit, evals: &CircuitEvaluation<F>) -> GKRProof<F> {

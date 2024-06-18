@@ -1,14 +1,11 @@
-use ark_ff::PrimeField;
-use polynomial::multilinear::Multilinear;
 use crate::{
     interfaces::{CircuitInterface, GKRProtocolCircuitInterface},
     primitives::{Circuit, CircuitEvaluation, GateType},
     utils::{compute_mle_num_var_from_layer_index, get_gate_properties, usize_vec_to_mle},
 };
+use ark_ff::PrimeField;
+use polynomial::multilinear::Multilinear;
 use std::ops::{Add, Mul};
-
-
-
 
 impl CircuitInterface for Circuit {
     fn evaluate<F>(&self, input: &[F]) -> CircuitEvaluation<F>
@@ -36,7 +33,6 @@ impl CircuitInterface for Circuit {
         CircuitEvaluation { layers }
     }
 }
-
 
 impl GKRProtocolCircuitInterface for Circuit {
     fn get_add_n_mul_mle<F: PrimeField>(

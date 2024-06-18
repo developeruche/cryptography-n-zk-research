@@ -6,7 +6,6 @@ pub enum GateType {
     Mul,
 }
 
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Gate {
     /// This represents the gate-type
@@ -32,11 +31,6 @@ pub struct CircuitEvaluation<F> {
     /// This is the curcuit evaluation on every layer
     pub layers: Vec<Vec<F>>,
 }
-
-
-
-
-
 
 impl Gate {
     pub fn new(g_type: GateType, inputs: [usize; 2]) -> Self {

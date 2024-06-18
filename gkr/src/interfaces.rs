@@ -1,8 +1,6 @@
-use circuits::primitives::{Circuit, CircuitEvaluation};
 use crate::primitives::GKRProof;
 use ark_ff::PrimeField;
-
-
+use circuits::primitives::{Circuit, CircuitEvaluation};
 
 /// This is the interface for the GKR protocol
 pub trait GKRProtocolInterface<F: PrimeField> {
