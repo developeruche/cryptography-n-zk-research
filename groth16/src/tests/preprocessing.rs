@@ -551,7 +551,15 @@ fn to_qap_polynomials() {
         ],
     };
 
-    let witness = Witness::new(vec![Fr::from(1u32)], vec![Fr::from(1u32), Fr::from(2u32), Fr::from(1u32), Fr::from(2u32)]);
+    let witness = Witness::new(
+        vec![Fr::from(1u32)],
+        vec![
+            Fr::from(1u32),
+            Fr::from(2u32),
+            Fr::from(1u32),
+            Fr::from(2u32),
+        ],
+    );
 
     let preprocessor = PreProcessor::new(r1cs, witness);
     let qap = preprocessor.preprocess();

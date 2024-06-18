@@ -1,5 +1,7 @@
 use crate::{
-    interfaces::{PreProcessorInterface, QAPInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface},
+    interfaces::{
+        PreProcessorInterface, QAPInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface,
+    },
     primitives::{QAPPolysCoefficients, Witness, QAP, R1CS},
     utils::generate_t_poly,
 };

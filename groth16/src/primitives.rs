@@ -1,7 +1,9 @@
 use ark_ff::PrimeField;
-use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial, utils::compute_domain};
+use polynomial::{
+    interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial,
+    utils::compute_domain,
+};
 use rand::rngs::OsRng;
-
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
@@ -100,7 +102,7 @@ impl<F: PrimeField> TrustedSetup<F> {
             number_of_constraints,
         }
     }
-    
+
     pub fn new_with_random(&self, number_of_constraints: usize) -> Self {
         let toxic_waste = ToxicWaste::random();
         Self {
@@ -113,13 +115,13 @@ impl<F: PrimeField> TrustedSetup<F> {
 impl<F: PrimeField> ToxicWaste<F> {
     pub fn random() -> Self {
         let rand_thread = &mut OsRng;
-        
+
         let alpha = F::rand(rand_thread);
         let beta = F::rand(rand_thread);
         let gamma = F::rand(rand_thread);
         let delta = F::rand(rand_thread);
         let tau = F::rand(rand_thread);
-        
+
         Self {
             alpha,
             beta,
@@ -160,7 +162,7 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
         let domain_lenght = self.a[0].len();
         let domain = compute_domain(domain_lenght);
-        
+
         let a = self
             .a
             .iter()

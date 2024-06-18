@@ -77,7 +77,12 @@ impl<F: PrimeField> UnivariantPolynomialInterface<F> for UnivariantPolynomial<F>
 /// Implement the `Display` trait for `Polynomial` so that we can print it out.
 impl<F: PrimeField> std::fmt::Display for UnivariantPolynomial<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        for (i, coeff) in self.coefficients.iter().enumerate().filter(|(_, c)| !c.is_zero()) {
+        for (i, coeff) in self
+            .coefficients
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| !c.is_zero())
+        {
             if i == 0 {
                 write!(f, "\n{:?}", coeff)?;
             } else if i == 1 {
