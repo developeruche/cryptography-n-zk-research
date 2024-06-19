@@ -1,5 +1,7 @@
 use crate::{
-    interfaces::{PreProcessorInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface},
+    interfaces::{
+        PreProcessorInterface, QAPInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface,
+    },
     primitives::{QAPPolysCoefficients, Witness, QAP, R1CS},
     utils::generate_t_poly,
 };
@@ -91,5 +93,11 @@ impl<F: PrimeField> PreProcessorInterface<F> for PreProcessor<F> {
     fn preprocess(&self) -> QAP<F> {
         let qap_poly_coefficients = self.r1cs.to_qap_poly_coefficients();
         qap_poly_coefficients.to_qap_polynomials(self.witness.render())
+    }
+}
+
+impl<F: PrimeField> QAPInterface<F> for QAP<F> {
+    fn is_satisfied(&self) -> bool {
+        self.qap_check()
     }
 }

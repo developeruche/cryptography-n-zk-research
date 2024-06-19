@@ -1,4 +1,4 @@
-use crate::primitives::{QAPPolysCoefficients, TrustedSetupExcecution, QAP};
+use crate::primitives::{QAPPolys, QAPPolysCoefficients, TrustedSetupExcecution, QAP};
 use ark_ff::PrimeField;
 
 pub trait R1CSProcessingInterface<F: PrimeField> {
@@ -18,7 +18,10 @@ pub trait QAPInterface<F: PrimeField> {
 
 pub trait TrustedSetupInterface<F: PrimeField> {
     /// This function is used to run the trusted setup
-    fn run_trusted_setup(&self) -> TrustedSetupExcecution<F>;
+    /// parameters:
+    /// circuit_details: The QAPPolys struct that contains the QAP polynomial coefficients.\
+    /// this is used for the circuit specific trusted setup
+    fn run_trusted_setup(&self, circuit_details: &QAPPolys<F>) -> TrustedSetupExcecution<F>;
 }
 
 pub trait PreProcessorInterface<F: PrimeField> {

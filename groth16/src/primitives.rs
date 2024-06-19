@@ -1,5 +1,9 @@
 use ark_ff::PrimeField;
-use polynomial::{ark_poly::domain, interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial, utils::compute_domain};
+use polynomial::{
+    interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial,
+    utils::compute_domain,
+};
+use rand::rngs::OsRng;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
@@ -67,8 +71,10 @@ pub struct TrustedSetup<F: PrimeField> {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetupExcecution<F: PrimeField> {
-    powers_of_tau_g1: Vec<F>,
-    powers_of_tau_g2: Vec<F>,
+    powers_of_tau_g1: Vec<F>, // from 0 to 2*m - 2
+    powers_of_tau_g2: Vec<F>, // from 0 to m - 1
+    powers_of_tau_g1_alpha: Vec<F>, // from 0 to m - 1
+    powers_of_tau_g1_beta: Vec<F>, // from 0 to m - 1
     alpha_g1: F,
     beta_g1: F,
     delta_g1: F,
@@ -98,6 +104,34 @@ impl<F: PrimeField> TrustedSetup<F> {
             number_of_constraints,
         }
     }
+
+    pub fn new_with_random(&self, number_of_constraints: usize) -> Self {
+        let toxic_waste = ToxicWaste::random();
+        Self {
+            toxic_waste,
+            number_of_constraints,
+        }
+    }
+}
+
+impl<F: PrimeField> ToxicWaste<F> {
+    pub fn random() -> Self {
+        let rand_thread = &mut OsRng;
+
+        let alpha = F::rand(rand_thread);
+        let beta = F::rand(rand_thread);
+        let gamma = F::rand(rand_thread);
+        let delta = F::rand(rand_thread);
+        let tau = F::rand(rand_thread);
+
+        Self {
+            alpha,
+            beta,
+            gamma,
+            delta,
+            tau,
+        }
+    }
 }
 
 impl<F: PrimeField> QAP<F> {
@@ -118,7 +152,9 @@ impl<F: PrimeField> QAP<F> {
     pub fn qap_check(&self) -> bool {
         let ht = self.compute_ht();
         let lhs = self.ax.clone() * self.bx.clone();
-        lhs == ht + self.cx.clone()
+        let check_1 = lhs == ht + self.cx.clone();
+        let check_2 = self.ax.evaluate(&F::from(1u32)) * self.bx.evaluate(&F::from(1u32)) == self.cx.evaluate(&F::from(1u32));
+        check_1 && check_2
     }
 }
 
@@ -130,7 +166,7 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
         let domain_lenght = self.a[0].len();
         let domain = compute_domain(domain_lenght);
-        
+
         let a = self
             .a
             .iter()
@@ -148,5 +184,17 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
             .collect();
 
         QAPPolys { a, b, c }
+    }
+}
+
+impl<F: PrimeField> TrustedSetupExcecution<F> {
+    pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<F> {
+        self.powers_of_tau_g1[..n].to_vec()
+    }
+}
+
+impl<F: PrimeField> QAPPolys<F> {
+    pub fn new(a: Vec<UnivariantPolynomial<F>>, b: Vec<UnivariantPolynomial<F>>, c: Vec<UnivariantPolynomial<F>>) -> Self {
+        Self { a, b, c }
     }
 }

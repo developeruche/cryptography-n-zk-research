@@ -263,6 +263,7 @@ dependencies = [
  "ark-ff",
  "ark-test-curves",
  "polynomial",
+ "rand",
 ]
 
 [[package]]
