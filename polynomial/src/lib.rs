@@ -5,3 +5,4 @@ pub mod interface;
 pub mod multilinear;
 pub mod univariant;
 pub mod utils;
+pub mod multivariate;
