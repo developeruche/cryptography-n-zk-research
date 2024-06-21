@@ -30,7 +30,10 @@ pub trait TrustedSetupInterface<P: Pairing> {
     ) -> TrustedSetupExcecution<P>;
 
     /// This function is used to obtain verification key
-    fn get_verification_key(&self,  trusted_setup_exec: &TrustedSetupExcecution<P>) -> VerificationKey<P>;
+    fn get_verification_key(
+        &self,
+        trusted_setup_exec: &TrustedSetupExcecution<P>,
+    ) -> VerificationKey<P>;
     /// This function is used to obtain the proving key
     fn get_proving_key(&self) -> ProvingKey<P>;
 }

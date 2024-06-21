@@ -212,13 +212,19 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
 }
 
 impl<P: Pairing> TrustedSetupExcecution<P> {
-    pub fn new(powers_of_tau_g1: Vec<P::G1>, powers_of_tau_g2: Vec<P::G2>, powers_of_tau_g1_alpha: Vec<P::G1>, powers_of_tau_g1_beta: Vec<P::G1>, beta_g2: P::G2) -> Self {
+    pub fn new(
+        powers_of_tau_g1: Vec<P::G1>,
+        powers_of_tau_g2: Vec<P::G2>,
+        powers_of_tau_g1_alpha: Vec<P::G1>,
+        powers_of_tau_g1_beta: Vec<P::G1>,
+        beta_g2: P::G2,
+    ) -> Self {
         Self {
             powers_of_tau_g1,
             powers_of_tau_g2,
             powers_of_tau_g1_alpha,
             powers_of_tau_g1_beta,
-            beta_g2
+            beta_g2,
         }
     }
     pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {

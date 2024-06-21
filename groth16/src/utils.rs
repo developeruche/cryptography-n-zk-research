@@ -67,15 +67,17 @@ pub fn generate_powers_of_tau_g2<P: Pairing>(tau: P::ScalarField, n: usize) -> V
     powers_of_tau_g2
 }
 
-
-pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(tau: P::ScalarField, alpha_or_beta: P::ScalarField, n: usize) -> Vec<P::G1> {
-    let mut powers_of_tau_g1_alpha_or_beta =  Vec::with_capacity(n);
+pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(
+    tau: P::ScalarField,
+    alpha_or_beta: P::ScalarField,
+    n: usize,
+) -> Vec<P::G1> {
+    let mut powers_of_tau_g1_alpha_or_beta = Vec::with_capacity(n);
     let mut tau_power = tau;
     let generator = P::G1::generator();
-    
+
     powers_of_tau_g1_alpha_or_beta.push(generator.mul_bigint(alpha_or_beta.into_bigint()));
-    
-    
+
     for _ in 1..n {
         let g1_p_of_tau = generator.mul_bigint(tau_power.into_bigint());
         powers_of_tau_g1_alpha_or_beta.push(g1_p_of_tau.mul_bigint(alpha_or_beta.into_bigint()));
@@ -83,7 +85,7 @@ pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(tau: P::ScalarField, 
     }
 
     powers_of_tau_g1_alpha_or_beta
-} 
+}
 
 #[cfg(test)]
 mod tests {
