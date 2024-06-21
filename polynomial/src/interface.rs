@@ -50,7 +50,6 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     fn mul_distinct(&self, rhs: &Self) -> Self;
 }
 
-
 pub trait MultivariatePolynomialInterface<F: PrimeField> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;

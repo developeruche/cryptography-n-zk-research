@@ -1,6 +1,8 @@
+use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use polynomial::{
-    interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial,
+    interface::{PolynomialInterface, UnivariantPolynomialInterface},
+    univariant::UnivariantPolynomial,
     utils::compute_domain,
 };
 use rand::rngs::OsRng;
@@ -53,33 +55,50 @@ pub struct QAP<F: PrimeField> {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct ToxicWaste<F: PrimeField> {
-    alpha: F,
-    beta: F,
-    gamma: F,
-    delta: F,
-    tau: F,
+    pub alpha: F,
+    pub beta: F,
+    pub gamma: F,
+    pub delta: F,
+    pub tau: F,
 }
 
 /// This is the trusted setup
 /// handles;
 /// Circuit specific trusted setup and noc-specific trusted setup
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TrustedSetup<F: PrimeField> {
-    toxic_waste: ToxicWaste<F>,
-    number_of_constraints: usize,
+pub struct TrustedSetup<P: Pairing> {
+    pub toxic_waste: ToxicWaste<P::ScalarField>,
+    pub number_of_constraints: usize,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TrustedSetupExcecution<F: PrimeField> {
-    powers_of_tau_g1: Vec<F>, // from 0 to 2*m - 2
-    powers_of_tau_g2: Vec<F>, // from 0 to m - 1
-    powers_of_tau_g1_alpha: Vec<F>, // from 0 to m - 1
-    powers_of_tau_g1_beta: Vec<F>, // from 0 to m - 1
-    alpha_g1: F,
-    beta_g1: F,
-    delta_g1: F,
-    beta_g2: F,
-    delta_g2: F,
+pub struct ProvingKey<P: Pairing> {
+    pub alpha_g1: P::G1,
+    pub beta_g1: P::G1,
+    pub delta_g1: P::G2,
+    pub powers_of_tau_g1: Vec<P::G1>, // from 0 to m - 1
+
+    pub beta_g2: P::G2,
+    pub delta_g2: P::G2,
+    pub powers_of_tau_g2: Vec<P::G2>, // from 0 to m - 1
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct VerificationKey<P: Pairing> {
+    pub alpha_g1: P::G1,
+
+    pub beta_g2: P::G2,
+    pub gamma_g2: P::G2,
+    pub delta_g2: P::G2,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct TrustedSetupExcecution<P: Pairing> {
+    pub powers_of_tau_g1: Vec<P::G1>,       // from 0 to 2*m - 2
+    pub powers_of_tau_g2: Vec<P::G2>,       // from 0 to m - 1
+    pub powers_of_tau_g1_alpha: Vec<P::G1>, // from 0 to m - 1
+    pub powers_of_tau_g1_beta: Vec<P::G1>,  // from 0 to m - 1
+    pub beta_g2: P::G2,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -97,8 +116,12 @@ impl<F: PrimeField> Witness<F> {
     }
 }
 
-impl<F: PrimeField> TrustedSetup<F> {
-    pub fn new(&self, toxic_waste: ToxicWaste<F>, number_of_constraints: usize) -> Self {
+impl<P: Pairing> TrustedSetup<P> {
+    pub fn new(
+        &self,
+        toxic_waste: ToxicWaste<P::ScalarField>,
+        number_of_constraints: usize,
+    ) -> Self {
         Self {
             toxic_waste,
             number_of_constraints,
@@ -153,7 +176,8 @@ impl<F: PrimeField> QAP<F> {
         let ht = self.compute_ht();
         let lhs = self.ax.clone() * self.bx.clone();
         let check_1 = lhs == ht + self.cx.clone();
-        let check_2 = self.ax.evaluate(&F::from(1u32)) * self.bx.evaluate(&F::from(1u32)) == self.cx.evaluate(&F::from(1u32));
+        let check_2 = self.ax.evaluate(&F::from(1u32)) * self.bx.evaluate(&F::from(1u32))
+            == self.cx.evaluate(&F::from(1u32));
         check_1 && check_2
     }
 }
@@ -187,14 +211,33 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     }
 }
 
-impl<F: PrimeField> TrustedSetupExcecution<F> {
-    pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<F> {
+impl<P: Pairing> TrustedSetupExcecution<P> {
+    pub fn new(
+        powers_of_tau_g1: Vec<P::G1>,
+        powers_of_tau_g2: Vec<P::G2>,
+        powers_of_tau_g1_alpha: Vec<P::G1>,
+        powers_of_tau_g1_beta: Vec<P::G1>,
+        beta_g2: P::G2,
+    ) -> Self {
+        Self {
+            powers_of_tau_g1,
+            powers_of_tau_g2,
+            powers_of_tau_g1_alpha,
+            powers_of_tau_g1_beta,
+            beta_g2,
+        }
+    }
+    pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {
         self.powers_of_tau_g1[..n].to_vec()
     }
 }
 
 impl<F: PrimeField> QAPPolys<F> {
-    pub fn new(a: Vec<UnivariantPolynomial<F>>, b: Vec<UnivariantPolynomial<F>>, c: Vec<UnivariantPolynomial<F>>) -> Self {
+    pub fn new(
+        a: Vec<UnivariantPolynomial<F>>,
+        b: Vec<UnivariantPolynomial<F>>,
+        c: Vec<UnivariantPolynomial<F>>,
+    ) -> Self {
         Self { a, b, c }
     }
 }
