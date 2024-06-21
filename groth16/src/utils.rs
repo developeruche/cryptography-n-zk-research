@@ -1,3 +1,4 @@
+use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
 
@@ -12,6 +13,25 @@ pub fn generate_t_poly<F: PrimeField>(number_of_constraints: usize) -> Univarian
     }
 
     t
+}
+
+/// tau = 5;
+/// powers_of_secret_gx = [g^5, g^10, g^15, g^20, g^25, g^30, g^35]
+pub fn linear_combination_homomorphic_poly_eval<P>(
+    poly: &UnivariantPolynomial<P::ScalarField>,
+    powers_of_secret_gx: Vec<P::G1>,
+) -> P::G1
+where
+    P: Pairing,
+{
+    poly.coefficients
+        .iter()
+        .enumerate()
+        .fold(P::G1::default(), |mut acc, (index, coeff)| {
+            let res = powers_of_secret_gx[index].mul_bigint(coeff.into_bigint());
+            acc = acc + res;
+            acc
+        })
 }
 
 #[cfg(test)]

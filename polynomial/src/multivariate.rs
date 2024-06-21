@@ -22,20 +22,19 @@ impl<F: PrimeField> Multivariate<F> {
             hc_index.pow(num_vars as u32),
             "Number of evaluations must be equal to 2^num_vars"
         );
-        
+
         Self {
             evaluations,
             num_vars,
             hc_index,
         }
     }
-    
+
     /// This function is used to check if the polynomial is zero
     pub fn is_zero(&self) -> bool {
         self.evaluations.iter().all(|x| x.is_zero())
     }
-    
-    
+
     /// This function is used to return the bytes representation of the polynomial
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut m_ploy_bytes = Vec::new();
