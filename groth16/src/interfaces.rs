@@ -27,16 +27,12 @@ pub trait TrustedSetupInterface<P: Pairing> {
     fn run_trusted_setup(
         &self,
         circuit_details: &QAPPolys<P::ScalarField>,
-    ) -> TrustedSetupExcecution<P::ScalarField>;
-    /// This function is used to run the trusted setup with toxic variables been know
-    fn run_trusted_setup_toxic_variables(
-        &self,
-        circuit_details: &QAPPolys<P::ScalarField>,
-    ) -> TrustedSetupExcecution<P::ScalarField>;
+    ) -> TrustedSetupExcecution<P>;
+
     /// This function is used to obtain verification key
-    fn get_verification_key(&self) -> VerificationKey<P::ScalarField>;
+    fn get_verification_key(&self,  trusted_setup_exec: &TrustedSetupExcecution<P>) -> VerificationKey<P>;
     /// This function is used to obtain the proving key
-    fn get_proving_key(&self) -> ProvingKey<P::ScalarField>;
+    fn get_proving_key(&self) -> ProvingKey<P>;
 }
 
 pub trait PreProcessorInterface<F: PrimeField> {

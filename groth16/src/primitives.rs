@@ -55,11 +55,11 @@ pub struct QAP<F: PrimeField> {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct ToxicWaste<F: PrimeField> {
-    alpha: F,
-    beta: F,
-    gamma: F,
-    delta: F,
-    tau: F,
+    pub alpha: F,
+    pub beta: F,
+    pub gamma: F,
+    pub delta: F,
+    pub tau: F,
 }
 
 /// This is the trusted setup
@@ -67,39 +67,38 @@ pub struct ToxicWaste<F: PrimeField> {
 /// Circuit specific trusted setup and noc-specific trusted setup
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetup<P: Pairing> {
-    toxic_waste: ToxicWaste<P::ScalarField>,
-    number_of_constraints: usize,
+    pub toxic_waste: ToxicWaste<P::ScalarField>,
+    pub number_of_constraints: usize,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct ProvingKey<F: PrimeField> {
-    alpha_g1: F,
-    beta_g1: F,
-    delta_g1: F,
-    powers_of_tau_g1: Vec<F>, // from 0 to m - 1
+pub struct ProvingKey<P: Pairing> {
+    pub alpha_g1: P::G1,
+    pub beta_g1: P::G1,
+    pub delta_g1: P::G2,
+    pub powers_of_tau_g1: Vec<P::G1>, // from 0 to m - 1
 
-    beta_g2: F,
-    delta_g2: F,
-    powers_of_tau_g2: Vec<F>, // from 0 to m - 1
+    pub beta_g2: P::G2,
+    pub delta_g2: P::G2,
+    pub powers_of_tau_g2: Vec<P::G2>, // from 0 to m - 1
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct VerificationKey<F: PrimeField> {
-    alpha_g1: F,
+pub struct VerificationKey<P: Pairing> {
+    pub alpha_g1: P::G1,
 
-    beta_g2: F,
-    gamma_g2: F,
-    delta_g2: F,
+    pub beta_g2: P::G2,
+    pub gamma_g2: P::G2,
+    pub delta_g2: P::G2,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TrustedSetupExcecution<F: PrimeField> {
-    powers_of_tau_g1: Vec<F>,       // from 0 to 2*m - 2
-    powers_of_tau_g2: Vec<F>,       // from 0 to m - 1
-    powers_of_tau_g1_alpha: Vec<F>, // from 0 to m - 1
-    powers_of_tau_g1_beta: Vec<F>,  // from 0 to m - 1
-    beta_g2: F,
-    delta_g2: F,
+pub struct TrustedSetupExcecution<P: Pairing> {
+    pub powers_of_tau_g1: Vec<P::G1>,       // from 0 to 2*m - 2
+    pub powers_of_tau_g2: Vec<P::G2>,       // from 0 to m - 1
+    pub powers_of_tau_g1_alpha: Vec<P::G1>, // from 0 to m - 1
+    pub powers_of_tau_g1_beta: Vec<P::G1>,  // from 0 to m - 1
+    pub beta_g2: P::G2,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -212,8 +211,17 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     }
 }
 
-impl<F: PrimeField> TrustedSetupExcecution<F> {
-    pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<F> {
+impl<P: Pairing> TrustedSetupExcecution<P> {
+    pub fn new(powers_of_tau_g1: Vec<P::G1>, powers_of_tau_g2: Vec<P::G2>, powers_of_tau_g1_alpha: Vec<P::G1>, powers_of_tau_g1_beta: Vec<P::G1>, beta_g2: P::G2) -> Self {
+        Self {
+            powers_of_tau_g1,
+            powers_of_tau_g2,
+            powers_of_tau_g1_alpha,
+            powers_of_tau_g1_beta,
+            beta_g2
+        }
+    }
+    pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {
         self.powers_of_tau_g1[..n].to_vec()
     }
 }
