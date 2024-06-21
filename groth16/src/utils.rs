@@ -17,7 +17,7 @@ pub fn generate_t_poly<F: PrimeField>(number_of_constraints: usize) -> Univarian
 
 /// tau = 5;
 /// powers_of_secret_gx = [g^5, g^10, g^15, g^20, g^25, g^30, g^35]
-pub fn linear_combination_homomorphic_poly_eval<P>(
+pub fn linear_combination_homomorphic_poly_eval_g1<P>(
     poly: &UnivariantPolynomial<P::ScalarField>,
     powers_of_secret_gx: Vec<P::G1>,
 ) -> P::G1
@@ -34,10 +34,33 @@ where
         })
 }
 
+
+/// This function generates the powers of tau for the circuit
+/// tau = 5;
+/// powers_of_tau_g1 = [g^5^0 g^5, g^10, g^15, g^20, g^25, g^30, g^35]
+pub fn generate_powers_of_tau_g1<P: Pairing>(tau: P::ScalarField, n: usize) -> Vec<P::G1> {
+    let mut powers_of_tau_g1 = Vec::with_capacity(n);
+    let mut tau_power = tau;
+    let generator = P::G1::generator();
+    
+    powers_of_tau_g1.push(generator);
+    
+    for _ in 1..n {
+        powers_of_tau_g1.push(generator.mul_bigint(tau_power.into_bigint()));
+        tau_power = tau_power * tau;
+    }
+
+    powers_of_tau_g1
+}
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ark_ec::AffineRepr;
     use ark_test_curves::bls12_381::Fr;
+    use polynomial::interface::PolynomialInterface;
 
     #[test]
     fn test_generate_t_poly() {
@@ -68,5 +91,21 @@ mod tests {
         ]);
 
         assert_eq!(t, expected_t);
+    }
+    
+    
+    #[test]
+    fn test_linear_combination_homomorphic_poly_eval_g1() {
+        let powers_of_tau_g1 = generate_powers_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(Fr::from(5u64), 3);
+        // f(tau).G1 when tau = 5 is know and f(x) = 2x^2 + 3x + 1
+        let poly = UnivariantPolynomial::from_coefficients_vec(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
+        let res = linear_combination_homomorphic_poly_eval_g1::<ark_test_curves::bls12_381::Bls12_381>(&poly, powers_of_tau_g1);
+        
+        
+        let generator = ark_test_curves::bls12_381::g1::G1Affine::generator();
+        let poly_at_tau = poly.evaluate(&Fr::from(5u64));
+        let expected_res = generator.mul_bigint(poly_at_tau.into_bigint());
+        
+        assert_eq!(res, expected_res);
     }
 }

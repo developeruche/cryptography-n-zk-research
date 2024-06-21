@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 ark-ff = "0.4.2"
 ark-ec = "0.4.2"
+ark-bls12-381 = "0.4.0"
 ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381"]}
 polynomial = {path = "../polynomial"}
 rand = "0.8.4"
