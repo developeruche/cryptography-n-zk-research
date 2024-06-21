@@ -9,11 +9,10 @@ use crate::{
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 
+
+
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
-    fn run_trusted_setup(
-        &self,
-        circuit_details: &QAPPolys<P::ScalarField>,
-    ) -> TrustedSetupExcecution<P> {
+    fn run_trusted_setup(&self) -> TrustedSetupExcecution<P> {
         let powers_of_tau_g1 = generate_powers_of_tau_g1::<P>(
             self.toxic_waste.tau,
             (self.number_of_constraints * 2) - 1,
@@ -44,11 +43,16 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn get_verification_key(
         &self,
         trusted_setup_exec: &TrustedSetupExcecution<P>,
+        circuit_details: &QAPPolys<P::ScalarField>,
     ) -> VerificationKey<P> {
         todo!()
     }
 
-    fn get_proving_key(&self) -> ProvingKey<P> {
+    fn get_proving_key(
+        &self,
+        trusted_setup_exec: &TrustedSetupExcecution<P>,
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> ProvingKey<P> {
         todo!()
     }
 }

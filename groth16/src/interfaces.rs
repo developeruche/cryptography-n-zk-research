@@ -24,18 +24,21 @@ pub trait TrustedSetupInterface<P: Pairing> {
     /// parameters:
     /// circuit_details: The QAPPolys struct that contains the QAP polynomial coefficients.\
     /// this is used for the circuit specific trusted setup
-    fn run_trusted_setup(
-        &self,
-        circuit_details: &QAPPolys<P::ScalarField>,
-    ) -> TrustedSetupExcecution<P>;
+    fn run_trusted_setup(&self) -> TrustedSetupExcecution<P>;
 
     /// This function is used to obtain verification key
     fn get_verification_key(
         &self,
         trusted_setup_exec: &TrustedSetupExcecution<P>,
+        circuit_details: &QAPPolys<P::ScalarField>,
     ) -> VerificationKey<P>;
+
     /// This function is used to obtain the proving key
-    fn get_proving_key(&self) -> ProvingKey<P>;
+    fn get_proving_key(
+        &self,
+        trusted_setup_exec: &TrustedSetupExcecution<P>,
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> ProvingKey<P>;
 }
 
 pub trait PreProcessorInterface<F: PrimeField> {
