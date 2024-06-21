@@ -1,26 +1,26 @@
 use crate::{
     interfaces::TrustedSetupInterface,
-    primitives::{QAPPolys, TrustedSetup, TrustedSetupExcecution},
+    primitives::{QAPPolys, TrustedSetup, TrustedSetupExcecution, VerificationKey},
 };
-use ark_ff::PrimeField;
+use ark_ec::pairing::Pairing;
 
-impl<F: PrimeField> TrustedSetupInterface<F> for TrustedSetup<F> {
-    fn run_trusted_setup(&self, circuit_details: &QAPPolys<F>) -> TrustedSetupExcecution<F> {
+impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
+    fn run_trusted_setup(&self, circuit_details: &QAPPolys<P::ScalarField>) -> TrustedSetupExcecution<P::ScalarField> {
         unimplemented!()
     }
 
-    fn get_verification_key(&self) -> crate::primitives::VerificationKey<F> {
+    fn get_verification_key(&self) -> VerificationKey<P::ScalarField> {
         todo!()
     }
 
-    fn get_proving_key(&self) -> crate::primitives::ProvingKey<F> {
+    fn get_proving_key(&self) -> crate::primitives::ProvingKey<P::ScalarField> {
         todo!()
     }
 
     fn run_trusted_setup_toxic_variables(
         &self,
-        circuit_details: &QAPPolys<F>,
-    ) -> TrustedSetupExcecution<F> {
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> TrustedSetupExcecution<P::ScalarField> {
         todo!()
     }
 }

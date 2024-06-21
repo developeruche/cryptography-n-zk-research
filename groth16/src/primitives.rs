@@ -1,3 +1,4 @@
+use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use polynomial::{
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
@@ -65,8 +66,8 @@ pub struct ToxicWaste<F: PrimeField> {
 /// handles;
 /// Circuit specific trusted setup and noc-specific trusted setup
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TrustedSetup<F: PrimeField> {
-    toxic_waste: ToxicWaste<F>,
+pub struct TrustedSetup<P: Pairing> {
+    toxic_waste: ToxicWaste<P::ScalarField>,
     number_of_constraints: usize,
 }
 
@@ -116,8 +117,8 @@ impl<F: PrimeField> Witness<F> {
     }
 }
 
-impl<F: PrimeField> TrustedSetup<F> {
-    pub fn new(&self, toxic_waste: ToxicWaste<F>, number_of_constraints: usize) -> Self {
+impl<P: Pairing> TrustedSetup<P> {
+    pub fn new(&self, toxic_waste: ToxicWaste<P::ScalarField>, number_of_constraints: usize) -> Self {
         Self {
             toxic_waste,
             number_of_constraints,

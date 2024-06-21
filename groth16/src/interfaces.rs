@@ -1,6 +1,7 @@
 use crate::primitives::{
     ProvingKey, QAPPolys, QAPPolysCoefficients, TrustedSetupExcecution, VerificationKey, QAP,
 };
+use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 
 pub trait R1CSProcessingInterface<F: PrimeField> {
@@ -18,22 +19,23 @@ pub trait QAPInterface<F: PrimeField> {
     fn is_satisfied(&self) -> bool;
 }
 
-pub trait TrustedSetupInterface<F: PrimeField> {
+pub trait TrustedSetupInterface<P: Pairing> {
     /// This function is used to run the trusted setup
     /// parameters:
     /// circuit_details: The QAPPolys struct that contains the QAP polynomial coefficients.\
     /// this is used for the circuit specific trusted setup
-    fn run_trusted_setup(&self, circuit_details: &QAPPolys<F>) -> TrustedSetupExcecution<F>;
+    fn run_trusted_setup(&self, circuit_details: &QAPPolys<P::ScalarField>) -> TrustedSetupExcecution<P::ScalarField>;
     /// This function is used to run the trusted setup with toxic variables been know
     fn run_trusted_setup_toxic_variables(
         &self,
-        circuit_details: &QAPPolys<F>,
-    ) -> TrustedSetupExcecution<F>;
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> TrustedSetupExcecution<P::ScalarField>;
     /// This function is used to obtain verification key
-    fn get_verification_key(&self) -> VerificationKey<F>;
+    fn get_verification_key(&self) -> VerificationKey<P::ScalarField>;
     /// This function is used to obtain the proving key
-    fn get_proving_key(&self) -> ProvingKey<F>;
+    fn get_proving_key(&self) -> ProvingKey<P::ScalarField>;
 }
+
 
 pub trait PreProcessorInterface<F: PrimeField> {
     /// This function is used to preprocess the R1CS
