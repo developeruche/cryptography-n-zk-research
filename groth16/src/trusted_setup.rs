@@ -5,7 +5,10 @@ use crate::{
 use ark_ec::pairing::Pairing;
 
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
-    fn run_trusted_setup(&self, circuit_details: &QAPPolys<P::ScalarField>) -> TrustedSetupExcecution<P::ScalarField> {
+    fn run_trusted_setup(
+        &self,
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> TrustedSetupExcecution<P::ScalarField> {
         unimplemented!()
     }
 

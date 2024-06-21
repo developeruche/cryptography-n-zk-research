@@ -24,7 +24,10 @@ pub trait TrustedSetupInterface<P: Pairing> {
     /// parameters:
     /// circuit_details: The QAPPolys struct that contains the QAP polynomial coefficients.\
     /// this is used for the circuit specific trusted setup
-    fn run_trusted_setup(&self, circuit_details: &QAPPolys<P::ScalarField>) -> TrustedSetupExcecution<P::ScalarField>;
+    fn run_trusted_setup(
+        &self,
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> TrustedSetupExcecution<P::ScalarField>;
     /// This function is used to run the trusted setup with toxic variables been know
     fn run_trusted_setup_toxic_variables(
         &self,
@@ -35,7 +38,6 @@ pub trait TrustedSetupInterface<P: Pairing> {
     /// This function is used to obtain the proving key
     fn get_proving_key(&self) -> ProvingKey<P::ScalarField>;
 }
-
 
 pub trait PreProcessorInterface<F: PrimeField> {
     /// This function is used to preprocess the R1CS

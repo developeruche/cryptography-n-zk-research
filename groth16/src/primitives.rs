@@ -118,7 +118,11 @@ impl<F: PrimeField> Witness<F> {
 }
 
 impl<P: Pairing> TrustedSetup<P> {
-    pub fn new(&self, toxic_waste: ToxicWaste<P::ScalarField>, number_of_constraints: usize) -> Self {
+    pub fn new(
+        &self,
+        toxic_waste: ToxicWaste<P::ScalarField>,
+        number_of_constraints: usize,
+    ) -> Self {
         Self {
             toxic_waste,
             number_of_constraints,
