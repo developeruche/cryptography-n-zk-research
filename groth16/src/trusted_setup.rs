@@ -9,8 +9,6 @@ use crate::{
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 
-
-
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn run_trusted_setup(&self) -> TrustedSetupExcecution<P> {
         let powers_of_tau_g1 = generate_powers_of_tau_g1::<P>(
