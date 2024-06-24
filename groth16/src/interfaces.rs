@@ -4,6 +4,8 @@ use crate::primitives::{
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 
+
+
 pub trait R1CSProcessingInterface<F: PrimeField> {
     /// This function take the columns from the R1CS matrix and returns the QAP polynomial coefficients
     fn to_qap_poly_coefficients(&self) -> QAPPolysCoefficients<F>;

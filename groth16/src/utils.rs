@@ -87,6 +87,11 @@ pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(
     powers_of_tau_g1_alpha_or_beta
 }
 
+
+pub fn compute_l_i_of_tau_g1<P: Pairing>(a_poly: &UnivariantPolynomial<P::ScalarField>, b_poly: &UnivariantPolynomial<P::ScalarField>, c_poly: &UnivariantPolynomialInterface<P::ScalarField>, alpha_t_g1: Vec<P::G1>, beta_t_g1: Vec<P::G1>, t_g1: Vec<P::G1>,) -> P::G1 {
+    
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
