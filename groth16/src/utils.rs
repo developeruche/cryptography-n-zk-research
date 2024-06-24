@@ -87,6 +87,21 @@ pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(
     powers_of_tau_g1_alpha_or_beta
 }
 
+pub fn compute_l_i_of_tau_g1<P: Pairing>(
+    a_poly_i: &UnivariantPolynomial<P::ScalarField>,
+    b_poly_i: &UnivariantPolynomial<P::ScalarField>,
+    c_poly_i: &UnivariantPolynomial<P::ScalarField>,
+    alpha_t_g1: Vec<P::G1>,
+    beta_t_g1: Vec<P::G1>,
+    t_g1: Vec<P::G1>,
+) -> P::G1 {
+    let beta_a_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(a_poly_i, beta_t_g1);
+    let alpha_b_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(b_poly_i, alpha_t_g1);
+    let c_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(c_poly_i, t_g1);
+    
+    beta_a_i_of_tau + alpha_b_i_of_tau + c_i_of_tau
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,6 +158,48 @@ mod tests {
         let poly_at_tau = poly.evaluate(&Fr::from(5u64));
         let expected_res = generator.mul_bigint(poly_at_tau.into_bigint());
 
+        assert_eq!(res, expected_res);
+    }
+    
+    #[test]
+    fn test_compute_l_i_of_tau_g1() {
+        let a_i = UnivariantPolynomial::from_coefficients_vec(vec![
+            Fr::from(1),
+            Fr::from(2),
+        ]);
+        let b_i = UnivariantPolynomial::from_coefficients_vec(vec![
+            Fr::from(3),
+            Fr::from(4),
+        ]);
+        let c_i = UnivariantPolynomial::from_coefficients_vec(vec![
+            Fr::from(5),
+            Fr::from(6),
+        ]);
+        
+        let alpha = Fr::from(5);
+        let beta = Fr::from(7);
+        let tau = Fr::from(4);
+        
+        let alpha_t_g1 = generate_powers_of_tau_g1_alpha_or_beta::<ark_test_curves::bls12_381::Bls12_381>(tau, alpha, 3);
+        let beta_t_g1 = generate_powers_of_tau_g1_alpha_or_beta::<ark_test_curves::bls12_381::Bls12_381>(tau, beta, 3);
+        let t_g1 = generate_powers_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(tau, 3);
+        
+        let l_of_i = (a_i.clone() * beta) + (b_i.clone() * alpha) + c_i.clone();
+        let l_of_i_at_tau = l_of_i.evaluate(&tau);
+        
+        let generator_1 = ark_test_curves::bls12_381::g1::G1Affine::generator();
+        
+        let expected_res = generator_1.mul_bigint(l_of_i_at_tau.into_bigint());
+        
+        let res = compute_l_i_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(
+            &a_i,
+            &b_i,
+            &c_i,
+            alpha_t_g1,
+            beta_t_g1,
+            t_g1,
+        );
+        
         assert_eq!(res, expected_res);
     }
 }
