@@ -37,20 +37,31 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
             beta_g2,
         )
     }
+    
+    fn get_proving_key(
+        &self,
+        trusted_setup_exec: &TrustedSetupExcecution<P>,
+        circuit_details: &QAPPolys<P::ScalarField>,
+    ) -> ProvingKey<P> {
+        let alpha_g1 = P::G1::generator().mul_bigint(self.toxic_waste.alpha.into_bigint());
+        let beta_g1 = P::G1::generator().mul_bigint(self.toxic_waste.beta.into_bigint());
+        let delta_g1 = P::G1::generator().mul_bigint(self.toxic_waste.delta.into_bigint());
+        let powers_of_tau_g1 = generate_powers_of_tau_g1::<P>(
+            self.toxic_waste.tau,
+            self.number_of_constraints - 1,
+        );
+        
+        
+        let beta_g2 = P::G2::generator().mul_bigint(self.toxic_waste.beta.into_bigint());
+        let delta_g2 = P::G2::generator().mul_bigint(self.toxic_waste.delta.into_bigint());
+        let powers_of_tau_g2 = generate_powers_of_tau_g2::<P>(self.toxic_waste.tau, self.number_of_constraints - 1);
+    }
 
     fn get_verification_key(
         &self,
         trusted_setup_exec: &TrustedSetupExcecution<P>,
         circuit_details: &QAPPolys<P::ScalarField>,
     ) -> VerificationKey<P> {
-        todo!()
-    }
-
-    fn get_proving_key(
-        &self,
-        trusted_setup_exec: &TrustedSetupExcecution<P>,
-        circuit_details: &QAPPolys<P::ScalarField>,
-    ) -> ProvingKey<P> {
         todo!()
     }
 }
