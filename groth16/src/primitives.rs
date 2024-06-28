@@ -62,13 +62,18 @@ pub struct ToxicWaste<F: PrimeField> {
     pub tau: F,
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct ToxicWastePhase2<F: PrimeField> {
+    pub gamma: F,
+    pub delta: F,
+}
+
 /// This is the trusted setup
 /// handles;
 /// Circuit specific trusted setup and noc-specific trusted setup
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetup<P: Pairing> {
-    pub toxic_waste: ToxicWaste<P::ScalarField>,
-    pub number_of_constraints: usize,
+    phantom: std::marker::PhantomData<P>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -99,6 +104,8 @@ pub struct TrustedSetupExcecution<P: Pairing> {
     pub powers_of_tau_g1_alpha: Vec<P::G1>, // from 0 to m - 1
     pub powers_of_tau_g1_beta: Vec<P::G1>,  // from 0 to m - 1
     pub beta_g2: P::G2,
+    pub alpha_g1: P::G1,
+    pub beta_g1: P::G1,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -113,27 +120,6 @@ impl<F: PrimeField> Witness<F> {
         let mut ren = self.public_input.clone();
         ren.extend(self.auxiliary_input.clone());
         ren
-    }
-}
-
-impl<P: Pairing> TrustedSetup<P> {
-    pub fn new(
-        &self,
-        toxic_waste: ToxicWaste<P::ScalarField>,
-        number_of_constraints: usize,
-    ) -> Self {
-        Self {
-            toxic_waste,
-            number_of_constraints,
-        }
-    }
-
-    pub fn new_with_random(&self, number_of_constraints: usize) -> Self {
-        let toxic_waste = ToxicWaste::random();
-        Self {
-            toxic_waste,
-            number_of_constraints,
-        }
     }
 }
 
@@ -218,6 +204,8 @@ impl<P: Pairing> TrustedSetupExcecution<P> {
         powers_of_tau_g1_alpha: Vec<P::G1>,
         powers_of_tau_g1_beta: Vec<P::G1>,
         beta_g2: P::G2,
+        alpha_g1: P::G1,
+        beta_g1: P::G1,
     ) -> Self {
         Self {
             powers_of_tau_g1,
@@ -225,6 +213,8 @@ impl<P: Pairing> TrustedSetupExcecution<P> {
             powers_of_tau_g1_alpha,
             powers_of_tau_g1_beta,
             beta_g2,
+            alpha_g1,
+            beta_g1,
         }
     }
     pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {

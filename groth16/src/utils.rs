@@ -1,5 +1,5 @@
 use ark_ec::{pairing::Pairing, Group};
-use ark_ff::PrimeField;
+use ark_ff::{Field, PrimeField};
 use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
 
 /// This function generates the t-polynomial for the circuit
@@ -102,17 +102,50 @@ pub fn compute_l_i_of_tau_g1<P: Pairing>(
     beta_a_i_of_tau + alpha_b_i_of_tau + c_i_of_tau
 }
 
-
 pub fn compute_delta_inverse_l_tau_g1<P: Pairing>(
-    a_poly: Vec<UnivariantPolynomial<P::ScalarField>>,
-    b_poly: Vec<UnivariantPolynomial<P::ScalarField>>,
-    c_poly: Vec<UnivariantPolynomial<P::ScalarField>>,
-    alpha_t_g1: Vec<P::G1>,
-    beta_t_g1: Vec<P::G1>,
-    t_g1: Vec<P::G1>,
+    a_poly: &Vec<UnivariantPolynomial<P::ScalarField>>,
+    b_poly: &Vec<UnivariantPolynomial<P::ScalarField>>,
+    c_poly: &Vec<UnivariantPolynomial<P::ScalarField>>,
+    alpha_t_g1: &Vec<P::G1>,
+    beta_t_g1: &Vec<P::G1>,
+    t_g1: &Vec<P::G1>,
+    delta_inverse: &P::ScalarField,
     controlling_pin: usize,
+    n: usize,
 ) -> Vec<P::G1> {
-    
+    let mut result = Vec::with_capacity(n);
+
+    for i in controlling_pin..n {
+        let l_p_of_tau_g1 = compute_l_i_of_tau_g1::<P>(
+            &a_poly[i],
+            &b_poly[i],
+            &c_poly[i],
+            alpha_t_g1.clone(),
+            beta_t_g1.clone(),
+            t_g1.clone(),
+        );
+        let l_p_of_tau_g1_delta_inverse = l_p_of_tau_g1.mul_bigint(delta_inverse.into_bigint());
+        result.push(l_p_of_tau_g1_delta_inverse);
+    }
+
+    result
+}
+
+pub fn compute_t_of_tau_delta_inverse_g1<P: Pairing>(
+    p_of_tau: &Vec<P::G1>,
+    t_poly: &UnivariantPolynomial<P::ScalarField>,
+    delta_inverse: &P::ScalarField,
+    n: usize,
+) -> Vec<P::G1> {
+    let mut result = Vec::with_capacity(n);
+    let t_of_tau_g1 = linear_combination_homomorphic_poly_eval_g1::<P>(&t_poly, p_of_tau.clone());
+
+    for i in p_of_tau {
+        let hold = *i + t_of_tau_g1;
+        result.push(hold.mul_bigint(delta_inverse.into_bigint()));
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -204,5 +237,31 @@ mod tests {
         );
 
         assert_eq!(res, expected_res);
+    }
+
+    #[test]
+    fn test_compute_t_of_tau_delta_inverse_g1() {
+        let delta_inverse = Fr::from(7);
+        let tau = Fr::from(4);
+        let t_poly = UnivariantPolynomial::from_coefficients_vec(vec![
+            Fr::from(1),
+            Fr::from(3),
+            Fr::from(2),
+        ]);
+        let p_of_tau = generate_powers_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(tau, 3);
+        let t_of_tau = t_poly.evaluate(&tau);
+        let mut  result = Vec::new();
+        
+        for i in &p_of_tau {
+            let hold = i.mul_bigint(delta_inverse.into_bigint());
+            result.push(hold.mul_bigint(t_of_tau.into_bigint()));
+        }
+        
+        
+        let res = compute_t_of_tau_delta_inverse_g1::<ark_test_curves::bls12_381::Bls12_381>(
+             &p_of_tau, &t_poly, &delta_inverse, 3,
+        );
+        
+        assert_eq!(res, result);
     }
 }

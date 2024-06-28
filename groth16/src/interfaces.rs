@@ -1,8 +1,9 @@
 use crate::primitives::{
-    ProvingKey, QAPPolys, QAPPolysCoefficients, TrustedSetupExcecution, VerificationKey, QAP,
+    ProvingKey, QAPPolys, QAPPolysCoefficients, ToxicWaste, ToxicWastePhase2, TrustedSetupExcecution, VerificationKey, QAP
 };
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
+use polynomial::univariant::UnivariantPolynomial;
 
 pub trait R1CSProcessingInterface<F: PrimeField> {
     /// This function take the columns from the R1CS matrix and returns the QAP polynomial coefficients
@@ -24,7 +25,11 @@ pub trait TrustedSetupInterface<P: Pairing> {
     /// parameters:
     /// circuit_details: The QAPPolys struct that contains the QAP polynomial coefficients.\
     /// this is used for the circuit specific trusted setup
-    fn run_trusted_setup(&self) -> TrustedSetupExcecution<P>;
+    fn run_trusted_setup(
+        &self,
+        toxic_waste: &ToxicWaste<P::ScalarField>,
+        number_of_constraints: usize,
+    ) -> TrustedSetupExcecution<P>;
 
     /// This function is used to obtain verification key
     fn get_verification_key(
@@ -38,6 +43,9 @@ pub trait TrustedSetupInterface<P: Pairing> {
         &self,
         trusted_setup_exec: &TrustedSetupExcecution<P>,
         circuit_details: &QAPPolys<P::ScalarField>,
+        t_poly: &UnivariantPolynomial<P::ScalarField>,
+        toxic_waste: &ToxicWastePhase2<P::ScalarField>,
+        number_of_constraints: usize,
     ) -> ProvingKey<P>;
 }
 
