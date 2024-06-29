@@ -1,5 +1,6 @@
 use crate::primitives::{
-    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution, Witness, QAP
+    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution, Witness,
+    QAP,
 };
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
@@ -45,6 +46,14 @@ pub trait ProtocolInterface<P: Pairing> {
         proof_rands: ProofRands<P>,
         trusted_setup: &TrustedSetupExcecution<P>,
         qap: &QAP<P::ScalarField>,
-        witness: &Witness<P::ScalarField>
+        witness: &Witness<P::ScalarField>,
     ) -> Proof<P>;
+
+    /// This function is used to verify a groth16 proof
+    fn verify_proof(
+        &self,
+        proof: &Proof<P>,
+        trusrted_setup: &TrustedSetupExcecution<P>,
+        public_input: &Vec<P::ScalarField>,
+    ) -> bool;
 }

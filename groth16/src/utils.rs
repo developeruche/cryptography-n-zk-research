@@ -58,8 +58,6 @@ where
         })
 }
 
-
-
 /// This function generates the powers of tau for the circuit
 /// tau = 5;
 /// powers_of_tau_g1 = [g^5^0 g^5, g^10, g^15, g^20, g^25, g^30, g^35]
