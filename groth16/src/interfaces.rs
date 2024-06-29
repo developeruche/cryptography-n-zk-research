@@ -30,7 +30,7 @@ pub trait TrustedSetupInterface<P: Pairing> {
     fn run_trusted_setup(
         &self,
         toxic_waste: &ToxicWaste<P::ScalarField>,
-        qap_coefficients: &QAPPolysCoefficients<P::ScalarField>,
+        qap_polys: &QAPPolys<P::ScalarField>,
         number_of_constraints: usize,
     ) -> TrustedSetupExcecution<P>;
 }

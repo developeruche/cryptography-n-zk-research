@@ -12,28 +12,40 @@ use crate::{
 };
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::{Field, PrimeField};
-use polynomial::univariant::UnivariantPolynomial;
+use polynomial::{interface::PolynomialInterface, univariant::UnivariantPolynomial};
 
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn run_trusted_setup(
         &self,
         toxic_waste: &ToxicWaste<P::ScalarField>,
-        qap_coefficients: &QAPPolysCoefficients<P::ScalarField>,
+        qap_polys: &QAPPolys<P::ScalarField>,
         number_of_constraints: usize,
     ) -> TrustedSetupExcecution<P> {
         let t_poly = generate_t_poly::<P::ScalarField>(number_of_constraints);
+        let powers_of_tau_g1 =
+            generate_powers_of_tau_g1::<P>(toxic_waste.tau, (number_of_constraints * 2) - 1);
+        let powers_of_tau_g2 =
+            generate_powers_of_tau_g2::<P>(toxic_waste.tau, number_of_constraints - 1);
         let powers_of_tau_t_poly_delta_inverse_g1 =
             generate_powers_of_tau_t_poly_delta_inverse_g1::<P>(
                 toxic_waste.tau,
                 toxic_waste.delta.inverse().unwrap(),
                 &t_poly,
-                number_of_constraints,
+                t_poly.degree(),
             );
+        let beta_g2 = P::G2::generator().mul_bigint(toxic_waste.beta.into_bigint());
+        let alpha_g1 = P::G1::generator().mul_bigint(toxic_waste.alpha.into_bigint());
+        let beta_g1 = P::G1::generator().mul_bigint(toxic_waste.beta.into_bigint());
+        
+        // this is done here because the phases for the trusted set is reduced to one
+        // this is Ideally done when needed by the prover using linear combination
+        // c(tau) + beta*a(tau) + alpha*c(tau))
+        let c_tau: Vec<P::ScalarField> = qap_polys.c.iter().map(|c| c.evaluate(&toxic_waste.tau)).collect();
+        let a_tau: Vec<P::ScalarField> = qap_polys.a.iter().map(|a| a.evaluate(&toxic_waste.tau) * toxic_waste.beta).collect();
+        let b_tau: Vec<P::ScalarField> = qap_polys.b.iter().map(|b| b.evaluate(&toxic_waste.tau) * toxic_waste.alpha).collect();
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau: Vec<P::ScalarField> = c_tau.iter().zip(a_tau.iter()).zip(b_tau.iter()).map(|((c, a), b)| *c + *a + b).collect();
 
-        let powers_of_tau_g1 =
-            generate_powers_of_tau_g1::<P>(toxic_waste.tau, (number_of_constraints * 2) - 1);
-        let powers_of_tau_g2 =
-            generate_powers_of_tau_g2::<P>(toxic_waste.tau, number_of_constraints - 1);
+
         let powers_of_tau_g1_alpha = generate_powers_of_tau_g1_alpha_or_beta::<P>(
             toxic_waste.tau,
             toxic_waste.alpha,
@@ -44,10 +56,6 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
             toxic_waste.beta,
             number_of_constraints - 1,
         );
-        let beta_g2 = P::G2::generator().mul_bigint(toxic_waste.beta.into_bigint());
-
-        let alpha_g1 = P::G1::generator().mul_bigint(toxic_waste.alpha.into_bigint());
-        let beta_g1 = P::G1::generator().mul_bigint(toxic_waste.beta.into_bigint());
 
         TrustedSetupExcecution::<P>::new(
             powers_of_tau_g1,
