@@ -7,8 +7,6 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
-
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
@@ -95,8 +93,8 @@ pub struct VerificationKey<P: Pairing> {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetupExcecution<P: Pairing> {
-    pub powers_of_tau_g1: Vec<P::G1>,       // from 0 to 2*m - 2
-    pub powers_of_tau_g2: Vec<P::G2>,       // from 0 to m - 1
+    pub powers_of_tau_g1: Vec<P::G1>, // from 0 to 2*m - 2
+    pub powers_of_tau_g2: Vec<P::G2>, // from 0 to m - 1
     pub beta_g2: P::G2,
     pub alpha_g1: P::G1,
     pub beta_g1: P::G1,
@@ -106,6 +104,19 @@ pub struct TrustedSetupExcecution<P: Pairing> {
     pub gamma_g2: P::G2,
     pub delta_g2: P::G2,
     pub delta_g1: P::G1,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Proof<P: Pairing> {
+    pub a: P::G1,
+    pub b: P::G2,
+    pub c: P::G1,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct ProofRands<P: Pairing> {
+    pub r: P::ScalarField,
+    pub s: P::ScalarField,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -225,8 +236,7 @@ impl<P: Pairing> TrustedSetupExcecution<P> {
             delta_g1,
         }
     }
-    
-    
+
     pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {
         self.powers_of_tau_g1[..n].to_vec()
     }
