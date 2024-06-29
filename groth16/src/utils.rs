@@ -7,7 +7,7 @@ use polynomial::{
 
 /// This is the index of the public variables in the witness
 /// this is constant for groth16
-const PRIVATE_VARIABLES_INDEX: usize = 1;
+pub const PRIVATE_VARIABLES_INDEX: usize = 2;
 
 /// This function generates the t-polynomial for the circuit
 /// we get this;
@@ -26,7 +26,7 @@ pub fn generate_t_poly<F: PrimeField>(number_of_constraints: usize) -> Univarian
 /// powers_of_secret_gx = [g^5, g^10, g^15, g^20, g^25, g^30, g^35]
 pub fn linear_combination_homomorphic_poly_eval_g1<P>(
     poly: &UnivariantPolynomial<P::ScalarField>,
-    powers_of_secret_gx: Vec<P::G1>,
+    powers_of_secret_gx: &Vec<P::G1>,
 ) -> P::G1
 where
     P: Pairing,
@@ -40,6 +40,25 @@ where
             acc
         })
 }
+
+pub fn linear_combination_homomorphic_poly_eval_g2<P>(
+    poly: &UnivariantPolynomial<P::ScalarField>,
+    powers_of_secret_gx: &Vec<P::G2>,
+) -> P::G2
+where
+    P: Pairing,
+{
+    poly.coefficients
+        .iter()
+        .enumerate()
+        .fold(P::G2::default(), |mut acc, (index, coeff)| {
+            let res = powers_of_secret_gx[index].mul_bigint(coeff.into_bigint());
+            acc = acc + res;
+            acc
+        })
+}
+
+
 
 /// This function generates the powers of tau for the circuit
 /// tau = 5;
@@ -157,9 +176,9 @@ pub fn compute_l_i_of_tau_g1<P: Pairing>(
     beta_t_g1: Vec<P::G1>,
     t_g1: Vec<P::G1>,
 ) -> P::G1 {
-    let beta_a_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(a_poly_i, beta_t_g1);
-    let alpha_b_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(b_poly_i, alpha_t_g1);
-    let c_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(c_poly_i, t_g1);
+    let beta_a_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(a_poly_i, &beta_t_g1);
+    let alpha_b_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(b_poly_i, &alpha_t_g1);
+    let c_i_of_tau = linear_combination_homomorphic_poly_eval_g1::<P>(c_poly_i, &t_g1);
 
     beta_a_i_of_tau + alpha_b_i_of_tau + c_i_of_tau
 }
@@ -200,11 +219,31 @@ pub fn compute_t_of_tau_delta_inverse_g1<P: Pairing>(
     n: usize,
 ) -> Vec<P::G1> {
     let mut result = Vec::with_capacity(n);
-    let t_of_tau_g1 = linear_combination_homomorphic_poly_eval_g1::<P>(&t_poly, p_of_tau.clone());
+    let t_of_tau_g1 = linear_combination_homomorphic_poly_eval_g1::<P>(&t_poly, &p_of_tau.clone());
 
     for i in p_of_tau {
         let hold = *i + t_of_tau_g1;
         result.push(hold.mul_bigint(delta_inverse.into_bigint()));
+    }
+
+    result
+}
+
+pub fn internal_product_g1<P: Pairing>(a: &Vec<P::G1>, b: &Vec<P::ScalarField>) -> P::G1 {
+    let mut result = P::G1::default();
+
+    for i in 0..b.len() {
+        result += a[i].mul_bigint(b[i].into_bigint());
+    }
+
+    result
+}
+
+pub fn internal_product_g2<P: Pairing>(a: &Vec<P::G2>, b: &Vec<P::ScalarField>) -> P::G2 {
+    let mut result = P::G2::default();
+
+    for i in 0..b.len() {
+        result += a[i].mul_bigint(b[i].into_bigint());
     }
 
     result
@@ -260,7 +299,7 @@ mod tests {
         ]);
         let res = linear_combination_homomorphic_poly_eval_g1::<
             ark_test_curves::bls12_381::Bls12_381,
-        >(&poly, powers_of_tau_g1);
+        >(&poly, &powers_of_tau_g1);
 
         let generator = ark_test_curves::bls12_381::g1::G1Affine::generator();
         let poly_at_tau = poly.evaluate(&Fr::from(5u64));

@@ -1,10 +1,8 @@
 use crate::primitives::{
-    ProvingKey, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution,
-    VerificationKey, QAP,
+    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution, Witness, QAP
 };
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
-use polynomial::univariant::UnivariantPolynomial;
 
 pub trait R1CSProcessingInterface<F: PrimeField> {
     /// This function take the columns from the R1CS matrix and returns the QAP polynomial coefficients
@@ -38,4 +36,15 @@ pub trait TrustedSetupInterface<P: Pairing> {
 pub trait PreProcessorInterface<F: PrimeField> {
     /// This function is used to preprocess the R1CS
     fn preprocess(&self) -> QAP<F>;
+}
+
+pub trait ProtocolInterface<P: Pairing> {
+    /// This function is used to generate a groth16 proof
+    fn generate_proof(
+        &self,
+        proof_rands: ProofRands<P>,
+        trusted_setup: &TrustedSetupExcecution<P>,
+        qap: &QAP<P::ScalarField>,
+        witness: &Witness<P::ScalarField>
+    ) -> Proof<P>;
 }

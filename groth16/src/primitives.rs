@@ -106,6 +106,19 @@ pub struct TrustedSetupExcecution<P: Pairing> {
     pub delta_g1: P::G1,
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Proof<P: Pairing> {
+    pub a: P::G1,
+    pub b: P::G2,
+    pub c: P::G1,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct ProofRands<P: Pairing> {
+    pub r: P::ScalarField,
+    pub s: P::ScalarField,
+}
+
 impl<F: PrimeField> Witness<F> {
     pub fn new(public_input: Vec<F>, auxiliary_input: Vec<F>) -> Self {
         Self {
