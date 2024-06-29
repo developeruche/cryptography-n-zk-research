@@ -62,12 +62,6 @@ pub struct ToxicWaste<F: PrimeField> {
     pub tau: F,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct ToxicWastePhase2<F: PrimeField> {
-    pub gamma: F,
-    pub delta: F,
-}
-
 /// This is the trusted setup
 /// handles;
 /// Circuit specific trusted setup and noc-specific trusted setup

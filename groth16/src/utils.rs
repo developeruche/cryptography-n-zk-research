@@ -1,6 +1,6 @@
-use ark_ec::{pairing::Pairing, Group};
+use ark_ec::{pairing::Pairing, AffineRepr, Group};
 use ark_ff::{Field, PrimeField};
-use polynomial::{interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial};
+use polynomial::{interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial};
 
 /// This function generates the t-polynomial for the circuit
 /// we get this;
@@ -85,6 +85,27 @@ pub fn generate_powers_of_tau_g1_alpha_or_beta<P: Pairing>(
     }
 
     powers_of_tau_g1_alpha_or_beta
+}
+
+pub fn generate_powers_of_tau_t_poly_delta_inverse_g1<P: Pairing>(
+    tau: P::ScalarField,
+    delta_inverse: P::ScalarField,
+    t_poly: &UnivariantPolynomial<P::ScalarField>,
+    n: usize,
+) -> Vec<P::G1> {
+    let mut powers_of_tau_t_poly_delta_inverse_g1 = Vec::with_capacity(n);
+    let mut tau_power = tau;
+    let generator = P::G1::generator();
+    
+    let first_element = t_poly.evaluate(&tau) * delta_inverse;
+    powers_of_tau_t_poly_delta_inverse_g1.push(generator.mul_bigint(first_element.into_bigint()));
+
+    for _ in 1..n {
+        powers_of_tau_t_poly_delta_inverse_g1.push(generator.mul_bigint((tau_power * t_poly.evaluate(&tau) * delta_inverse).into_bigint()));
+        tau_power = tau_power * tau;
+    }
+
+    powers_of_tau_t_poly_delta_inverse_g1
 }
 
 pub fn compute_l_i_of_tau_g1<P: Pairing>(
