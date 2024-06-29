@@ -7,6 +7,8 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
+
+
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
