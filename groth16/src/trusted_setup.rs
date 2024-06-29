@@ -5,9 +5,7 @@ use crate::{
         TrustedSetupExcecution, VerificationKey,
     },
     utils::{
-        compute_delta_inverse_l_tau_g1, compute_t_of_tau_delta_inverse_g1,
-        generate_powers_of_tau_g1, generate_powers_of_tau_g1_alpha_or_beta,
-        generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly,
+        compute_delta_inverse_l_tau_g1, compute_t_of_tau_delta_inverse_g1, generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public, generate_powers_of_tau_g1, generate_powers_of_tau_g1_alpha_or_beta, generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly
     },
 };
 use ark_ec::{pairing::Pairing, Group};
@@ -35,36 +33,53 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
             );
         let beta_g2 = P::G2::generator().mul_bigint(toxic_waste.beta.into_bigint());
         let alpha_g1 = P::G1::generator().mul_bigint(toxic_waste.alpha.into_bigint());
+        let gamma_g2 = P::G2::generator().mul_bigint(toxic_waste.gamma.into_bigint());
+        let delta_g2 = P::G2::generator().mul_bigint(toxic_waste.delta.into_bigint());
         let beta_g1 = P::G1::generator().mul_bigint(toxic_waste.beta.into_bigint());
-        
+        let delta_g1 = P::G1::generator().mul_bigint(toxic_waste.delta.into_bigint());
+
         // this is done here because the phases for the trusted set is reduced to one
         // this is Ideally done when needed by the prover using linear combination
         // c(tau) + beta*a(tau) + alpha*c(tau))
-        let c_tau: Vec<P::ScalarField> = qap_polys.c.iter().map(|c| c.evaluate(&toxic_waste.tau)).collect();
-        let a_tau: Vec<P::ScalarField> = qap_polys.a.iter().map(|a| a.evaluate(&toxic_waste.tau) * toxic_waste.beta).collect();
-        let b_tau: Vec<P::ScalarField> = qap_polys.b.iter().map(|b| b.evaluate(&toxic_waste.tau) * toxic_waste.alpha).collect();
-        let c_tau_plus_beta_a_tau_plus_alpha_b_tau: Vec<P::ScalarField> = c_tau.iter().zip(a_tau.iter()).zip(b_tau.iter()).map(|((c, a), b)| *c + *a + b).collect();
-
-
-        let powers_of_tau_g1_alpha = generate_powers_of_tau_g1_alpha_or_beta::<P>(
-            toxic_waste.tau,
-            toxic_waste.alpha,
-            number_of_constraints - 1,
-        );
-        let powers_of_tau_g1_beta = generate_powers_of_tau_g1_alpha_or_beta::<P>(
-            toxic_waste.tau,
-            toxic_waste.beta,
-            number_of_constraints - 1,
-        );
+        let c_tau: Vec<P::ScalarField> = qap_polys
+            .c
+            .iter()
+            .map(|c| c.evaluate(&toxic_waste.tau))
+            .collect();
+        let a_tau: Vec<P::ScalarField> = qap_polys
+            .a
+            .iter()
+            .map(|a| a.evaluate(&toxic_waste.tau) * toxic_waste.beta)
+            .collect();
+        let b_tau: Vec<P::ScalarField> = qap_polys
+            .b
+            .iter()
+            .map(|b| b.evaluate(&toxic_waste.tau) * toxic_waste.alpha)
+            .collect();
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau: Vec<P::ScalarField> = c_tau
+            .iter()
+            .zip(a_tau.iter())
+            .zip(b_tau.iter())
+            .map(|((c, a), b)| *c + *a + b)
+            .collect();
+        
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public = generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(&c_tau_plus_beta_a_tau_plus_alpha_b_tau, &toxic_waste.gamma);
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private = generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(&c_tau_plus_beta_a_tau_plus_alpha_b_tau, &toxic_waste.gamma);
+        
+    
 
         TrustedSetupExcecution::<P>::new(
             powers_of_tau_g1,
             powers_of_tau_g2,
-            powers_of_tau_g1_alpha,
-            powers_of_tau_g1_beta,
             beta_g2,
             alpha_g1,
             beta_g1,
+            c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public,
+            c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private,
+            powers_of_tau_t_poly_delta_inverse_g1,
+            gamma_g2,
+            delta_g2,
+            delta_g1,
         )
     }
 

@@ -5,6 +5,10 @@ use polynomial::{
     univariant::UnivariantPolynomial,
 };
 
+/// This is the index of the public variables in the witness
+/// this is constant for groth16
+const PRIVATE_VARIABLES_INDEX: usize = 1;
+
 /// This function generates the t-polynomial for the circuit
 /// we get this;
 /// t(x) = (x-1)(x-2)(x-3)(x-4)(x-5)(x-6)(x-7)
@@ -111,6 +115,38 @@ pub fn generate_powers_of_tau_t_poly_delta_inverse_g1<P: Pairing>(
     }
 
     powers_of_tau_t_poly_delta_inverse_g1
+}
+
+pub fn generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public<P: Pairing>(
+    c_tau_plus_beta_a_tau_plus_alpha_b_tau: &Vec<P::ScalarField>,
+    gamma: &P::ScalarField,
+) -> Vec<P::G1> {
+    let mut result = Vec::with_capacity(c_tau_plus_beta_a_tau_plus_alpha_b_tau.len());
+    let generator = P::G1::generator();
+
+    for c in 0..PRIVATE_VARIABLES_INDEX {
+        result.push(
+            generator.mul_bigint((c_tau_plus_beta_a_tau_plus_alpha_b_tau[c] / gamma).into_bigint()),
+        );
+    }
+
+    result
+}
+
+pub fn generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private<P: Pairing>(
+    c_tau_plus_beta_a_tau_plus_alpha_b_tau: &Vec<P::ScalarField>,
+    delta: &P::ScalarField,
+) -> Vec<P::G1> {
+    let mut result = Vec::with_capacity(c_tau_plus_beta_a_tau_plus_alpha_b_tau.len());
+    let generator = P::G1::generator();
+
+    for c in PRIVATE_VARIABLES_INDEX..c_tau_plus_beta_a_tau_plus_alpha_b_tau.len() {
+        result.push(
+            generator.mul_bigint((c_tau_plus_beta_a_tau_plus_alpha_b_tau[c] / delta).into_bigint()),
+        );
+    }
+
+    result
 }
 
 pub fn compute_l_i_of_tau_g1<P: Pairing>(
