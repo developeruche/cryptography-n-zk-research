@@ -27,7 +27,6 @@ pub trait TrustedSetupInterface<P: Pairing> {
     /// this is used for the circuit specific trusted setup
     /// This trusted setup would also be used to generate the proving and verification key.
     fn run_trusted_setup(
-        &self,
         toxic_waste: &ToxicWaste<P::ScalarField>,
         qap_polys: &QAPPolys<P::ScalarField>,
         number_of_constraints: usize,

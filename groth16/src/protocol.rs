@@ -81,7 +81,6 @@ impl<P: Pairing> ProtocolInterface<P> for Groth16Protocol<P> {
             .delta_g1
             .mul_bigint((proof_rands.r * proof_rands.s).into_bigint());
         let c_g1 = c_prime_g1 + ht_g1 + s_a_g1 + r_b_g1 + (-r_mul_s_delta_g1);
-        
 
         Proof {
             a: a_g1,
@@ -107,7 +106,7 @@ impl<P: Pairing> ProtocolInterface<P> for Groth16Protocol<P> {
             trusted_setup.gamma_g2,
         );
         let rhs_3 = P::pairing(proof.c, trusted_setup.delta_g2);
-        
+
         lhs == (rhs_1 + rhs_2 + rhs_3)
     }
 }

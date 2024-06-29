@@ -12,7 +12,6 @@ use polynomial::interface::PolynomialInterface;
 
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn run_trusted_setup(
-        &self,
         toxic_waste: &ToxicWaste<P::ScalarField>,
         qap_polys: &QAPPolys<P::ScalarField>,
         number_of_constraints: usize,
