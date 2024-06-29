@@ -1,23 +1,14 @@
 use crate::{
     interfaces::TrustedSetupInterface,
-    primitives::{
-        QAPPolys, ToxicWaste, TrustedSetup,
-        TrustedSetupExcecution,
-    },
+    primitives::{QAPPolys, ToxicWaste, TrustedSetup, TrustedSetupExcecution},
     utils::{
-        generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public, generate_powers_of_tau_g1, generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly
+        generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public, generate_powers_of_tau_g1,
+        generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly,
     },
 };
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::{Field, PrimeField};
 use polynomial::interface::PolynomialInterface;
-
-
-
-
-
-
-
 
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn run_trusted_setup(
@@ -69,11 +60,17 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
             .zip(b_tau.iter())
             .map(|((c, a), b)| *c + *a + b)
             .collect();
-        
-        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public = generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(&c_tau_plus_beta_a_tau_plus_alpha_b_tau, &toxic_waste.gamma);
-        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private = generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(&c_tau_plus_beta_a_tau_plus_alpha_b_tau, &toxic_waste.gamma);
-        
-    
+
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public =
+            generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(
+                &c_tau_plus_beta_a_tau_plus_alpha_b_tau,
+                &toxic_waste.gamma,
+            );
+        let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private =
+            generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(
+                &c_tau_plus_beta_a_tau_plus_alpha_b_tau,
+                &toxic_waste.gamma,
+            );
 
         TrustedSetupExcecution::<P>::new(
             powers_of_tau_g1,
