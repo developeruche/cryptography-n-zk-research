@@ -1,6 +1,9 @@
 use ark_ec::{pairing::Pairing, AffineRepr, Group};
 use ark_ff::{Field, PrimeField};
-use polynomial::{interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial};
+use polynomial::{
+    interface::{PolynomialInterface, UnivariantPolynomialInterface},
+    univariant::UnivariantPolynomial,
+};
 
 /// This function generates the t-polynomial for the circuit
 /// we get this;
@@ -96,12 +99,14 @@ pub fn generate_powers_of_tau_t_poly_delta_inverse_g1<P: Pairing>(
     let mut powers_of_tau_t_poly_delta_inverse_g1 = Vec::with_capacity(n);
     let mut tau_power = tau;
     let generator = P::G1::generator();
-    
+
     let first_element = t_poly.evaluate(&tau) * delta_inverse;
     powers_of_tau_t_poly_delta_inverse_g1.push(generator.mul_bigint(first_element.into_bigint()));
 
     for _ in 1..n {
-        powers_of_tau_t_poly_delta_inverse_g1.push(generator.mul_bigint((tau_power * t_poly.evaluate(&tau) * delta_inverse).into_bigint()));
+        powers_of_tau_t_poly_delta_inverse_g1.push(
+            generator.mul_bigint((tau_power * t_poly.evaluate(&tau) * delta_inverse).into_bigint()),
+        );
         tau_power = tau_power * tau;
     }
 
@@ -271,18 +276,20 @@ mod tests {
         ]);
         let p_of_tau = generate_powers_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(tau, 3);
         let t_of_tau = t_poly.evaluate(&tau);
-        let mut  result = Vec::new();
-        
+        let mut result = Vec::new();
+
         for i in &p_of_tau {
             let hold = i.mul_bigint(delta_inverse.into_bigint());
             result.push(hold.mul_bigint(t_of_tau.into_bigint()));
         }
-        
-        
+
         let res = compute_t_of_tau_delta_inverse_g1::<ark_test_curves::bls12_381::Bls12_381>(
-             &p_of_tau, &t_poly, &delta_inverse, 3,
+            &p_of_tau,
+            &t_poly,
+            &delta_inverse,
+            3,
         );
-        
+
         assert_eq!(res, result);
     }
 }

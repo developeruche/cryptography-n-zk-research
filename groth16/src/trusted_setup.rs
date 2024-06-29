@@ -1,16 +1,18 @@
 use crate::{
     interfaces::TrustedSetupInterface,
     primitives::{
-        ProvingKey, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetup, TrustedSetupExcecution, VerificationKey
+        ProvingKey, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetup,
+        TrustedSetupExcecution, VerificationKey,
     },
     utils::{
-        compute_delta_inverse_l_tau_g1, compute_t_of_tau_delta_inverse_g1, generate_powers_of_tau_g1, generate_powers_of_tau_g1_alpha_or_beta, generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly
+        compute_delta_inverse_l_tau_g1, compute_t_of_tau_delta_inverse_g1,
+        generate_powers_of_tau_g1, generate_powers_of_tau_g1_alpha_or_beta,
+        generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly,
     },
 };
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::{Field, PrimeField};
 use polynomial::univariant::UnivariantPolynomial;
-
 
 impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
     fn run_trusted_setup(
@@ -20,8 +22,14 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
         number_of_constraints: usize,
     ) -> TrustedSetupExcecution<P> {
         let t_poly = generate_t_poly::<P::ScalarField>(number_of_constraints);
-        let powers_of_tau_t_poly_delta_inverse_g1 = generate_powers_of_tau_t_poly_delta_inverse_g1::<P>(toxic_waste.tau, toxic_waste.delta.inverse().unwrap(), &t_poly, number_of_constraints);
-        
+        let powers_of_tau_t_poly_delta_inverse_g1 =
+            generate_powers_of_tau_t_poly_delta_inverse_g1::<P>(
+                toxic_waste.tau,
+                toxic_waste.delta.inverse().unwrap(),
+                &t_poly,
+                number_of_constraints,
+            );
+
         let powers_of_tau_g1 =
             generate_powers_of_tau_g1::<P>(toxic_waste.tau, (number_of_constraints * 2) - 1);
         let powers_of_tau_g2 =
