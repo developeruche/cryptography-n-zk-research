@@ -7,6 +7,8 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
+
+
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
@@ -67,8 +69,7 @@ pub struct ToxicWaste<F: PrimeField> {
 /// Circuit specific trusted setup and noc-specific trusted setup
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct TrustedSetup<P: Pairing> {
-    pub toxic_waste: ToxicWaste<P::ScalarField>,
-    pub number_of_constraints: usize,
+    phantom: std::marker::PhantomData<P>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -96,9 +97,15 @@ pub struct VerificationKey<P: Pairing> {
 pub struct TrustedSetupExcecution<P: Pairing> {
     pub powers_of_tau_g1: Vec<P::G1>,       // from 0 to 2*m - 2
     pub powers_of_tau_g2: Vec<P::G2>,       // from 0 to m - 1
-    pub powers_of_tau_g1_alpha: Vec<P::G1>, // from 0 to m - 1
-    pub powers_of_tau_g1_beta: Vec<P::G1>,  // from 0 to m - 1
     pub beta_g2: P::G2,
+    pub alpha_g1: P::G1,
+    pub beta_g1: P::G1,
+    pub c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public: Vec<P::G1>,
+    pub c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private: Vec<P::G1>,
+    pub powers_of_tau_t_poly_delta_inverse_g1: Vec<P::G1>,
+    pub gamma_g2: P::G2,
+    pub delta_g2: P::G2,
+    pub delta_g1: P::G1,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -113,27 +120,6 @@ impl<F: PrimeField> Witness<F> {
         let mut ren = self.public_input.clone();
         ren.extend(self.auxiliary_input.clone());
         ren
-    }
-}
-
-impl<P: Pairing> TrustedSetup<P> {
-    pub fn new(
-        &self,
-        toxic_waste: ToxicWaste<P::ScalarField>,
-        number_of_constraints: usize,
-    ) -> Self {
-        Self {
-            toxic_waste,
-            number_of_constraints,
-        }
-    }
-
-    pub fn new_with_random(&self, number_of_constraints: usize) -> Self {
-        let toxic_waste = ToxicWaste::random();
-        Self {
-            toxic_waste,
-            number_of_constraints,
-        }
     }
 }
 
@@ -215,18 +201,32 @@ impl<P: Pairing> TrustedSetupExcecution<P> {
     pub fn new(
         powers_of_tau_g1: Vec<P::G1>,
         powers_of_tau_g2: Vec<P::G2>,
-        powers_of_tau_g1_alpha: Vec<P::G1>,
-        powers_of_tau_g1_beta: Vec<P::G1>,
         beta_g2: P::G2,
+        alpha_g1: P::G1,
+        beta_g1: P::G1,
+        c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public: Vec<P::G1>,
+        c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private: Vec<P::G1>,
+        powers_of_tau_t_poly_delta_inverse_g1: Vec<P::G1>,
+        gamma_g2: P::G2,
+        delta_g2: P::G2,
+        delta_g1: P::G1,
     ) -> Self {
         Self {
             powers_of_tau_g1,
             powers_of_tau_g2,
-            powers_of_tau_g1_alpha,
-            powers_of_tau_g1_beta,
             beta_g2,
+            alpha_g1,
+            beta_g1,
+            c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public,
+            c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private,
+            powers_of_tau_t_poly_delta_inverse_g1,
+            gamma_g2,
+            delta_g2,
+            delta_g1,
         }
     }
+    
+    
     pub fn get_n_powers_of_tau_g1(&self, n: usize) -> Vec<P::G1> {
         self.powers_of_tau_g1[..n].to_vec()
     }
