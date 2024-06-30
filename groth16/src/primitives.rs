@@ -114,9 +114,9 @@ pub struct Proof<P: Pairing> {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct ProofRands<P: Pairing> {
-    pub r: P::ScalarField,
-    pub s: P::ScalarField,
+pub struct ProofRands<F: PrimeField> {
+    pub r: F,
+    pub s: F,
 }
 
 impl<F: PrimeField> Witness<F> {
@@ -151,6 +151,17 @@ impl<F: PrimeField> ToxicWaste<F> {
             delta,
             tau,
         }
+    }
+}
+
+impl<F: PrimeField> ProofRands<F> {
+    pub fn random() -> Self {
+        let rand_thread = &mut OsRng;
+
+        let r = F::rand(rand_thread);
+        let s = F::rand(rand_thread);
+
+        Self { r, s }
     }
 }
 

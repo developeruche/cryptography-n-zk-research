@@ -2,8 +2,7 @@ use crate::{
     interfaces::TrustedSetupInterface,
     primitives::{QAPPolys, ToxicWaste, TrustedSetup, TrustedSetupExcecution},
     utils::{
-        generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public, generate_powers_of_tau_g1,
-        generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly,
+        generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private, generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public, generate_powers_of_tau_g1, generate_powers_of_tau_g2, generate_powers_of_tau_t_poly_delta_inverse_g1, generate_t_poly
     },
 };
 use ark_ec::{pairing::Pairing, Group};
@@ -20,7 +19,7 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
         let powers_of_tau_g1 =
             generate_powers_of_tau_g1::<P>(toxic_waste.tau, (number_of_constraints * 2) - 1);
         let powers_of_tau_g2 =
-            generate_powers_of_tau_g2::<P>(toxic_waste.tau, number_of_constraints - 1);
+            generate_powers_of_tau_g2::<P>(toxic_waste.tau, number_of_constraints + 1);
         let powers_of_tau_t_poly_delta_inverse_g1 =
             generate_powers_of_tau_t_poly_delta_inverse_g1::<P>(
                 toxic_waste.tau,
@@ -66,9 +65,9 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
                 &toxic_waste.gamma,
             );
         let c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private =
-            generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public::<P>(
+            generate_c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_private::<P>(
                 &c_tau_plus_beta_a_tau_plus_alpha_b_tau,
-                &toxic_waste.gamma,
+                &toxic_waste.delta,
             );
 
         TrustedSetupExcecution::<P>::new(

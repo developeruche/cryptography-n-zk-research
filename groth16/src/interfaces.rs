@@ -41,8 +41,7 @@ pub trait PreProcessorInterface<F: PrimeField> {
 pub trait ProtocolInterface<P: Pairing> {
     /// This function is used to generate a groth16 proof
     fn generate_proof(
-        &self,
-        proof_rands: ProofRands<P>,
+        proof_rands: ProofRands<P::ScalarField>,
         trusted_setup: &TrustedSetupExcecution<P>,
         qap: &QAP<P::ScalarField>,
         witness: &Witness<P::ScalarField>,
@@ -50,7 +49,6 @@ pub trait ProtocolInterface<P: Pairing> {
 
     /// This function is used to verify a groth16 proof
     fn verify_proof(
-        &self,
         proof: &Proof<P>,
         trusrted_setup: &TrustedSetupExcecution<P>,
         public_input: &Vec<P::ScalarField>,
