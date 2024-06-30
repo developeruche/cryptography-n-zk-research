@@ -210,22 +210,6 @@ pub fn compute_delta_inverse_l_tau_g1<P: Pairing>(
     result
 }
 
-pub fn compute_t_of_tau_delta_inverse_g1<P: Pairing>(
-    p_of_tau: &Vec<P::G1>,
-    t_poly: &UnivariantPolynomial<P::ScalarField>,
-    delta_inverse: &P::ScalarField,
-    n: usize,
-) -> Vec<P::G1> {
-    let mut result = Vec::with_capacity(n);
-    let t_of_tau_g1 = linear_combination_homomorphic_poly_eval_g1::<P>(&t_poly, &p_of_tau.clone());
-
-    for i in p_of_tau {
-        let hold = *i + t_of_tau_g1;
-        result.push(hold.mul_bigint(delta_inverse.into_bigint()));
-    }
-
-    result
-}
 
 pub fn internal_product_g1<P: Pairing>(a: &Vec<P::G1>, b: &Vec<P::ScalarField>) -> P::G1 {
     let mut result = P::G1::default();
@@ -336,33 +320,5 @@ mod tests {
         );
 
         assert_eq!(res, expected_res);
-    }
-
-    #[test]
-    fn test_compute_t_of_tau_delta_inverse_g1() {
-        let delta_inverse = Fr::from(7);
-        let tau = Fr::from(4);
-        let t_poly = UnivariantPolynomial::from_coefficients_vec(vec![
-            Fr::from(1),
-            Fr::from(3),
-            Fr::from(2),
-        ]);
-        let p_of_tau = generate_powers_of_tau_g1::<ark_test_curves::bls12_381::Bls12_381>(tau, 3);
-        let t_of_tau = t_poly.evaluate(&tau);
-        let mut result = Vec::new();
-
-        for i in &p_of_tau {
-            let hold = i.mul_bigint(delta_inverse.into_bigint());
-            result.push(hold.mul_bigint(t_of_tau.into_bigint()));
-        }
-
-        let res = compute_t_of_tau_delta_inverse_g1::<ark_test_curves::bls12_381::Bls12_381>(
-            &p_of_tau,
-            &t_poly,
-            &delta_inverse,
-            3,
-        );
-
-        assert_eq!(res, result);
     }
 }
