@@ -106,6 +106,9 @@ fn test_valid_protocol() {
     );
     let preprocessor = PreProcessor::new(r1cs, witness.clone());
     let qap = preprocessor.preprocess();
+    let check = qap.qap_check();
+    assert_eq!(check, true);
+    
     
     let toxic_waste = ToxicWaste::new(
         Fr::from(2u32),
