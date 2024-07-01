@@ -152,6 +152,16 @@ impl<F: PrimeField> ToxicWaste<F> {
             tau,
         }
     }
+
+    pub fn new(alpha: F, beta: F, gamma: F, delta: F, tau: F) -> Self {
+        Self {
+            alpha,
+            beta,
+            gamma,
+            delta,
+            tau,
+        }
+    }
 }
 
 impl<F: PrimeField> ProofRands<F> {
@@ -161,6 +171,10 @@ impl<F: PrimeField> ProofRands<F> {
         let r = F::rand(rand_thread);
         let s = F::rand(rand_thread);
 
+        Self { r, s }
+    }
+
+    pub fn new(r: F, s: F) -> Self {
         Self { r, s }
     }
 }

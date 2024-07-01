@@ -210,7 +210,6 @@ pub fn compute_delta_inverse_l_tau_g1<P: Pairing>(
     result
 }
 
-
 pub fn internal_product_g1<P: Pairing>(a: &Vec<P::G1>, b: &Vec<P::ScalarField>) -> P::G1 {
     let mut result = P::G1::default();
 
