@@ -213,6 +213,11 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
         let domain_lenght = self.a[0].len();
         let domain = compute_domain(domain_lenght);
 
+        // println!("Domain: {:?}", domain);
+        // println!("This a: {:?}", self.a[3]);
+        // let test_poly = UnivariantPolynomial::interpolate(self.a[3].clone(), domain.clone());
+        // println!("Test poly: {:?}", test_poly);
+
         let a = self
             .a
             .iter()
@@ -274,5 +279,15 @@ impl<F: PrimeField> QAPPolys<F> {
         c: Vec<UnivariantPolynomial<F>>,
     ) -> Self {
         Self { a, b, c }
+    }
+}
+
+impl<F: PrimeField> R1CS<F> {
+    pub fn new(a: Vec<Vec<F>>, b: Vec<Vec<F>>, c: Vec<Vec<F>>) -> Self {
+        Self { a, b, c }
+    }
+
+    pub fn check(&self) -> bool {
+        todo!()
     }
 }

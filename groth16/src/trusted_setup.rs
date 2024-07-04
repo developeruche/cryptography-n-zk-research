@@ -20,8 +20,7 @@ impl<P: Pairing> TrustedSetupInterface<P> for TrustedSetup<P> {
         let t_poly = generate_t_poly::<P::ScalarField>(number_of_constraints);
         println!("Tau: {:?}", toxic_waste.tau);
         println!("degres: {}", number_of_constraints);
-        
-        
+
         let powers_of_tau_g1 =
             generate_powers_of_tau_g1::<P>(toxic_waste.tau, number_of_constraints + 1);
         let powers_of_tau_g2 =
