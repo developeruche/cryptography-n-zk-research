@@ -561,6 +561,9 @@ fn to_qap_polynomials() {
         ],
     );
 
+    let r1cs_check = r1cs.check(witness.render());
+    assert!(r1cs_check, "this is the R1CS check");
+
     let preprocessor = PreProcessor::new(r1cs, witness);
     let qap = preprocessor.preprocess();
     let check = qap.qap_check();

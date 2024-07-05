@@ -7,6 +7,8 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
+use crate::utils::check_init;
+
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
@@ -152,6 +154,16 @@ impl<F: PrimeField> ToxicWaste<F> {
             tau,
         }
     }
+
+    pub fn new(alpha: F, beta: F, gamma: F, delta: F, tau: F) -> Self {
+        Self {
+            alpha,
+            beta,
+            gamma,
+            delta,
+            tau,
+        }
+    }
 }
 
 impl<F: PrimeField> ProofRands<F> {
@@ -161,6 +173,10 @@ impl<F: PrimeField> ProofRands<F> {
         let r = F::rand(rand_thread);
         let s = F::rand(rand_thread);
 
+        Self { r, s }
+    }
+
+    pub fn new(r: F, s: F) -> Self {
         Self { r, s }
     }
 }
@@ -183,10 +199,8 @@ impl<F: PrimeField> QAP<F> {
     pub fn qap_check(&self) -> bool {
         let ht = self.compute_ht();
         let lhs = self.ax.clone() * self.bx.clone();
-        let check_1 = lhs == ht + self.cx.clone();
-        let check_2 = self.ax.evaluate(&F::from(1u32)) * self.bx.evaluate(&F::from(1u32))
-            == self.cx.evaluate(&F::from(1u32));
-        check_1 && check_2
+        let check = lhs == ht + self.cx.clone();
+        check
     }
 }
 
@@ -260,5 +274,20 @@ impl<F: PrimeField> QAPPolys<F> {
         c: Vec<UnivariantPolynomial<F>>,
     ) -> Self {
         Self { a, b, c }
+    }
+}
+
+impl<F: PrimeField> R1CS<F> {
+    pub fn new(a: Vec<Vec<F>>, b: Vec<Vec<F>>, c: Vec<Vec<F>>) -> Self {
+        Self { a, b, c }
+    }
+
+    pub fn check(&self, witness: Vec<F>) -> bool {
+        check_init(
+            self.a.clone(),
+            self.b.clone(),
+            self.c.clone(),
+            witness.clone(),
+        )
     }
 }
