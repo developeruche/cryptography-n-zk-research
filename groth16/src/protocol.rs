@@ -1,6 +1,5 @@
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
-
 use crate::{
     interfaces::ProtocolInterface,
     primitives::{Proof, ProofRands, TrustedSetupExcecution, Witness, QAP},
@@ -10,6 +9,8 @@ use crate::{
     },
 };
 
+
+/// This is the Groth16 protocol implementation (Struct binding to the ProtocolInterface)
 pub struct Groth16Protocol<P: Pairing> {
     // just binding this struct to this type...
     phantom: std::marker::PhantomData<P>,
