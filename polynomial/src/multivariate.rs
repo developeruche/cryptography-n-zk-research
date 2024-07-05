@@ -1,8 +1,9 @@
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::ops::{Add, AddAssign};
+// use std::ops::{Add, AddAssign};
 
 /// A multivariate polynomial.
+/// Building a generic structure that can accomodate both (univarate, multi-linear and multivarate) polynomials
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
 pub struct Multivariate<F: PrimeField> {
     /// The coefficients of the polynomial.
