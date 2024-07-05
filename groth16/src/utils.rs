@@ -1,5 +1,5 @@
-use ark_ec::{pairing::Pairing, AffineRepr, Group};
-use ark_ff::{Field, PrimeField};
+use ark_ec::{pairing::Pairing, Group};
+use ark_ff::PrimeField;
 use polynomial::{
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
     univariant::UnivariantPolynomial,
