@@ -176,16 +176,17 @@ fn test_valid_protocol() {
             Fr::from(2u32),
         ],
     );
-
+    
     let r1cs_check = r1cs.check(witness.render());
     assert!(r1cs_check, "this is the R1CS check");
-
+    
     let qap_poly_coefficients = r1cs.to_qap_poly_coefficients();
     let qap_poly = qap_poly_coefficients.into_poly_rep();
 
     let preprocessor = PreProcessor::new(r1cs, witness.clone());
     let qap = preprocessor.preprocess();
 
+    
     let check = qap.qap_check();
     assert_eq!(check, true);
 
@@ -196,7 +197,7 @@ fn test_valid_protocol() {
         Fr::from(6u32),
         Fr::from(4u32),
     );
-
+    
     let trusted_setup = TrustedSetup::<ark_test_curves::bls12_381::Bls12_381>::run_trusted_setup(
         &toxic_waste,
         &qap_poly,
@@ -211,7 +212,7 @@ fn test_valid_protocol() {
         &qap,
         &witness,
     );
-
+    
     let is_valid = Groth16Protocol::<ark_test_curves::bls12_381::Bls12_381>::verify_proof(
         &groth16_proof,
         &trusted_setup,
@@ -227,152 +228,23 @@ fn test_valid_protocol_2() {
         a: vec![
             vec![
                 Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
                 Fr::from(0u32),
                 Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
                 Fr::from(0u32),
             ],
         ],
         b: vec![
             vec![
                 Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
                 Fr::from(0u32),
                 Fr::from(0u32),
                 Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-            ],
-            vec![
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(1u32),
-                Fr::from(0u32),
             ],
         ],
         c: vec![
             vec![
-                Fr::from(-2),
-                Fr::from(3u32),
                 Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(-2),
-                Fr::from(0u32),
-                Fr::from(3u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(-2),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(3u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(-2),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(3u32),
-            ],
-            vec![
-                Fr::from(2u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(2u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
-            ],
-            vec![
-                Fr::from(2u32),
-                Fr::from(0u32),
-                Fr::from(0u32),
+                Fr::from(1u32),
                 Fr::from(0u32),
                 Fr::from(0u32),
             ],
@@ -382,22 +254,22 @@ fn test_valid_protocol_2() {
     let witness = Witness::new(
         vec![Fr::from(1u32)],
         vec![
-            Fr::from(1u32),
-            Fr::from(2u32),
-            Fr::from(1u32),
-            Fr::from(2u32),
+            Fr::from(4223u32),
+            Fr::from(41u32),
+            Fr::from(103u32),
         ],
     );
-
+    
     let r1cs_check = r1cs.check(witness.render());
     assert!(r1cs_check, "this is the R1CS check");
-
+    
     let qap_poly_coefficients = r1cs.to_qap_poly_coefficients();
     let qap_poly = qap_poly_coefficients.into_poly_rep();
 
     let preprocessor = PreProcessor::new(r1cs, witness.clone());
     let qap = preprocessor.preprocess();
 
+    
     let check = qap.qap_check();
     assert_eq!(check, true);
 
@@ -408,7 +280,7 @@ fn test_valid_protocol_2() {
         Fr::from(6u32),
         Fr::from(4u32),
     );
-
+    
     let trusted_setup = TrustedSetup::<ark_test_curves::bls12_381::Bls12_381>::run_trusted_setup(
         &toxic_waste,
         &qap_poly,
@@ -423,7 +295,7 @@ fn test_valid_protocol_2() {
         &qap,
         &witness,
     );
-
+    
     let is_valid = Groth16Protocol::<ark_test_curves::bls12_381::Bls12_381>::verify_proof(
         &groth16_proof,
         &trusted_setup,
