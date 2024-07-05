@@ -9,7 +9,6 @@ use polynomial::{
 /// this is constant for groth16
 pub const PRIVATE_VARIABLES_INDEX: usize = 2;
 
-
 /// This function generates the t-polynomial for the circuit
 /// we get this;
 /// t(x) = (x-1)(x-2)(x-3)(x-4)(x-5)(x-6)(x-7)
@@ -240,20 +239,19 @@ pub fn check_init<F: PrimeField>(
     let mut result_a = Vec::new();
     let mut result_b = Vec::new();
     let mut result_c = Vec::new();
-    
+
     for i in r_s_a {
         result_a.push(mul_n_sum(i.clone(), w.clone()));
     }
-    
+
     for i in r_s_b {
         result_b.push(mul_n_sum(i.clone(), w.clone()));
     }
-    
+
     for i in r_s_c {
         result_c.push(mul_n_sum(i.clone(), w.clone()));
     }
-    
-    
+
     quick_vec_mul(result_a, result_b) == result_c
 }
 
@@ -273,7 +271,7 @@ pub fn quick_vec_mul<F: PrimeField>(a: Vec<F>, b: Vec<F>) -> Vec<F> {
     for i in 0..a.len() {
         result.push(a[i] * b[i]);
     }
-    
+
     result
 }
 
@@ -367,7 +365,7 @@ mod tests {
 
         assert_eq!(res, expected_res);
     }
-    
+
     #[test]
     fn test_check_init() {
         // constraints_A = np.array([[0, 1, 0, 0, 0, 0],
@@ -383,24 +381,108 @@ mod tests {
         //                           [0, 0, 0, 0, 0, 1],
         //                           [0, 0, 1, 0, 0, 0]])
         let r_s_a = vec![
-            vec![Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(1), Fr::from(0)],
-            vec![Fr::from(5), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)],
+            vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(5),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+            ],
         ];
         let r_s_b = vec![
-            vec![Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0)],
+            vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
         ];
         let r_s_c = vec![
-            vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0)],
-            vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1), Fr::from(0)],
-            vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)],
-            vec![Fr::from(0), Fr::from(0), Fr::from(1), Fr::from(0), Fr::from(0), Fr::from(0)],
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+            ],
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(1),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
         ];
-        
+
         // [1, 3, 35, 9, 27, 30]
         let w = vec![
             Fr::from(1),
@@ -408,7 +490,8 @@ mod tests {
             Fr::from(35),
             Fr::from(9),
             Fr::from(27),
-            Fr::from(30)];
+            Fr::from(30),
+        ];
 
         let res = check_init::<Fr>(r_s_a, r_s_b, r_s_c, w);
 

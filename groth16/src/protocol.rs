@@ -1,5 +1,3 @@
-use ark_ec::{pairing::Pairing, Group};
-use ark_ff::PrimeField;
 use crate::{
     interfaces::ProtocolInterface,
     primitives::{Proof, ProofRands, TrustedSetupExcecution, Witness, QAP},
@@ -8,7 +6,8 @@ use crate::{
         linear_combination_homomorphic_poly_eval_g2, PRIVATE_VARIABLES_INDEX,
     },
 };
-
+use ark_ec::{pairing::Pairing, Group};
+use ark_ff::PrimeField;
 
 /// This is the Groth16 protocol implementation (Struct binding to the ProtocolInterface)
 pub struct Groth16Protocol<P: Pairing> {

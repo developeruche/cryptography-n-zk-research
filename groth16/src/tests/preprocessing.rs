@@ -560,7 +560,7 @@ fn to_qap_polynomials() {
             Fr::from(2u32),
         ],
     );
-    
+
     let r1cs_check = r1cs.check(witness.render());
     assert!(r1cs_check, "this is the R1CS check");
 

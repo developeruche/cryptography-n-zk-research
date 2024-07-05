@@ -283,6 +283,11 @@ impl<F: PrimeField> R1CS<F> {
     }
 
     pub fn check(&self, witness: Vec<F>) -> bool {
-        check_init(self.a.clone(), self.b.clone(), self.c.clone(), witness.clone())
+        check_init(
+            self.a.clone(),
+            self.b.clone(),
+            self.c.clone(),
+            witness.clone(),
+        )
     }
 }
