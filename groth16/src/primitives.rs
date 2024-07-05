@@ -7,6 +7,8 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
+use crate::utils::check_init;
+
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
@@ -287,7 +289,7 @@ impl<F: PrimeField> R1CS<F> {
         Self { a, b, c }
     }
 
-    pub fn check(&self) -> bool {
-        todo!()
+    pub fn check(&self, witness: Vec<F>) -> bool {
+        check_init(self.a.clone(), self.b.clone(), self.c.clone(), witness.clone())
     }
 }

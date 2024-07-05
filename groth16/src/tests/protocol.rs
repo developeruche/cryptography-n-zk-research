@@ -102,7 +102,10 @@ fn test_valid_protocol() {
             Fr::from(24u32),
         ],
     );
-
+    
+    let r1cs_check = r1cs.check(witness.render());
+    assert!(r1cs_check, "this is the R1CS check");
+    
     let qap_poly_coefficients = r1cs.to_qap_poly_coefficients();
     let qap_poly = qap_poly_coefficients.into_poly_rep();
 

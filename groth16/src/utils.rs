@@ -241,6 +241,7 @@ pub fn check_init<F: PrimeField>(
     let mut result_c = Vec::new();
     
     for i in r_s_a {
+        println!("This is the lenght: {}", i.len());
         result_a.push(mul_n_sum(i.clone(), w.clone()));
     }
     
