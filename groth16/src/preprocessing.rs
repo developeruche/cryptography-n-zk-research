@@ -3,10 +3,11 @@ use crate::{
         PreProcessorInterface, QAPInterface, QAPPolysCoefficientsInterface, R1CSProcessingInterface,
     },
     primitives::{QAPPolysCoefficients, Witness, QAP, R1CS},
-    utils::{check_init, generate_t_poly},
+    utils::generate_t_poly,
 };
 use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
+
 
 pub struct PreProcessor<F: PrimeField> {
     pub r1cs: R1CS<F>,

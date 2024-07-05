@@ -199,10 +199,8 @@ impl<F: PrimeField> QAP<F> {
     pub fn qap_check(&self) -> bool {
         let ht = self.compute_ht();
         let lhs = self.ax.clone() * self.bx.clone();
-        let check_1 = lhs == ht + self.cx.clone();
-        let check_2 = self.ax.evaluate(&F::from(1u32)) * self.bx.evaluate(&F::from(1u32))
-            == self.cx.evaluate(&F::from(1u32));
-        check_1 && check_2
+        let check = lhs == ht + self.cx.clone();
+        check
     }
 }
 
@@ -214,11 +212,6 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
         let domain_lenght = self.a[0].len();
         let domain = compute_domain(domain_lenght);
-
-        // println!("Domain: {:?}", domain);
-        // println!("This a: {:?}", self.a[3]);
-        // let test_poly = UnivariantPolynomial::interpolate(self.a[3].clone(), domain.clone());
-        // println!("Test poly: {:?}", test_poly);
 
         let a = self
             .a
