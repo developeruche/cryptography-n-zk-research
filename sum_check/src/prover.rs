@@ -5,6 +5,7 @@ use polynomial::{
     interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
+
 #[derive(Clone, Default, Debug)]
 pub struct Prover<F: PrimeField> {
     /// This is the polynomial to calculate the sum check proof
@@ -53,7 +54,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     fn compute_round_zero_poly(&mut self) {
         let number_of_round = self.poly.num_vars - 1;
         let bh = boolean_hypercube(number_of_round);
-        let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
+        let mut bh_partials: Multilinear<F> = Multilinear::zero(1); // this is an accumulator
 
         for bh_i in bh {
             let current_partial = self

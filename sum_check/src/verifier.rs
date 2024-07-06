@@ -26,7 +26,7 @@ impl<F: PrimeField> VerifierInterface<F> for Verifier<F> {
         // steps
         // 1. eval poly_0 at 0 and 1 and check if the sum is equal to the sum in the proof [done]
         // 2. append poly_0 to the transcript
-        // 3. eval poly_1 at rand(0) from transcript and check if the eval of poly_0 at 0 and 1 is equal to poly_1 at rand(0)
+        // 3. eval poly_1 at rand_0 from transcript and check if the eval of poly_0 at 0 and 1 is equal to poly_1 at rand_0
         // 4. append poly_1 to the transcript
         // 5. repeat step 3 and 4 until the last round
         // 6. check if the eval of the last poly at rand(last) is equal to the eval of the main poly at all rands()
