@@ -6,5 +6,8 @@ members = [
     "sum_check", 
     "gkr", 
     "circuits", 
-    "groth16",
+    "groth16", 
+]
+exclude = [
+    "circom-groth16"
 ]
