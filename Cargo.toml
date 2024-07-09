@@ -4,6 +4,7 @@ members = [
     "bls-multi-sign-threshold-wallet", 
     "fiat_shamir", 
     "sum_check", 
+    "sha256-hash-function",
     "gkr", 
     "circuits", 
     "groth16", 

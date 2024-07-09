@@ -61,4 +61,13 @@ In the realm of cybersecurity, ensuring data integrity and authenticity is param
 Suppose we are given a v-variate polynomial g defined over a finite field F. The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
 
 
+
+
+
+
+
+
+
+
+
 NOTE: THIS IS NOT TO BE USED IN PRODUCTION. THIS IS A RESEARCH PROJECT.
