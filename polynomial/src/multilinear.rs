@@ -1,5 +1,5 @@
 use crate::{
-    interface::MultivariantPolynomialInterface,
+    interface::MultilinearPolynomialInterface,
     utils::{multilinear_evalutation_equation, round_pairing_index_ext},
 };
 use ark_ff::{BigInteger, PrimeField};
@@ -58,7 +58,7 @@ impl<F: PrimeField> Multilinear<F> {
     }
 }
 
-impl<F: PrimeField> MultivariantPolynomialInterface<F> for Multilinear<F> {
+impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize {
         self.num_vars
@@ -110,6 +110,45 @@ impl<F: PrimeField> MultivariantPolynomialInterface<F> for Multilinear<F> {
         }
 
         eval_result
+    }
+
+    fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
+        let repeat_length = 1 << num_of_new_variables;
+        let mut new_evaluations = Vec::new();
+
+        for eval in &self.evaluations {
+            for _ in 0..repeat_length {
+                new_evaluations.push(*eval);
+            }
+        }
+
+        Self::new(new_evaluations, self.num_vars + num_of_new_variables)
+    }
+
+    fn add_distinct(&self, rhs: &Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        let repeat_sequence = rhs.evaluations.len();
+
+        for i in 0..self.evaluations.len() {
+            for j in 0..repeat_sequence {
+                new_evaluations.push(self.evaluations[i] + rhs.evaluations[j]);
+            }
+        }
+
+        Self::new(new_evaluations, self.num_vars + rhs.num_vars)
+    }
+
+    fn mul_distinct(&self, rhs: &Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        let repeat_sequence = rhs.evaluations.len();
+
+        for i in 0..self.evaluations.len() {
+            for j in 0..repeat_sequence {
+                new_evaluations.push(self.evaluations[i] * rhs.evaluations[j]);
+            }
+        }
+
+        Self::new(new_evaluations, self.num_vars + rhs.num_vars)
     }
 }
 
@@ -240,5 +279,149 @@ mod tests {
         // 9x + 21
         let y_z_eval_result = new_polynomial_y_z.evaluate(&vec![Fr::from(3)]);
         assert_eq!(y_z_eval_result, Some(Fr::from(48)));
+    }
+
+    #[test]
+    fn test_extend_with_new_variables() {
+        // 2xy + 4x + 2y + 5
+        let poly = Multilinear::new(vec![Fr::from(5), Fr::from(7), Fr::from(9), Fr::from(13)], 2);
+        let new_poly = poly.extend_with_new_variables(1);
+        let resulting_evaluations = vec![
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(13),
+            Fr::from(13),
+        ];
+
+        assert_eq!(new_poly.num_vars, 3);
+        assert_eq!(new_poly.evaluations, resulting_evaluations);
+    }
+
+    #[test]
+    fn test_extend_with_new_variables_0() {
+        // 2xy + 4x + 2y + 5
+        let poly = Multilinear::new(vec![Fr::from(5), Fr::from(7), Fr::from(9), Fr::from(13)], 2);
+        let new_poly = poly.extend_with_new_variables(2);
+
+        let resulting_evaluations = vec![
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(7),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(9),
+            Fr::from(13),
+            Fr::from(13),
+            Fr::from(13),
+            Fr::from(13),
+        ];
+
+        assert_eq!(new_poly.num_vars, 4);
+        assert_eq!(new_poly.evaluations, resulting_evaluations);
+    }
+
+    #[test]
+    fn test_add_distinct() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+        let poly_1 = Multilinear::new(
+            vec![
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(6),
+                Fr::from(7),
+                Fr::from(9),
+                Fr::from(10),
+            ],
+            3,
+        );
+        // f(x) = 2x + 9
+        let poly_2 = Multilinear::new(vec![Fr::from(9), Fr::from(11)], 1);
+
+        let result = poly_1.add_distinct(&poly_2);
+
+        let resulting_evaluations = vec![
+            Fr::from(13),
+            Fr::from(15),
+            Fr::from(14),
+            Fr::from(16),
+            Fr::from(13),
+            Fr::from(15),
+            Fr::from(14),
+            Fr::from(16),
+            Fr::from(15),
+            Fr::from(17),
+            Fr::from(16),
+            Fr::from(18),
+            Fr::from(18),
+            Fr::from(20),
+            Fr::from(19),
+            Fr::from(21),
+        ];
+
+        assert_eq!(result.num_vars, 4);
+        assert_eq!(result.evaluations, resulting_evaluations);
+    }
+
+    #[test]
+    fn test_add_distinct_0() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+
+        // f(x,y) = 4xy + 3x + 4y + 3
+    }
+
+    #[test]
+    fn test_mul_distinct() {
+        // f(a, b, c) = 2a + 3ab + c + 4
+        let poly_1 = Multilinear::new(
+            vec![
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(6),
+                Fr::from(7),
+                Fr::from(9),
+                Fr::from(10),
+            ],
+            3,
+        );
+        // f(x) = 2x + 9
+        let poly_2 = Multilinear::new(vec![Fr::from(9), Fr::from(11)], 1);
+
+        let result = poly_1.mul_distinct(&poly_2);
+
+        let resulting_evaluations = vec![
+            Fr::from(36),
+            Fr::from(44),
+            Fr::from(45),
+            Fr::from(55),
+            Fr::from(36),
+            Fr::from(44),
+            Fr::from(45),
+            Fr::from(55),
+            Fr::from(54),
+            Fr::from(66),
+            Fr::from(63),
+            Fr::from(77),
+            Fr::from(81),
+            Fr::from(99),
+            Fr::from(90),
+            Fr::from(110),
+        ];
+
+        assert_eq!(result.num_vars, 4);
+        assert_eq!(result.evaluations, resulting_evaluations);
     }
 }

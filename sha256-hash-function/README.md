@@ -2,6 +2,10 @@ In the realm of cybersecurity, ensuring data integrity and authenticity is param
 
 
 
+In the realm of cybersecurity, ensuring data integrity and authenticity is paramount. Cryptographic hash functions play a vital role in achieving this objective. One of the most widely employed and trusted algorithms in this domain is SHA-256 (Secure Hash Algorithm 256-bit). This introduction will delve into the concept of SHA-256, outlining its functionalities, key characteristics, and the prevalent applications that leverage its capabilities.
+
+
+
 - Necessity for data integrity and authenticity: Briefly explain why data security is crucial and how it can be compromised.
     
 - Hash functions explained: Introduce the concept of hash functions, their role in cryptography, and how they differ from encryption.
@@ -61,7 +65,7 @@ There are 6 logical functions used by the SHA256 hash function They are as follo
 1. sigma_0: The sigma_0 function comprises of 4 operations, ROTR_7, ROTR_18, SHR_3 and XOR. The equation looking more like this: ROTR_7(x) ^ ROTR_18(x) ^ SHR_3(x);
 2. sigma_1: The sigma_1 function very similar to the sigma_0 function but varies in the number of rotation. This equation is given in this manner; ROTR_17(x) ^ ROTR_19(x) ^ SHR_10(x)
 3. prime_sigma_0: ROTR_2(x) ^ ROTR_13(x) ^ ROTR_22(x) 
-4. prime_sigma_1: ROTR_6(x) ^ ROTR_11(x) ^ ROTR_25(x) 
+4. prime_sigma_1: ROTR_6(x) ^ ROTR_11(x) ^ ROTR_25(x)
 5. choice Ch(𝑥,𝑦,𝑧)=(𝑥∧𝑦)⊕(¬𝑥∧𝑧) : Ch stands for choose (source: poncho) or choice, as the 𝑥 input chooses if the output is from 𝑦 or from 𝑧. More precisely, for each bit index, that result bit is according to the bit from 𝑦 (or respectively 𝑧) at this index, depending on if the bit from 𝑥 at this index is 1 (or respectively 0).
 6. majority Maj(𝑥,𝑦,𝑧)=(𝑥∧𝑦)⊕(𝑥∧𝑧)⊕(𝑦∧𝑧): Maj stands for majority: for each bit index, that result bit is according to the majority of the 3 inputs bits for 𝑥 𝑦 and 𝑧 at this index.
 7. compute_message_shedule_extension: 
@@ -186,3 +190,4 @@ pub const H: [u32; 8] = [
 
 
 ### Hash Computation 
+

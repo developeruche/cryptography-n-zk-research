@@ -28,7 +28,7 @@ pub trait UnivariantPolynomialInterface<F: PrimeField>: PolynomialInterface<F> {
     fn interpolate(point_ys: Vec<F>, domain: Vec<F>) -> Self;
 }
 
-pub trait MultivariantPolynomialInterface<F: PrimeField> {
+pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize;
     /// This function creates a new polynomial from a list of evaluations
@@ -37,4 +37,28 @@ pub trait MultivariantPolynomialInterface<F: PrimeField> {
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
     /// This function is used to evaluate the polynomial at a given point
     fn evaluate(&self, point: &Vec<F>) -> Option<F>;
+    /// Extend polynomials with new variables
+    /// given f(x,y) = 2xy + 3y + 4x + 5 this function can extend it to f(x,y,z) = 2xy + 3y + 4x + 5 + 0z
+    fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self;
+    /// Addition for multilinear polynomials with 2 distinict variables
+    /// given f(x,y) = 2xy + 3y + 4x + 5 and f(a,b) = 2ab + 3b + 4a + 5
+    /// f(x,y) + f(a,b) = 2xy + 3y + 4x + 5 + 2ab + 3b + 4a + 5
+    fn add_distinct(&self, rhs: &Self) -> Self;
+    /// Multiplication for multilinear polynomials with 2 distinict variables
+    /// given f(x,y) = 2xy + 3y + 4x + 5 and f(a,b) = 2ab + 3b + 4a + 5
+    /// f(x,y) * f(a,b) = 4xyab + 6yab + 8xab + 10ab + 6y + 8x + 10
+    fn mul_distinct(&self, rhs: &Self) -> Self;
+}
+
+pub trait MultivariatePolynomialInterface<F: PrimeField> {
+    /// This function returns the number of variables in the polynomial
+    fn num_vars(&self) -> usize;
+    /// This function returns the operational hypercube index
+    fn hc_index(&self) -> usize;
+    /// This function is used to evaluate the polynomial at a given point
+    fn evaluate(&self, point: &Vec<F>) -> Option<F>;
+    /// This function creates a new polynomial from a list of evaluations
+    fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self;
+    /// This function allows for multiple parial evaluations
+    fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
 }

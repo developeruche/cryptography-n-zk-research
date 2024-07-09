@@ -127,6 +127,15 @@ pub fn return_binary(mut num: u128) -> Vec<u8> {
     binary
 }
 
+pub fn compute_domain<F: PrimeField>(n: usize) -> Vec<F> {
+    let mut domain = Vec::new();
+    for i in 1..n + 1 {
+        domain.push(F::from(i as u128));
+    }
+
+    domain
+}
+
 #[cfg(test)]
 mod tests {
     use std::time::Instant;
@@ -261,5 +270,14 @@ mod tests {
         let now = Instant::now();
         let _ = boolean_hypercube_2(4);
         println!("Time taken for hypercube 2: {:?}", now.elapsed());
+    }
+
+    #[test]
+    fn test_compute_domain() {
+        let domain = compute_domain::<Fr>(4);
+        assert_eq!(
+            domain,
+            vec![Fr::from(1), Fr::from(2), Fr::from(3), Fr::from(4)]
+        );
     }
 }

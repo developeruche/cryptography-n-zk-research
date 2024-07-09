@@ -2,8 +2,9 @@ use crate::{data_structure::SumCheckProof, interface::ProverInterface};
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
-    interface::MultivariantPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
+    interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
+
 
 #[derive(Clone, Default, Debug)]
 pub struct Prover<F: PrimeField> {
@@ -53,7 +54,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     fn compute_round_zero_poly(&mut self) {
         let number_of_round = self.poly.num_vars - 1;
         let bh = boolean_hypercube(number_of_round);
-        let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
+        let mut bh_partials: Multilinear<F> = Multilinear::zero(1); // this is an accumulator
 
         for bh_i in bh {
             let current_partial = self
@@ -343,6 +344,40 @@ mod tests {
         );
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
+        let proof = prover.sum_check_proof();
+        let mut verifer = Verifier::new();
+
+        assert!(verifer.verify(&proof));
+    }
+
+    #[test]
+    fn test_sum_check_proof_3() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(1),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(7),
+                Fr::from(2),
+                Fr::from(4),
+                Fr::from(6),
+                Fr::from(8),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(7),
+                Fr::from(9),
+                Fr::from(4),
+                Fr::from(6),
+                Fr::from(8),
+                Fr::from(10),
+            ],
+            4,
+        );
+        let mut prover = Prover::new(poly);
+        prover.calculate_sum();
+
+        println!("Sum: {:?}", prover.sum);
+
         let proof = prover.sum_check_proof();
         let mut verifer = Verifier::new();
 

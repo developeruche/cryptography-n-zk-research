@@ -1,75 +1,64 @@
 # Sum check protocol
 --------------------
 
+Sum-Check Protocol The Sum-Check Protocol is a fundamental technique in theoretical computer science, particularly in the field of interactive proof systems and complexity theory. It’s often used to prove properties about polynomials and is a key component in constructing various interactive proofs, including those for NP-complete problems.
+
 Suppose we are given a v-variate polynomial g defined over a finite field F. The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
 
-### Structures
 
-Sum Check Proof
-```rust 
-	#[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-	pub struct SumCheckProof<F: PrimeField> {
-	    /// This is the polynomial that is used to generate the sum check proof
-	    pub polynomial: Multilinear<F>,
-	    /// This vector stores the round polynomials
-	    pub round_poly: Vec<Multilinear<F>>,
-	    /// This vectors store the polynomial from the first round
-	    pub round_0_poly: Multilinear<F>,
-	    /// This holds the sum of the polynomial evaluation over the boolean hypercube
-	    pub sum: F,
-	}
+###  Build Guide
+
+1. Clone the repository
+
+```bash
+git clone **
 ```
 
-Prover 
+2. Build the project
 
-```rust 
-#[derive(Clone, Default, Debug)]
-pub struct Prover<F: PrimeField> {
-    /// This is the polynomial to calculate the sum check proof
-    pub poly: Multilinear<F>,
-    /// This struct is used to store the sum check proof
-    pub round_poly: Vec<Multilinear<F>>,
-    /// This vectors store the polynomial from the first round
-    pub round_0_poly: Multilinear<F>,
-    /// This holds the sum of the polynomial evaluation over the boolean hypercube
-    pub sum: F,
-    /// This is this fiat-shamir challenge transcript
-    pub transcript: FiatShamirTranscript,
-}
+```bash
+cargo build --release
 ```
 
-Verifier 
+3. Run the project test
 
-```rust 
-#[derive(Clone, Default, Debug)]
-pub struct Verifier<F: PrimeField> {
-    /// This is this fiat-shamir challenge transcript
-    pub transcript: FiatShamirTranscript,
-    phantom: std::marker::PhantomData<F>,
-}
-
+```bash
+cargo test
 ```
 
-Interfaces
+### Usage (How to compute proofs and verify claims)
 
-```rust 
-use crate::data_structure::SumCheckProof;
-use ark_ff::PrimeField;
+```rust
 
-/// This trait is used to define the prover interface
-pub trait ProverInterface<F: PrimeField> {
-    /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
-    fn calculate_sum(&mut self);
-    /// This function returns the round zero computed polynomial
-    fn compute_round_zero_poly(&mut self);
-    /// This function computes sum check proof
-    fn sum_check_proof(&mut self) -> SumCheckProof<F>;
-}
-
-/// The verifier interface is used to verify the sum check proof
-pub trait VerifierInterface<F: PrimeField> {
-    /// This function verifies the sum check proof
-    fn verify(&mut self, proof: &SumCheckProof<F>) -> bool;
-}
+    let poly = Multilinear::new(
+        vec![
+            Fr::from(1),
+            Fr::from(3),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(2),
+            Fr::from(4),
+            Fr::from(6),
+            Fr::from(8),
+            Fr::from(3),
+            Fr::from(5),
+            Fr::from(7),
+            Fr::from(9),
+            Fr::from(4),
+            Fr::from(6),
+            Fr::from(8),
+            Fr::from(10),
+        ],
+        4,
+    );
+    let mut prover = Prover::new(poly);
+    prover.calculate_sum();
+    
+    println!("Sum: {:?}", prover.sum);
+    
+    let proof = prover.sum_check_proof();
+    let mut verifer = Verifier::new();
+    
+    assert!(verifer.verify(&proof));
 
 ```
