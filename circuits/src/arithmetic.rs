@@ -86,7 +86,6 @@ mod tests {
     //   5(+)_0   20(*)_1 - layer 1
     //   / \    /  \
     //  2   3   4   5
-    //
     #[test]
     fn test_circuit_evaluation_1() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);

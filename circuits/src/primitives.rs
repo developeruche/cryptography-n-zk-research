@@ -14,6 +14,13 @@ pub struct Gate {
     pub inputs: [usize; 2],
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Constraints {
+    pub a_s: Vec<usize>,
+    pub b_s: Vec<usize>,
+    pub c_s: Vec<usize>,
+}
+
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct CircuitLayer {
     /// This circuit layer is just a row of gates
