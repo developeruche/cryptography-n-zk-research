@@ -16,9 +16,15 @@ pub struct Gate {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Constraints {
-    pub a_s: Vec<usize>,
-    pub b_s: Vec<usize>,
-    pub c_s: Vec<usize>,
+    // a, b, c; where c = a.b;
+    abc_s: Vec<(usize, usize, usize)>
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct ConstraintsRaw {
+    pub input: [usize; 2],
+    pub gate_type: GateType,
+    pub label: usize
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
