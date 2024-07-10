@@ -5,15 +5,21 @@
 
 This library provides an implementation of the Elliptic Curve Digital Signature Algorithm (ECDSA) in Rust. It allows you to:
 
+**Features**
 - Generate ECDSA keypairs (private and public keys)
 - Sign messages using a private key
 - Verify signatures using a public key
 
+
+[codebase]()
+<br>
+<br>
+
 ## KZG polynomial commitment scheme
 
-This is a Rust implementation of the Kate Commitments (KZG) polynomial commitment scheme. KZG allows you to commit to a polynomial while keeping the contents hidden. Later, you can prove that a specific evaluation of the polynomial results in a certain value. This is useful for various cryptographic applications where you want to prove possession of data without revealing it.
+This is a Rust implementation of the Kate Commitments (KZG) polynomial commitment scheme. KZG allows you to commit to a polynomial while keeping the contents hidden.
 
-### Features
+**Features**
 
 - Creates KZG parameters for a given degree.
 - Commits to a polynomial of a specified degree.
