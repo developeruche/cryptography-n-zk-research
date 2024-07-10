@@ -154,6 +154,14 @@ Suppose we are given a v-variate polynomial `g` defined over a finite field `F`.
 <br>
 <br>
 
+### Circuits 
+
+### Fiat Shamir 
+
+### GKR 
+
+### Groth16 
+
 
 
 
