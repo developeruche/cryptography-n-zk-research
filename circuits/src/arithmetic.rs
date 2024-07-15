@@ -63,8 +63,6 @@ impl GKRProtocolCircuitInterface for Circuit {
             }
         }
 
-        println!("add usize: {:?}", add_usize_vec.clone());
-        println!("mul usize: {:?}", mul_usize_vec.clone());
 
         let add_mle = usize_vec_to_mle::<F>(&add_usize_vec, mle_num_of_vars);
         let mul_mle = usize_vec_to_mle::<F>(&mul_usize_vec, mle_num_of_vars);
