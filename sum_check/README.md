@@ -5,6 +5,9 @@ Sum-Check Protocol The Sum-Check Protocol is a fundamental technique in theoreti
 
 Suppose we are given a v-variate polynomial g defined over a finite field F. The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
 
+#### Example
+![Sum Check Protocol Example](https://raw.githubusercontent.com/developeruche/cryptography-n-zk-research/main/assets/sum%20check%20protocol.png)
+
 
 ###  Build Guide
 
