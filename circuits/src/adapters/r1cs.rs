@@ -1,5 +1,7 @@
-use crate::{interfaces::ExtractConstraintsInterface, primitives::{Circuit, Constraints, ConstraintsRaw}};
-
+use crate::{
+    interfaces::ExtractConstraintsInterface,
+    primitives::{Circuit, Constraints, ConstraintsRaw},
+};
 
 impl ExtractConstraintsInterface for Circuit {
     fn extract_constraints(&self) -> Constraints {
@@ -9,24 +11,22 @@ impl ExtractConstraintsInterface for Circuit {
                     0
                 } else {
                     let mut cache_pin = 0;
-                    
-                    
+
                     for i in 0..layer_index {
                         let size_of_prev_layer = self.layers[layer_index - 1].layer.len();
-                        
                     }
-                    
+
                     0
                 };
                 let label = layer.layer.len() + gate_index + 1;
                 let raw_c = ConstraintsRaw {
                     input: [gate.inputs[0] + pin, gate.inputs[1] + pin],
                     gate_type: gate.g_type.clone(),
-                    label
+                    label,
                 };
             }
         }
-        
+
         todo!()
     }
 }

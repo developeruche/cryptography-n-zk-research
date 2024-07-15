@@ -17,14 +17,14 @@ pub struct Gate {
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Constraints {
     // a, b, c; where c = a.b;
-    abc_s: Vec<(usize, usize, usize)>
+    abc_s: Vec<(usize, usize, usize)>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct ConstraintsRaw {
     pub input: [usize; 2],
     pub gate_type: GateType,
-    pub label: usize
+    pub label: usize,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]

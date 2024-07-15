@@ -5,7 +5,6 @@ use polynomial::{
     interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
 };
 
-
 #[derive(Clone, Default, Debug)]
 pub struct Prover<F: PrimeField> {
     /// This is the polynomial to calculate the sum check proof

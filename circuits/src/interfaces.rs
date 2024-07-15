@@ -20,7 +20,6 @@ pub trait GKRProtocolCircuitInterface {
     ) -> (Multilinear<F>, Multilinear<F>);
 }
 
-
 /// This is an interface for handling R1CS related operations
 pub trait ExtractConstraintsInterface {
     /// this function extracts constrant for the algebric circuit

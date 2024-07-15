@@ -1,8 +1,7 @@
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use polynomial::{
-    interface::UnivariantPolynomialInterface,
-    univariant::UnivariantPolynomial,
+    interface::UnivariantPolynomialInterface, univariant::UnivariantPolynomial,
     utils::compute_domain,
 };
 use rand::rngs::OsRng;
