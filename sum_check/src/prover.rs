@@ -42,7 +42,7 @@ impl<F: PrimeField> Prover<F> {
         }
     }
 
-    /// This function creates a new  prover intance, computes the sum and computes the round zero polynomial
+    /// This function creates a new  prover instance, computes the sum and computes the round zero polynomial
     pub fn new_with_sum_and_round_zero(poly: Multilinear<F>) -> Self {
         let mut prover = Self::new(poly);
         prover.calculate_sum();
