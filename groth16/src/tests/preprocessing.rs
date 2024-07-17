@@ -1,9 +1,10 @@
 use crate::{
     interfaces::{PreProcessorInterface, R1CSProcessingInterface},
     preprocessing::PreProcessor,
-    primitives::{QAPPolysCoefficients, Witness, R1CS},
+    primitives::{QAPPolysCoefficients, Witness},
 };
 use ark_test_curves::bls12_381::Fr;
+use circuits::primitives::R1CS;
 
 #[test]
 fn test_to_qap_poly_coefficients() {

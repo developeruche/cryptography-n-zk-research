@@ -1,4 +1,4 @@
-use crate::primitives::{CircuitEvaluation, Constraints};
+use crate::primitives::{CircuitEvaluation, ConstraintsWithLabelSize};
 use ark_ff::PrimeField;
 use polynomial::multilinear::Multilinear;
 use std::ops::{Add, Mul};
@@ -23,5 +23,5 @@ pub trait GKRProtocolCircuitInterface {
 /// This is an interface for handling R1CS related operations
 pub trait ExtractConstraintsInterface {
     /// this function extracts constrant for the algebric circuit
-    fn extract_constraints(&self) -> Constraints;
+    fn extract_constraints(&self) -> ConstraintsWithLabelSize;
 }

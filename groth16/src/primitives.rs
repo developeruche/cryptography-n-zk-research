@@ -6,24 +6,12 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
-use crate::utils::check_init;
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Witness<F: PrimeField> {
     /// The public input to the circuit
     pub public_input: Vec<F>,
     /// The auxiliary input to the circuit (private input)
     pub auxiliary_input: Vec<F>,
-}
-
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct R1CS<F: PrimeField> {
-    /// This is the C matrix
-    pub c: Vec<Vec<F>>,
-    /// This is the A matrix
-    pub a: Vec<Vec<F>>,
-    /// This is the B matrix
-    pub b: Vec<Vec<F>>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -273,20 +261,5 @@ impl<F: PrimeField> QAPPolys<F> {
         c: Vec<UnivariantPolynomial<F>>,
     ) -> Self {
         Self { a, b, c }
-    }
-}
-
-impl<F: PrimeField> R1CS<F> {
-    pub fn new(a: Vec<Vec<F>>, b: Vec<Vec<F>>, c: Vec<Vec<F>>) -> Self {
-        Self { a, b, c }
-    }
-
-    pub fn check(&self, witness: Vec<F>) -> bool {
-        check_init(
-            self.a.clone(),
-            self.b.clone(),
-            self.c.clone(),
-            witness.clone(),
-        )
     }
 }

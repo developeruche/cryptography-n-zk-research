@@ -276,6 +276,7 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-test-curves",
+ "circuits",
  "polynomial",
  "rand",
 ]
