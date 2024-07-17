@@ -123,11 +123,29 @@ impl ConstraintsWithLabelSize {
         let mut b = vec![vec![F::zero(); self.label_size + 1]; self.constraints.len()];
         let mut c = vec![vec![F::zero(); self.label_size + 1]; self.constraints.len()];
 
-        for constraint in self.constraints.iter() {
-            for i in 0..self.label_size {
-                a[constraint.a[i]][i] = F::one();
-                b[constraint.b[i]][i] = F::one();
-                c[constraint.c[i]][i] = F::one();
+        for (c_i, constraint) in self.constraints.iter().enumerate() {
+            if constraint.a.len() == 0 {
+                a[c_i][0] = F::one();
+            } else {
+                for a_val in constraint.a.iter() {
+                    a[c_i][*a_val] = F::one();
+                }
+            }
+
+            if constraint.b.len() == 0 {
+                b[c_i][0] = F::one();
+            } else {
+                for b_val in constraint.b.iter() {
+                    b[c_i][*b_val] = F::one();
+                }
+            }
+
+            if constraint.c.len() == 0 {
+                c[c_i][0] = F::one();
+            } else {
+                for c_val in constraint.c.iter() {
+                    c[c_i][*c_val] = F::one();
+                }
             }
         }
 
