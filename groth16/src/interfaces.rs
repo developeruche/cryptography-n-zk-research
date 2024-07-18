@@ -1,6 +1,5 @@
 use crate::primitives::{
-    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution,
-    QAP,
+    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution, QAP,
 };
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;

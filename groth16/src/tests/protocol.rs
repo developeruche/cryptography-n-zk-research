@@ -7,7 +7,10 @@ use crate::{
     protocol::Groth16Protocol,
 };
 use ark_test_curves::bls12_381::Fr;
-use circuits::{interfaces::ExtractConstraintsInterface, primitives::{Circuit, CircuitLayer, Gate, GateType, Witness, R1CS}};
+use circuits::{
+    interfaces::ExtractConstraintsInterface,
+    primitives::{Circuit, CircuitLayer, Gate, GateType, Witness, R1CS},
+};
 use polynomial::interface::PolynomialInterface;
 
 #[test]
@@ -307,10 +310,10 @@ fn test_valid_protocol_on_arithmetic_circuit() {
         Gate::new(GateType::Mul, [0, 1]),
         Gate::new(GateType::Add, [2, 3]),
     ]);
-    
+
     let circuit = Circuit::new(vec![layer_0, layer_1]);
     let constraints = circuit.extract_constraints();
-    
+
     let r1cs = constraints.to_r1cs_vec::<Fr>();
     let witness = Witness::new(
         vec![Fr::from(1u32)],

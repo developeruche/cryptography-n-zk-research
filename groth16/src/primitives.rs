@@ -6,8 +6,6 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
-
-
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct QAPPolysCoefficients<F: PrimeField> {
     pub a: Vec<Vec<F>>,
@@ -101,7 +99,6 @@ pub struct ProofRands<F: PrimeField> {
     pub r: F,
     pub s: F,
 }
-
 
 impl<F: PrimeField> ToxicWaste<F> {
     pub fn random() -> Self {

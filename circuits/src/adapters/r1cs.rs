@@ -1,10 +1,9 @@
-use std::collections::HashMap;
 use crate::{
     interfaces::ExtractConstraintsInterface,
     primitives::{Circuit, Constraint, ConstraintRaw, ConstraintsWithLabelSize, GateType},
     utils::compute_constraint_item,
 };
-
+use std::collections::HashMap;
 
 impl ExtractConstraintsInterface for Circuit {
     fn extract_constraints(&self) -> ConstraintsWithLabelSize {
@@ -19,27 +18,27 @@ impl ExtractConstraintsInterface for Circuit {
                 let b_label = compute_constraint_item(layer_index + 1, gate.inputs[1]);
 
                 match label_to_index_mapping.entry(c_label) {
-                    std::collections::hash_map::Entry::Occupied(_) => {},
+                    std::collections::hash_map::Entry::Occupied(_) => {}
                     std::collections::hash_map::Entry::Vacant(e) => {
                         e.insert(latest_constraint_index);
                         latest_constraint_index += 1;
-                    },
+                    }
                 }
-                
+
                 match label_to_index_mapping.entry(a_label) {
-                    std::collections::hash_map::Entry::Occupied(_) => {},
+                    std::collections::hash_map::Entry::Occupied(_) => {}
                     std::collections::hash_map::Entry::Vacant(e) => {
                         e.insert(latest_constraint_index);
                         latest_constraint_index += 1;
-                    },
+                    }
                 }
-                
+
                 match label_to_index_mapping.entry(b_label) {
-                    std::collections::hash_map::Entry::Occupied(_) => {},
+                    std::collections::hash_map::Entry::Occupied(_) => {}
                     std::collections::hash_map::Entry::Vacant(e) => {
                         e.insert(latest_constraint_index);
                         latest_constraint_index += 1;
-                    },
+                    }
                 }
 
                 match gate.g_type {
@@ -77,13 +76,11 @@ impl ExtractConstraintsInterface for Circuit {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::primitives::{CircuitLayer, Gate, Witness};
     use ark_test_curves::bls12_381::Fr;
-    use super::*;
-    
 
     // sample circuit evaluation
     //      100(*)    - layer 0
@@ -99,20 +96,18 @@ mod tests {
             Gate::new(GateType::Add, [2, 3]),
         ]);
         let circuit = Circuit::new(vec![layer_0, layer_1]);
-        
+
         let constraints = circuit.extract_constraints();
-        
+
         assert_eq!(constraints.label_size, 8);
         assert_eq!(constraints.constraints.len(), 3);
-        
+
         let r1cs = constraints.to_r1cs_vec::<Fr>();
         assert_eq!(r1cs.a.len(), 3);
         assert_eq!(r1cs.b.len(), 3);
         assert_eq!(r1cs.c.len(), 3);
     }
-    
-    
-    
+
     // sample circuit evaluation
     //      100(*)    - layer 0
     //     /     \
@@ -127,14 +122,14 @@ mod tests {
             Gate::new(GateType::Add, [2, 3]),
         ]);
         let circuit = Circuit::new(vec![layer_0, layer_1]);
-        
+
         let constraints = circuit.extract_constraints();
-        
+
         assert_eq!(constraints.label_size, 8);
         assert_eq!(constraints.constraints.len(), 3);
-        
+
         let r1cs = constraints.to_r1cs_vec::<Fr>();
-        
+
         let witness = Witness::new(
             vec![Fr::from(1u32)],
             vec![
@@ -147,9 +142,9 @@ mod tests {
                 Fr::from(5u32),
             ],
         );
-        
+
         println!("r1cs a: {:?}", r1cs.c);
-        
+
         let r1cs_check = r1cs.check(witness.render());
         assert!(r1cs_check, "this is the R1CS check");
     }
