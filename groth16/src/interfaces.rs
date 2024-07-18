@@ -1,9 +1,10 @@
 use crate::primitives::{
-    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution, Witness,
+    Proof, ProofRands, QAPPolys, QAPPolysCoefficients, ToxicWaste, TrustedSetupExcecution,
     QAP,
 };
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
+use circuits::primitives::Witness;
 
 pub trait R1CSProcessingInterface<F: PrimeField> {
     /// This function take the columns from the R1CS matrix and returns the QAP polynomial coefficients

@@ -66,6 +66,14 @@ pub struct R1CS<F: PrimeField> {
     pub b: Vec<Vec<F>>,
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Witness<F: PrimeField> {
+    /// The public input to the circuit
+    pub public_input: Vec<F>,
+    /// The auxiliary input to the circuit (private input)
+    pub auxiliary_input: Vec<F>,
+}
+
 impl Gate {
     pub fn new(g_type: GateType, inputs: [usize; 2]) -> Self {
         Gate { g_type, inputs }
@@ -119,9 +127,9 @@ impl ConstraintsWithLabelSize {
     }
 
     pub fn to_r1cs_vec<F: PrimeField>(&self) -> R1CS<F> {
-        let mut a = vec![vec![F::zero(); self.label_size + 1]; self.constraints.len()];
-        let mut b = vec![vec![F::zero(); self.label_size + 1]; self.constraints.len()];
-        let mut c = vec![vec![F::zero(); self.label_size + 1]; self.constraints.len()];
+        let mut a = vec![vec![F::zero(); self.label_size]; self.constraints.len()];
+        let mut b = vec![vec![F::zero(); self.label_size]; self.constraints.len()];
+        let mut c = vec![vec![F::zero(); self.label_size]; self.constraints.len()];
 
         for (c_i, constraint) in self.constraints.iter().enumerate() {
             if constraint.a.len() == 0 {
@@ -165,5 +173,20 @@ impl<F: PrimeField> R1CS<F> {
             self.c.clone(),
             witness.clone(),
         )
+    }
+}
+
+impl<F: PrimeField> Witness<F> {
+    pub fn new(public_input: Vec<F>, auxiliary_input: Vec<F>) -> Self {
+        Self {
+            public_input,
+            auxiliary_input,
+        }
+    }
+
+    pub fn render(&self) -> Vec<F> {
+        let mut ren = self.public_input.clone();
+        ren.extend(self.auxiliary_input.clone());
+        ren
     }
 }

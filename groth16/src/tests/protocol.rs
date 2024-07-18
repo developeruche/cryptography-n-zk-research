@@ -3,11 +3,11 @@ use crate::{
         PreProcessorInterface, ProtocolInterface, R1CSProcessingInterface, TrustedSetupInterface,
     },
     preprocessing::PreProcessor,
-    primitives::{ProofRands, ToxicWaste, TrustedSetup, Witness},
+    primitives::{ProofRands, ToxicWaste, TrustedSetup},
     protocol::Groth16Protocol,
 };
 use ark_test_curves::bls12_381::Fr;
-use circuits::primitives::R1CS;
+use circuits::primitives::{Witness, R1CS};
 use polynomial::interface::PolynomialInterface;
 
 #[test]

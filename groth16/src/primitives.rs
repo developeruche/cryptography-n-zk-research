@@ -6,13 +6,7 @@ use polynomial::{
 };
 use rand::rngs::OsRng;
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Witness<F: PrimeField> {
-    /// The public input to the circuit
-    pub public_input: Vec<F>,
-    /// The auxiliary input to the circuit (private input)
-    pub auxiliary_input: Vec<F>,
-}
+
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct QAPPolysCoefficients<F: PrimeField> {
@@ -108,20 +102,6 @@ pub struct ProofRands<F: PrimeField> {
     pub s: F,
 }
 
-impl<F: PrimeField> Witness<F> {
-    pub fn new(public_input: Vec<F>, auxiliary_input: Vec<F>) -> Self {
-        Self {
-            public_input,
-            auxiliary_input,
-        }
-    }
-
-    pub fn render(&self) -> Vec<F> {
-        let mut ren = self.public_input.clone();
-        ren.extend(self.auxiliary_input.clone());
-        ren
-    }
-}
 
 impl<F: PrimeField> ToxicWaste<F> {
     pub fn random() -> Self {
