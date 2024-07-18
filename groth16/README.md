@@ -81,27 +81,15 @@ assert!(is_valid);
 ### 2. Using the arithmetic `Circuit` struct to generate the R1CS and then the QAP.
 
 ```rust
-let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
-let layer_1 = CircuitLayer::new(vec![
-    Gate::new(GateType::Mul, [0, 1]),
-    Gate::new(GateType::Add, [2, 3]),
-]);
+let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
 
-let circuit = Circuit::new(vec![layer_0, layer_1]);
+let circuit = Circuit::new(vec![layer_0]);
 let constraints = circuit.extract_constraints();
 
 let r1cs = constraints.to_r1cs_vec::<Fr>();
 let witness = Witness::new(
     vec![Fr::from(1u32)],
-    vec![
-        Fr::from(15u32),
-        Fr::from(6u32),
-        Fr::from(9u32),
-        Fr::from(2u32),
-        Fr::from(3u32),
-        Fr::from(4u32),
-        Fr::from(5u32),
-    ],
+    vec![Fr::from(4223u32), Fr::from(41u32), Fr::from(103u32)],
 );
 let r1cs_check = r1cs.check(witness.render());
 assert!(r1cs_check, "this is the R1CS check");

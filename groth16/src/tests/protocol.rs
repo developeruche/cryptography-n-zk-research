@@ -300,9 +300,7 @@ fn test_valid_protocol_2() {
 // running groth16 on this circuit
 //      100(*)    - layer 0
 //     /     \
-//   5(+)_0   20(*)_1 - layer 1
-//   / \    /  \
-//  2   3   4   5
+//   41      103 - input layer
 #[test]
 fn test_valid_protocol_on_arithmetic_circuit() {
     let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
