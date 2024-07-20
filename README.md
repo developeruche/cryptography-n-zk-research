@@ -26,7 +26,7 @@ This is a Rust implementation of the Kate Commitments (KZG) polynomial commitmen
 - [x] Opens a commitment at a specific point, revealing the evaluated value and proof.
 - [x] Verifies the opening proof for a commitment.
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase]https://github.com/developeruche/kzg-commitment-rust)
 <br>
 <br>
 
@@ -35,13 +35,13 @@ This is a Rust implementation of the Kate Commitments (KZG) polynomial commitmen
 This is a Rust implementation of the KZG commitment scheme over the bn254 elliptic curve. Using this implementation to perform a token airdrop distribution using instead of using the regular `Merkle tree` commitment scheme.
 
 **Features**
-- [ ] Toolkit for data preparation and formatting.
-- [ ] Trusted setup importation and implementation.
-- [ ] Massive proof generation script
-- [ ] Rust proof verification
+- [x] Toolkit for data preparation and formatting.
+- [x] Trusted setup importation and implementation.
+- [x] Massive proof generation script (Still needs optimization)
+- [x] Rust proof verification
 - [ ] Solidity proof verification
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/kzg-airdrop-bn254)
 <br>
 <br>
 
@@ -53,17 +53,17 @@ In the realm of blockchain technology, privacy remains a crucial aspect. This re
 - [x] Solidity Interface and Verification smart contract
 - [ ] Basic UI
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/light-tornodo-cash)
 <br>
 <br>
 
-## Non-interactive Chaum Pederson zero-knowledge proof
+## Interactive Chaum Pederson zero-knowledge proof
 The Chaum-Pedersen Zero-Knowledge Proof (ZKP) protocol allows a prover to convince a verifier that they possess a secret value (knowledge) without revealing the actual value itself. It operates in an interactive setting, meaning the prover and verifier exchange messages back and forth.
 
 **Features**
 - [x] Interactive proof generation and verification.
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/non-interactive-chaum-pedersen-lib)
 <br>
 <br>
 
@@ -75,7 +75,7 @@ The standard Chaum-Pedersen protocol is interactive, but it can be converted int
 - [x] Non-interactive proof generation
 - [x] Non-interactive proof verification
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/non-interactive-chaum-pedersen-lib)
 <br>
 <br>
 
@@ -89,7 +89,7 @@ The variations of polynomials built in here are;
 
 ... the last two could give a man 2^N complexity nightmare :).
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/polynomial)
 <br>
 <br>
 
@@ -102,7 +102,7 @@ A Schnorr signature is a digital signature produced by the Schnorr signature alg
 - [x] Sign messages using a private key
 - [x] Verify signatures using a public key
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/schnorr)
 <br>
 <br>
 
@@ -115,7 +115,7 @@ In the realm of cybersecurity, ensuring data integrity and authenticity is param
 - [x] Operation implementation
 - [ ] Complete hash function implementation
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/sha256-hash-function)
 <br>
 <br>
 
@@ -126,7 +126,7 @@ A Verifiable Random Function (VRF) is a cryptographic primitive that provides a 
 - [x] Rust implementaion of VRS
 - [x] Solidity binding interface
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/vrf-rust-solidity/tree)
 <br>
 <br>
 
@@ -138,7 +138,7 @@ This is a mini project, using the Shamir Secret Sharing Scheme lib. This project
 - [x] Binding Lib
 - [x] Script for secret sharing
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/bls-multi-sign-threshold-wallet)
 <br>
 <br>
 
@@ -150,23 +150,73 @@ Suppose we are given a v-variate polynomial `g` defined over a finite field `F`.
 - [x] library implementation
 - [x] library test implementation
 
-[codebase](https://github.com/developeruche/ecdsa-rust)
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/sum_check)
 <br>
 <br>
 
 ### Circuits 
+This is a library for creating and manipulating circuits. The library is designed to be modular and extensible. The library is designed to be used in the context of snarks, but can be used for any type of circuit.
+
+**Features**
+- [x] Arithemetic Circuit representation
+- [x] Boolean Circuit representation
+- [x] Circuit evaluation
+- [x] Circuit optimization
+- [x] Arithmetic Circuit to R1CS conversion
+- [x] GKR `Add` and `Mul` Multilinear Extension (MLE)
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/circuits)
+<br>
+<br>
+
 
 ### Fiat Shamir 
+The Fiat-Shamir transcript is a cryptographic technique used to transform an interactive proof system into a non-interactive one. This transformation enhances the efficiency and practicality of certain cryptographic protocols, including zero-knowledge proofs, by eliminating the need for interaction between the prover and the verifier.
+
+
+**Features**
+- [x] Extternally adadptable interface
+- [x] Transcript implementation
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/fiat_shamir)
+<br>
+<br>
+
 
 ### GKR 
+The GKR protocol is very fascinating, fairly not so complicated compared to other protocols but heavily generic and useful. The GKR protocol involves running one protocol (Sum check) inside this protocol (GKR). The GKR protocol, named after Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum, is a zero-knowledge proof protocol that focuses on efficient delegation of computation. Specifically, it is designed to verify computations represented as layered arithmetic circuits with logarithmic depth in the number of inputs. The GKR protocol is known for its efficiency and ability to handle large-scale computations.
+
+
+**Features**
+- [x] In Progress
+
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
+<br>
+<br>
+
+
 
 ### Groth16 
 
+### Circom Groth16
+This is a experimental project aiming to prove and verify a circom circuit using the Groth16 implemenation done in this reasearch project.
+
+**Features**
+- [x] Circom circuit
+- [ ] Circom intermidate representation binding
+- [ ] Groth16 implementation (Prove and Vefier)
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/circom-groth16)
+<br>
+<br>
 
 
 
-
-
+<br>
+<br>
+<br>
+<br>
 
 
 

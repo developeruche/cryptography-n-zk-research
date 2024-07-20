@@ -1,4 +1,5 @@
 # Fiat Shamir Transcirpt
+The Fiat-Shamir transcript is a cryptographic technique used to transform an interactive proof system into a non-interactive one. This transformation enhances the efficiency and practicality of certain cryptographic protocols, including zero-knowledge proofs, by eliminating the need for interaction between the prover and the verifier.
 
 
 ### TranscriptInterface 
