@@ -50,7 +50,7 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// f(x,y) * f(a,b) = 4xyab + 6yab + 8xab + 10ab + 6y + 8x + 10
     fn mul_distinct(&self, rhs: &Self) -> Self;
     /// Interpolation for multilinear polynomials with 2 distinict variables
-    fn interpolate(y_s: Vec<F>, domain: Vec<F>) -> Self;
+    fn interpolate(y_s: Vec<F>) -> Self;
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {

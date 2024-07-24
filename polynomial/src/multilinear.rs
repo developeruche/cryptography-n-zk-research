@@ -1,9 +1,12 @@
 use crate::{
     interface::MultilinearPolynomialInterface,
-    utils::{multilinear_evalutation_equation, round_pairing_index_ext},
+    utils::{
+        compute_number_of_variables, multilinear_evalutation_equation, round_pairing_index_ext,
+    },
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use std::iter;
 use std::ops::{Add, AddAssign};
 
 /// A multilinear polynomial over a field.
@@ -151,8 +154,12 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
         Self::new(new_evaluations, self.num_vars + rhs.num_vars)
     }
 
-    fn interpolate(y_s: Vec<F>, domain: Vec<F>) -> Self {
-        Self::zero(1)
+    fn interpolate(y_s: Vec<F>) -> Self {
+        let number_of_vars = compute_number_of_variables(y_s.len() as u128);
+        let mut y_s = y_s;
+        y_s.extend(iter::repeat(F::ZERO).take((1 << number_of_vars - y_s.len() as u128) as usize));
+
+        Self::new(y_s, number_of_vars as usize)
     }
 }
 

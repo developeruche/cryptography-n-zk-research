@@ -136,6 +136,13 @@ pub fn compute_domain<F: PrimeField>(n: usize, pin: usize) -> Vec<F> {
     domain
 }
 
+pub fn compute_number_of_variables(n: u128) -> u128 {
+    if n == 0 {
+        return 0;
+    }
+    128 - n.leading_zeros() as u128
+}
+
 #[cfg(test)]
 mod tests {
     use std::time::Instant;
