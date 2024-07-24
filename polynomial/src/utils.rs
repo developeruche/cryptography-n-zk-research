@@ -274,7 +274,7 @@ mod tests {
 
     #[test]
     fn test_compute_domain() {
-        let domain = compute_domain::<Fr>(4);
+        let domain = compute_domain::<Fr>(4, 1);
         assert_eq!(
             domain,
             vec![Fr::from(1), Fr::from(2), Fr::from(3), Fr::from(4)]

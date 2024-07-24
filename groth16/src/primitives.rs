@@ -175,7 +175,7 @@ impl<F: PrimeField> QAPPolysCoefficients<F> {
 
     pub fn into_poly_rep(&self) -> QAPPolys<F> {
         let domain_lenght = self.a[0].len();
-        let domain = compute_domain(domain_lenght);
+        let domain = compute_domain(domain_lenght, 1);
 
         let a = self
             .a
