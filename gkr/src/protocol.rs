@@ -12,8 +12,8 @@ pub struct GKRProtocol;
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
     fn prove(circuit: &Circuit, evals: &CircuitEvaluation<F>) -> GKRProof<F> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
-        // let mut sumcheck_proofs = vec![];
-        // let mut q_polynomials = vec![];
+        let mut sumcheck_proofs = vec![];
+        let mut q_polynomials = vec![];
 
         let w_0_mle = Multilinear::new(evals.layers[0].clone(), evals.layers[0].len());
         transcript.append(w_0_mle.to_bytes());

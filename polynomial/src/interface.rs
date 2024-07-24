@@ -1,4 +1,5 @@
 use ark_ff::PrimeField;
+use ark_poly::domain;
 
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field
@@ -48,6 +49,8 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// given f(x,y) = 2xy + 3y + 4x + 5 and f(a,b) = 2ab + 3b + 4a + 5
     /// f(x,y) * f(a,b) = 4xyab + 6yab + 8xab + 10ab + 6y + 8x + 10
     fn mul_distinct(&self, rhs: &Self) -> Self;
+    /// Interpolation for multilinear polynomials with 2 distinict variables
+    fn interpolate(y_s: Vec<F>, domain: Vec<F>) -> Self;
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {

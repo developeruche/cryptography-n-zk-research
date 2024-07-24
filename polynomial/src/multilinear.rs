@@ -150,6 +150,10 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
 
         Self::new(new_evaluations, self.num_vars + rhs.num_vars)
     }
+
+    fn interpolate(y_s: Vec<F>, domain: Vec<F>) -> Self {
+        Self::zero(1)
+    }
 }
 
 impl<F: PrimeField> Add for Multilinear<F> {
