@@ -6,7 +6,6 @@ use crate::{
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::iter;
 use std::ops::{Add, AddAssign};
 
 /// A multilinear polynomial over a field.
@@ -154,10 +153,10 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
         Self::new(new_evaluations, self.num_vars + rhs.num_vars)
     }
 
-    fn interpolate(y_s: Vec<F>) -> Self {
+    fn interpolate(y_s: &[F]) -> Self {
         let number_of_vars = compute_number_of_variables(y_s.len() as u128);
-        let mut y_s = y_s;
-        y_s.extend(iter::repeat(F::ZERO).take((1 << number_of_vars - y_s.len() as u128) as usize));
+        let mut y_s = y_s.to_vec();
+        y_s.resize(1 << number_of_vars as usize, F::ZERO);
 
         Self::new(y_s, number_of_vars as usize)
     }
@@ -434,5 +433,61 @@ mod tests {
 
         assert_eq!(result.num_vars, 4);
         assert_eq!(result.evaluations, resulting_evaluations);
+    }
+
+    #[test]
+    fn test_interpolate() {
+        let y_s = vec![Fr::from(1), Fr::from(2), Fr::from(3)];
+        let result = Multilinear::<Fr>::interpolate(&y_s);
+
+        let expected =
+            Multilinear::new(vec![Fr::from(1), Fr::from(2), Fr::from(3), Fr::from(0)], 2);
+        
+        
+        assert_eq!(expected, result);
+        
+        
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(1));
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(2));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(3));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(0));
+    }
+
+    #[test]
+    fn test_interpolate_1() {
+        let y_s = vec![
+            Fr::from(2),
+            Fr::from(4),
+            Fr::from(6),
+            Fr::from(8),
+            Fr::from(10),
+        ];
+        let result = Multilinear::<Fr>::interpolate(&y_s);
+
+        let expected = Multilinear::new(
+            vec![
+                Fr::from(2),
+                Fr::from(4),
+                Fr::from(6),
+                Fr::from(8),
+                Fr::from(10),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+            ],
+            3,
+        );
+
+        assert_eq!(expected, result);
+        
+        
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(2));
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(4));
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(6));
+        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(8));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(10));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(0));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(0));
+        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(0));
     }
 }
