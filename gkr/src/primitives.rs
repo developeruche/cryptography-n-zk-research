@@ -8,13 +8,15 @@ use sum_check::data_structure::SumCheckProof;
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct W<F: PrimeField> {
     /// This is the addition multilinear extension
-    add_i: Multilinear<F>,
+    add_i: Option<Multilinear<F>>,
     /// This is the multiplication multilinear extension
-    mul_i: Multilinear<F>,
+    mul_i: Option<Multilinear<F>>,
     /// This is the w_b equation
-    w_b: Multilinear<F>,
+    w_b: Option<Multilinear<F>>,
     /// This is the w_c equation
-    w_c: Multilinear<F>,
+    w_c: Option<Multilinear<F>>,
+    /// this is a vector of all random sampling
+    random_sampling: Vec<F>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
@@ -29,16 +31,18 @@ pub struct GKRProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
 
 impl<F: PrimeField> W<F> {
     pub fn new(
-        add_i: Multilinear<F>,
-        mul_i: Multilinear<F>,
-        w_b: Multilinear<F>,
-        w_c: Multilinear<F>,
+        add_i: Option<Multilinear<F>>,
+        mul_i: Option<Multilinear<F>>,
+        w_b: Option<Multilinear<F>>,
+        w_c: Option<Multilinear<F>>,
+        r: Vec<F>,
     ) -> Self {
         W {
             add_i,
             mul_i,
             w_b,
             w_c,
+            random_sampling: r,
         }
     }
 }

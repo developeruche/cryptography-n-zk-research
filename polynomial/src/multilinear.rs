@@ -32,19 +32,9 @@ impl<F: PrimeField> Multilinear<F> {
         }
     }
 
-    /// This function returns the additive identity of the polynomial
-    pub fn zero(num_vars: usize) -> Self {
-        Self::new(vec![F::zero(); 1 << num_vars], num_vars)
-    }
-
     /// This function returns the additive identity of this polynomial (self)
     pub fn self_zero(&self) -> Self {
         Self::zero(self.num_vars)
-    }
-
-    /// This function is used to check if the polynomial is zero
-    pub fn is_zero(&self) -> bool {
-        self.evaluations.iter().all(|x| x.is_zero())
     }
 
     /// This function is used to return the bytes representation of the polynomial
@@ -64,6 +54,16 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
     /// This function returns the number of variables in the polynomial
     fn num_vars(&self) -> usize {
         self.num_vars
+    }
+
+    /// This function returns the additive identity of the polynomial
+    fn zero(num_vars: usize) -> Self {
+        Self::new(vec![F::zero(); 1 << num_vars], num_vars)
+    }
+
+    /// This function is used to check if the polynomial is zero
+    fn is_zero(&self) -> bool {
+        self.evaluations.iter().all(|x| x.is_zero())
     }
 
     /// This function creates a new polynomial from a list of evaluations

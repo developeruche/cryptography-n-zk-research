@@ -57,6 +57,10 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     fn mul_distinct(&self, rhs: &Self) -> Self;
     /// Interpolation for multilinear polynomials with 2 distinict variables
     fn interpolate(y_s: &[F]) -> Self;
+    /// This function returns the additive identity of the polynomial
+    fn zero(num_vars: usize) -> Self;
+    /// This function is used to check if the polynomial is zero
+    fn is_zero(&self) -> bool;
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {

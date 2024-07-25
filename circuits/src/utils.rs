@@ -1,5 +1,5 @@
 use ark_ff::PrimeField;
-use polynomial::multilinear::Multilinear;
+use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
 
 /// This function is used to convert a vector of usize to a multilinear extension
 /// param vec: This is the vector of usize, indicating the variables that are set to ONE
