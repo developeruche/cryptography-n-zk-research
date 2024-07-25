@@ -297,8 +297,6 @@ mod tests {
                 .evaluate(&vec![Fr::from(3)])
                 .unwrap();
 
-            println!("{:?} - {:?}", sum, pre_eval);
-
             assert_eq!(sum, pre_eval);
         }
     }
@@ -321,9 +319,8 @@ mod tests {
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
         let proof = prover.sum_check_proof();
-        let mut verifer = Verifier::new();
 
-        assert!(verifer.verify(&proof));
+        assert!(Verifier::verify(&proof));
     }
 
     #[test]
@@ -352,9 +349,8 @@ mod tests {
         let mut prover = Prover::new(poly);
         prover.calculate_sum();
         let proof = prover.sum_check_proof();
-        let mut verifer = Verifier::new();
 
-        assert!(verifer.verify(&proof));
+        assert!(Verifier::verify(&proof));
     }
 
     #[test]
@@ -386,8 +382,7 @@ mod tests {
         println!("Sum: {:?}", prover.sum);
 
         let proof = prover.sum_check_proof();
-        let mut verifer = Verifier::new();
 
-        assert!(verifer.verify(&proof));
+        assert!(Verifier::verify(&proof));
     }
 }

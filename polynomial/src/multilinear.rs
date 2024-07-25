@@ -442,15 +442,25 @@ mod tests {
 
         let expected =
             Multilinear::new(vec![Fr::from(1), Fr::from(2), Fr::from(3), Fr::from(0)], 2);
-        
-        
+
         assert_eq!(expected, result);
-        
-        
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(1));
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(2));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(3));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(0));
+
+        assert_eq!(
+            result.evaluate(&vec![Fr::from(0), Fr::from(0)]).unwrap(),
+            Fr::from(1)
+        );
+        assert_eq!(
+            result.evaluate(&vec![Fr::from(0), Fr::from(1)]).unwrap(),
+            Fr::from(2)
+        );
+        assert_eq!(
+            result.evaluate(&vec![Fr::from(1), Fr::from(0)]).unwrap(),
+            Fr::from(3)
+        );
+        assert_eq!(
+            result.evaluate(&vec![Fr::from(1), Fr::from(1)]).unwrap(),
+            Fr::from(0)
+        );
     }
 
     #[test]
@@ -479,15 +489,54 @@ mod tests {
         );
 
         assert_eq!(expected, result);
-        
-        
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(2));
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(4));
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(6));
-        assert_eq!(result.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(8));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(0)]).unwrap(), Fr::from(10));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(1)]).unwrap(), Fr::from(0));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(0)]).unwrap(), Fr::from(0));
-        assert_eq!(result.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(1)]).unwrap(), Fr::from(0));
+
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(0)])
+                .unwrap(),
+            Fr::from(2)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(1)])
+                .unwrap(),
+            Fr::from(4)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(0)])
+                .unwrap(),
+            Fr::from(6)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(1)])
+                .unwrap(),
+            Fr::from(8)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(0)])
+                .unwrap(),
+            Fr::from(10)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(1)])
+                .unwrap(),
+            Fr::from(0)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(0)])
+                .unwrap(),
+            Fr::from(0)
+        );
+        assert_eq!(
+            result
+                .evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(1)])
+                .unwrap(),
+            Fr::from(0)
+        );
     }
 }
