@@ -41,50 +41,48 @@ impl<F: PrimeField> Prover<F> {
             transcript: Default::default(),
         }
     }
-
-    /// This function creates a new  prover instance, computes the sum and computes the round zero polynomial
-    pub fn new_with_sum_and_round_zero(poly: Multilinear<F>) -> Self {
-        let mut prover = Self::new(poly);
-        prover.calculate_sum();
-        prover.compute_round_zero_poly();
-        prover
-    }
 }
 
 impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
-    fn calculate_sum(&mut self) {
-        self.sum = self.poly.evaluations.iter().sum();
+    fn calculate_sum(poly: &Multilinear<F>) -> F {
+        poly.evaluations.iter().sum()
     }
 
     /// This function returns the round zero computed polynomial
-    fn compute_round_zero_poly(&mut self) {
-        let number_of_round = self.poly.num_vars - 1;
+    fn compute_round_zero_poly(
+        poly: &Multilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> Multilinear<F> {
+        let number_of_round = poly.num_vars - 1;
         let bh = boolean_hypercube(number_of_round);
         let mut bh_partials: Multilinear<F> = Multilinear::zero(1); // this is an accumulator
 
         for bh_i in bh {
-            let current_partial = self
-                .poly
-                .partial_evaluations(bh_i, vec![1; number_of_round]);
+            let current_partial = poly.partial_evaluations(bh_i, vec![1; number_of_round]);
             bh_partials += current_partial;
         }
 
-        self.transcript.append(bh_partials.to_bytes());
-        self.round_0_poly = bh_partials;
+        transcript.append(bh_partials.to_bytes());
+        bh_partials
     }
 
     /// This function computes sum check proof
-    fn sum_check_proof(&mut self) -> SumCheckProof<F> {
-        self.compute_round_zero_poly();
+    fn sum_check_proof(
+        poly: &Multilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+        sum: &F,
+    ) -> SumCheckProof<F> {
+        let round_0_poly = Self::compute_round_zero_poly(poly, transcript);
         let mut all_random_reponse = Vec::new();
+        let mut round_poly = Vec::new();
 
-        for i in 1..self.poly.num_vars {
-            let number_of_round = self.poly.num_vars - i - 1;
+        for i in 1..poly.num_vars {
+            let number_of_round = poly.num_vars - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
 
             let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
-            let verifier_random_reponse_f = F::from_be_bytes_mod_order(&self.transcript.sample());
+            let verifier_random_reponse_f = F::from_be_bytes_mod_order(&transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
 
             for bh_i in bh {
@@ -95,20 +93,20 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
                 let suffix_eval_index = vec![1; bh_len];
                 eval_index.extend(suffix_eval_index);
 
-                let current_partial = self.poly.partial_evaluations(eval_vector, eval_index);
+                let current_partial = poly.partial_evaluations(eval_vector, eval_index);
 
                 bh_partials += current_partial;
             }
 
-            self.transcript.append(bh_partials.to_bytes());
-            self.round_poly.push(bh_partials);
+            transcript.append(bh_partials.to_bytes());
+            round_poly.push(bh_partials);
         }
 
         SumCheckProof {
-            polynomial: self.poly.clone(),
-            round_poly: self.round_poly.clone(),
-            round_0_poly: self.round_0_poly.clone(),
-            sum: self.sum,
+            polynomial: poly.clone(),
+            round_poly: round_poly.clone(),
+            round_0_poly: round_0_poly.clone(),
+            sum: sum.clone(),
         }
     }
 }
@@ -135,9 +133,9 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.calculate_sum();
-        assert_eq!(prover.sum, Fr::from(12));
+
+        let sum = Prover::calculate_sum(&poly);
+        assert_eq!(sum, Fr::from(12));
     }
 
     #[test]
@@ -155,12 +153,9 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.compute_round_zero_poly();
-        assert_eq!(
-            prover.round_0_poly.evaluations,
-            vec![Fr::from(2), Fr::from(10)]
-        );
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = Prover::compute_round_zero_poly(&poly, &mut transcript);
+        assert_eq!(round_0_poly.evaluations, vec![Fr::from(2), Fr::from(10)]);
     }
 
     #[test]
@@ -178,10 +173,11 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.compute_round_zero_poly();
-        let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
-            + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = Prover::compute_round_zero_poly(&poly, &mut transcript);
+        let sum = round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
+            + round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+
         assert_eq!(sum, Fr::from(12));
     }
 
@@ -200,12 +196,11 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.compute_round_zero_poly();
-        assert_eq!(
-            prover.round_0_poly.evaluations,
-            vec![Fr::from(9), Fr::from(22)]
-        );
+
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = Prover::compute_round_zero_poly(&poly, &mut transcript);
+
+        assert_eq!(round_0_poly.evaluations, vec![Fr::from(9), Fr::from(22)]);
     }
 
     #[test]
@@ -223,10 +218,12 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.compute_round_zero_poly();
-        let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
-            + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = Prover::compute_round_zero_poly(&poly, &mut transcript);
+        let sum = round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
+            + round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+
         assert_eq!(sum, Fr::from(31));
     }
 
@@ -253,52 +250,13 @@ mod tests {
             ],
             4,
         );
-        let mut prover = Prover::new(poly);
-        prover.compute_round_zero_poly();
-        let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
-            + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
+
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = Prover::compute_round_zero_poly(&poly, &mut transcript);
+
+        let sum = round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
+            + round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
         assert_eq!(sum, Fr::from(3));
-    }
-
-    #[test]
-    #[ignore] // un-disable this test when all random response is F::from(3)
-    fn test_sum_check_proof_ignored() {
-        let poly = Multilinear::new(
-            vec![
-                Fr::from(0),
-                Fr::from(0),
-                Fr::from(2),
-                Fr::from(7),
-                Fr::from(3),
-                Fr::from(3),
-                Fr::from(6),
-                Fr::from(11),
-            ],
-            3,
-        );
-        let mut prover = Prover::new(poly);
-        prover.calculate_sum();
-        let proof = prover.sum_check_proof();
-
-        let sum = prover.round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap()
-            + prover.round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
-        assert_eq!(sum, Fr::from(32));
-
-        let test_eval_round_0 = proof.round_0_poly.evaluate(&vec![Fr::from(3)]).unwrap();
-        let test_eval_round_1 = prover.round_poly[0].evaluate(&vec![Fr::from(1)]).unwrap()
-            + prover.round_poly[0].evaluate(&vec![Fr::from(0)]).unwrap();
-
-        assert_eq!(test_eval_round_0, test_eval_round_1);
-
-        for i in 1..proof.round_poly.len() {
-            let sum = proof.round_poly[i].evaluate(&vec![Fr::from(1)]).unwrap()
-                + proof.round_poly[i].evaluate(&vec![Fr::from(0)]).unwrap();
-            let pre_eval = proof.round_poly[i - 1]
-                .evaluate(&vec![Fr::from(3)])
-                .unwrap();
-
-            assert_eq!(sum, pre_eval);
-        }
     }
 
     #[test]
@@ -316,9 +274,9 @@ mod tests {
             ],
             3,
         );
-        let mut prover = Prover::new(poly);
-        prover.calculate_sum();
-        let proof = prover.sum_check_proof();
+        let mut transcript = FiatShamirTranscript::default();
+        let sum = Prover::calculate_sum(&poly);
+        let proof = Prover::sum_check_proof(&poly, &mut transcript, &sum);
 
         assert!(Verifier::verify(&proof));
     }
@@ -346,9 +304,9 @@ mod tests {
             ],
             4,
         );
-        let mut prover = Prover::new(poly);
-        prover.calculate_sum();
-        let proof = prover.sum_check_proof();
+        let mut transcript = FiatShamirTranscript::default();
+        let sum = Prover::calculate_sum(&poly);
+        let proof = Prover::sum_check_proof(&poly, &mut transcript, &sum);
 
         assert!(Verifier::verify(&proof));
     }
@@ -376,12 +334,9 @@ mod tests {
             ],
             4,
         );
-        let mut prover = Prover::new(poly);
-        prover.calculate_sum();
-
-        println!("Sum: {:?}", prover.sum);
-
-        let proof = prover.sum_check_proof();
+        let mut transcript = FiatShamirTranscript::default();
+        let sum = Prover::calculate_sum(&poly);
+        let proof = Prover::sum_check_proof(&poly, &mut transcript, &sum);
 
         assert!(Verifier::verify(&proof));
     }
