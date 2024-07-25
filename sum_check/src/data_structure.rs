@@ -1,11 +1,11 @@
 use ark_ff::PrimeField;
-use polynomial::multilinear::Multilinear;
+use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
 
 /// This struct is used to store the sum check proof
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-pub struct SumCheckProof<F: PrimeField> {
+pub struct SumCheckProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
     /// This is the polynomial that is used to generate the sum check proof
-    pub polynomial: Multilinear<F>,
+    pub polynomial: P,
     /// This vector stores the round polynomials
     pub round_poly: Vec<Multilinear<F>>,
     /// This vectors store the polynomial from the first round

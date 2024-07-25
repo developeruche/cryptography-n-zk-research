@@ -5,12 +5,15 @@ use circuits::{
     primitives::{Circuit, CircuitEvaluation},
 };
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
-use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
+use polynomial::interface::MultilinearPolynomialInterface;
 
 pub struct GKRProtocol;
 
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
-    fn prove(circuit: &Circuit, evals: &CircuitEvaluation<F>) -> GKRProof<F> {
+    fn prove<P: MultilinearPolynomialInterface<F> + Clone>(
+        circuit: &Circuit,
+        evals: &CircuitEvaluation<F>,
+    ) -> GKRProof<F, P> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
         // let mut sumcheck_proofs = vec![];
         // let mut q_polynomials = vec![];
@@ -30,7 +33,11 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         todo!()
     }
 
-    fn verify(circuit: &Circuit, input: &[F], proof: &GKRProof<F>) -> bool {
+    fn verify<P: MultilinearPolynomialInterface<F> + Clone>(
+        circuit: &Circuit,
+        input: &[F],
+        proof: &GKRProof<F, P>,
+    ) -> bool {
         unimplemented!()
     }
 }

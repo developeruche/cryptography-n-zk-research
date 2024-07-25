@@ -50,11 +50,11 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     }
 
     /// This function returns the round zero computed polynomial
-    fn compute_round_zero_poly(
-        poly: &Multilinear<F>,
+    fn compute_round_zero_poly<P: MultilinearPolynomialInterface<F>>(
+        poly: &P,
         transcript: &mut FiatShamirTranscript,
     ) -> Multilinear<F> {
-        let number_of_round = poly.num_vars - 1;
+        let number_of_round = poly.num_vars() - 1;
         let bh = boolean_hypercube(number_of_round);
         let mut bh_partials: Multilinear<F> = Multilinear::zero(1); // this is an accumulator
 
@@ -68,17 +68,17 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     }
 
     /// This function computes sum check proof
-    fn sum_check_proof(
-        poly: &Multilinear<F>,
+    fn sum_check_proof<P: MultilinearPolynomialInterface<F> + Clone>(
+        poly: &P,
         transcript: &mut FiatShamirTranscript,
         sum: &F,
-    ) -> SumCheckProof<F> {
+    ) -> SumCheckProof<F, P> {
         let round_0_poly = Self::compute_round_zero_poly(poly, transcript);
         let mut all_random_reponse = Vec::new();
         let mut round_poly = Vec::new();
 
-        for i in 1..poly.num_vars {
-            let number_of_round = poly.num_vars - i - 1;
+        for i in 1..poly.num_vars() {
+            let number_of_round = poly.num_vars() - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
 
             let mut bh_partials: Multilinear<F> = Multilinear::zero(1);

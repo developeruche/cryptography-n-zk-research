@@ -8,7 +8,7 @@ pub struct Verifier;
 
 impl<F: PrimeField> VerifierInterface<F> for Verifier {
     /// This function verifies the sum check proof
-    fn verify(proof: &SumCheckProof<F>) -> bool {
+    fn verify<P: MultilinearPolynomialInterface<F>>(proof: &SumCheckProof<F, P>) -> bool {
         // steps
         // 1. eval poly_0 at 0 and 1 and check if the sum is equal to the sum in the proof [done]
         // 2. append poly_0 to the transcript

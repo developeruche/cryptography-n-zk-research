@@ -1,6 +1,8 @@
 use ark_ff::PrimeField;
 use ark_poly::domain;
 
+use crate::multilinear::Multilinear;
+
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field
 pub trait PolynomialInterface<F: PrimeField> {
@@ -35,7 +37,11 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// This function creates a new polynomial from a list of evaluations
     fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self;
     /// This function allows for multiple parial evaluations
-    fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
+    fn partial_evaluations(
+        &self,
+        evaluation_points: Vec<F>,
+        variable_indices: Vec<usize>,
+    ) -> Multilinear<F>;
     /// This function is used to evaluate the polynomial at a given point
     fn evaluate(&self, point: &Vec<F>) -> Option<F>;
     /// Extend polynomials with new variables
