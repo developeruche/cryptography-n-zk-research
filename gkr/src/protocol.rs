@@ -28,6 +28,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         for l_index in 1..evals.layers.len() {
             let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(l_index - 1);
             let w_i_mle = gen_w_mle(&evals.layers, l_index);
+            // let f_r_i
         }
 
         todo!()
