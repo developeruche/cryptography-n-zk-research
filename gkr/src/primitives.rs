@@ -49,7 +49,16 @@ impl<F: PrimeField> W<F> {
 
 impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     fn num_vars(&self) -> usize {
-        todo!()
+        let n_b_vars = match &self.w_b {
+            Some(w_b) => w_b.num_vars(),
+            None => 0,
+        };
+        let n_c_vars = match &self.w_c {
+            Some(w_c) => w_c.num_vars(),
+            None => 0,
+        };
+
+        n_b_vars + n_c_vars
     }
 
     fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self {
@@ -65,15 +74,15 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     }
 
     fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn add_distinct(&self, rhs: &Self) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn mul_distinct(&self, rhs: &Self) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn interpolate(y_s: &[F]) -> Self {
@@ -81,22 +90,100 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     }
 
     fn zero(num_vars: usize) -> Self {
-        todo!()
+        Self {
+            add_i: None,
+            mul_i: None,
+            w_b: None,
+            w_c: None,
+            random_sampling: vec![],
+        }
     }
 
     fn is_zero(&self) -> bool {
-        todo!()
+        if self.add_i.is_none() && self.mul_i.is_none() && self.w_b.is_none() && self.w_c.is_none()
+        {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     fn internal_add(&self, rhs: &Self) -> Self {
-        todo!()
+        if self.is_zero() {
+            return rhs.clone();
+        } else if rhs.is_zero() {
+            return self.clone();
+        } else {
+            let random_sampling = self.random_sampling.clone();
+
+            todo!()
+            // return W {
+            //     add_i,
+            //     mul_i,
+            //     w_b,
+            //     w_c,
+            //     random_sampling,
+            // };
+        }
     }
 
     fn internal_add_assign(&mut self, rhs: &Self) {
-        todo!()
+        if self.is_zero() {
+            *self = rhs.clone();
+        } else if rhs.is_zero() {
+            return;
+        } else {
+            let random_sampling = self.random_sampling.clone();
+            todo!()
+            // *self = W {
+            //     add_i,
+            //     mul_i,
+            //     w_b,
+            //     w_c,
+            //     random_sampling,
+            // };
+        }
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        todo!()
+        let mut bytes = vec![];
+
+        match &self.add_i {
+            Some(add_i) => {
+                bytes.extend_from_slice(&add_i.to_bytes());
+            }
+            None => {
+                bytes.extend_from_slice(&[0u8; 32]);
+            }
+        }
+
+        match &self.mul_i {
+            Some(mul_i) => {
+                bytes.extend_from_slice(&mul_i.to_bytes());
+            }
+            None => {
+                bytes.extend_from_slice(&[0u8; 32]);
+            }
+        }
+
+        match &self.w_b {
+            Some(w_b) => {
+                bytes.extend_from_slice(&w_b.to_bytes());
+            }
+            None => {
+                bytes.extend_from_slice(&[0u8; 32]);
+            }
+        }
+
+        match &self.w_c {
+            Some(w_c) => {
+                bytes.extend_from_slice(&w_c.to_bytes());
+            }
+            None => {
+                bytes.extend_from_slice(&[0u8; 32]);
+            }
+        }
+
+        bytes
     }
 }
