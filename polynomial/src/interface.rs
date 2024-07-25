@@ -37,11 +37,7 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// This function creates a new polynomial from a list of evaluations
     fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self;
     /// This function allows for multiple parial evaluations
-    fn partial_evaluations(
-        &self,
-        evaluation_points: Vec<F>,
-        variable_indices: Vec<usize>,
-    ) -> Multilinear<F>;
+    fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
     /// This function is used to evaluate the polynomial at a given point
     fn evaluate(&self, point: &Vec<F>) -> Option<F>;
     /// Extend polynomials with new variables
@@ -65,6 +61,8 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     fn internal_add(&self, rhs: &Self) -> Self;
     /// This function performs `AddAssign` but in contexct of the type
     fn internal_add_assign(&mut self, rhs: &Self);
+    /// This function is used to return the bytes representation of the polynomial
+    fn to_bytes(&self) -> Vec<u8>;
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {

@@ -7,9 +7,9 @@ pub struct SumCheckProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
     /// This is the polynomial that is used to generate the sum check proof
     pub polynomial: P,
     /// This vector stores the round polynomials
-    pub round_poly: Vec<Multilinear<F>>,
+    pub round_poly: Vec<P>,
     /// This vectors store the polynomial from the first round
-    pub round_0_poly: Multilinear<F>,
+    pub round_0_poly: P,
     /// This holds the sum of the polynomial evaluation over the boolean hypercube
     pub sum: F,
 }

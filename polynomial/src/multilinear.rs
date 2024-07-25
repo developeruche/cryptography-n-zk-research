@@ -36,18 +36,6 @@ impl<F: PrimeField> Multilinear<F> {
     pub fn self_zero(&self) -> Self {
         Self::zero(self.num_vars)
     }
-
-    /// This function is used to return the bytes representation of the polynomial
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut m_ploy_bytes = Vec::new();
-
-        for eval in &self.evaluations {
-            let big_int = eval.into_bigint().to_bytes_be();
-            m_ploy_bytes.extend_from_slice(&big_int);
-        }
-
-        m_ploy_bytes
-    }
 }
 
 impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
@@ -199,6 +187,18 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
         for i in 0..self.evaluations.len() {
             self.evaluations[i] += rhs.evaluations[i];
         }
+    }
+
+    /// This function is used to return the bytes representation of the polynomial
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut m_ploy_bytes = Vec::new();
+
+        for eval in &self.evaluations {
+            let big_int = eval.into_bigint().to_bytes_be();
+            m_ploy_bytes.extend_from_slice(&big_int);
+        }
+
+        m_ploy_bytes
     }
 }
 

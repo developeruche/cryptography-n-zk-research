@@ -6,44 +6,9 @@ use polynomial::{
 };
 
 #[derive(Clone, Default, Debug)]
-pub struct Prover<F: PrimeField> {
-    /// This is the polynomial to calculate the sum check proof
-    pub poly: Multilinear<F>,
-    /// This struct is used to store the sum check proof
-    pub round_poly: Vec<Multilinear<F>>,
-    /// This vectors store the polynomial from the first round
-    pub round_0_poly: Multilinear<F>,
-    /// This holds the sum of the polynomial evaluation over the boolean hypercube
-    pub sum: F,
-    /// This is this fiat-shamir challenge transcript
-    pub transcript: FiatShamirTranscript,
-}
+pub struct Prover;
 
-impl<F: PrimeField> Prover<F> {
-    /// This function creates a new prover instance
-    pub fn new(poly: Multilinear<F>) -> Self {
-        Self {
-            poly,
-            round_poly: Default::default(),
-            round_0_poly: Default::default(),
-            sum: Default::default(),
-            transcript: Default::default(),
-        }
-    }
-
-    /// This function crates a new prover instance with sum already computed
-    pub fn new_with_sum(poly: Multilinear<F>, sum: F) -> Self {
-        Self {
-            poly,
-            round_poly: Default::default(),
-            round_0_poly: Default::default(),
-            sum,
-            transcript: Default::default(),
-        }
-    }
-}
-
-impl<F: PrimeField> ProverInterface<F> for Prover<F> {
+impl<F: PrimeField> ProverInterface<F> for Prover {
     /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
     fn calculate_sum(poly: &Multilinear<F>) -> F {
         poly.evaluations.iter().sum()
@@ -53,14 +18,14 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
     fn compute_round_zero_poly<P: MultilinearPolynomialInterface<F>>(
         poly: &P,
         transcript: &mut FiatShamirTranscript,
-    ) -> Multilinear<F> {
+    ) -> P {
         let number_of_round = poly.num_vars() - 1;
         let bh = boolean_hypercube(number_of_round);
-        let mut bh_partials: Multilinear<F> = Multilinear::zero(1); // this is an accumulator
+        let mut bh_partials = P::zero(1); // this is an accumulator
 
         for bh_i in bh {
             let current_partial = poly.partial_evaluations(bh_i, vec![1; number_of_round]);
-            bh_partials += current_partial;
+            bh_partials.internal_add_assign(&current_partial);
         }
 
         transcript.append(bh_partials.to_bytes());
@@ -81,7 +46,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
             let number_of_round = poly.num_vars() - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
 
-            let mut bh_partials: Multilinear<F> = Multilinear::zero(1);
+            let mut bh_partials = P::zero(1);
             let verifier_random_reponse_f = F::from_be_bytes_mod_order(&transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
 
@@ -95,7 +60,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover<F> {
 
                 let current_partial = poly.partial_evaluations(eval_vector, eval_index);
 
-                bh_partials += current_partial;
+                bh_partials.internal_add_assign(&current_partial);
             }
 
             transcript.append(bh_partials.to_bytes());

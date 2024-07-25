@@ -11,7 +11,7 @@ pub trait ProverInterface<F: PrimeField> {
     fn compute_round_zero_poly<P: MultilinearPolynomialInterface<F>>(
         poly: &P,
         transcript: &mut FiatShamirTranscript,
-    ) -> Multilinear<F>;
+    ) -> P;
     /// This function computes sum check proof
     fn sum_check_proof<P: MultilinearPolynomialInterface<F> + Clone>(
         poly: &P,
