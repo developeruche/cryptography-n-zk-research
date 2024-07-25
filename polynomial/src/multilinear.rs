@@ -160,6 +160,46 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
 
         Self::new(y_s, number_of_vars as usize)
     }
+
+    fn internal_add(&self, rhs: &Self) -> Self {
+        if self.is_zero() {
+            return rhs.clone();
+        }
+
+        if rhs.is_zero() {
+            return self.clone();
+        }
+        let mut new_evaluations = Vec::new();
+
+        if self.num_vars != rhs.num_vars() {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(self.evaluations[i] + rhs.evaluations[i]);
+        }
+
+        Self::new(new_evaluations, self.num_vars)
+    }
+
+    fn internal_add_assign(&mut self, rhs: &Self) {
+        if self.is_zero() {
+            *self = rhs.clone();
+            return;
+        }
+
+        if rhs.is_zero() {
+            return;
+        }
+
+        if self.num_vars != rhs.num_vars {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+
+        for i in 0..self.evaluations.len() {
+            self.evaluations[i] += rhs.evaluations[i];
+        }
+    }
 }
 
 impl<F: PrimeField> Add for Multilinear<F> {

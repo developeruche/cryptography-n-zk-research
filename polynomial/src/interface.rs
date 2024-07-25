@@ -61,6 +61,10 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     fn zero(num_vars: usize) -> Self;
     /// This function is used to check if the polynomial is zero
     fn is_zero(&self) -> bool;
+    /// This function performs `Add` but in contexct of the type
+    fn internal_add(&self, rhs: &Self) -> Self;
+    /// This function performs `AddAssign` but in contexct of the type
+    fn internal_add_assign(&mut self, rhs: &Self);
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {
