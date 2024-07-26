@@ -5,6 +5,9 @@ use polynomial::{
 };
 use sum_check::data_structure::SumCheckProof;
 
+/// This is the W polynomial that is used in the GKR protocol
+/// this is how that algebraic equation is represented;
+/// W(a, b, c) = add_i(a, b, c) * (w_b(b) + w_c(c)) + mul_i(a, b, c) * (w_b(b) * w_c(c))
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct W<F: PrimeField> {
     /// This is the addition multilinear extension
@@ -31,10 +34,10 @@ pub struct GKRProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
 
 impl<F: PrimeField> W<F> {
     pub fn new(
-        add_i: Option<Multilinear<F>>,
-        mul_i: Option<Multilinear<F>>,
-        w_b: Option<Multilinear<F>>,
-        w_c: Option<Multilinear<F>>,
+        add_i: Option<Multilinear<F>>, //  add_i(a,b,c)
+        mul_i: Option<Multilinear<F>>, //  mul_i(a,b,c)
+        w_b: Option<Multilinear<F>>,   // w_b(b)
+        w_c: Option<Multilinear<F>>,   // w_c(c)
         r: Vec<F>,
     ) -> Self {
         W {
@@ -69,8 +72,36 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
         todo!()
     }
 
+    // The parameter `Point` in this case is waht is expressed in the text ar `b, c`
     fn evaluate(&self, point: &Vec<F>) -> Option<F> {
-        todo!()
+        let r_b_c = [self.random_sampling.clone(), point.clone()].concat();
+
+        let w_b_eval = match &self.w_b {
+            Some(w_b) => w_b.evaluate(&point[0..w_b.num_vars()].to_vec()),
+            None => None,
+        }
+        .expect("w_b is None");
+        let w_c_eval = match &self.w_c {
+            Some(w_c) => w_c.evaluate(&point[w_c.num_vars()..].to_vec()),
+            None => None,
+        }
+        .expect("w_c is None");
+
+        let add_i_eval = match &self.add_i {
+            Some(add_i) => add_i.evaluate(&r_b_c),
+            None => None,
+        }
+        .expect("add_i is None");
+        let mul_i_eval = match &self.mul_i {
+            Some(mul_i) => mul_i.evaluate(&r_b_c),
+            None => None,
+        }
+        .expect("mul_i is None");
+
+        let add_section_eval = add_i_eval * (w_b_eval + w_c_eval);
+        let mul_section_eval = mul_i_eval * (w_b_eval * w_c_eval);
+
+        Some(add_section_eval + mul_section_eval)
     }
 
     fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
@@ -86,7 +117,7 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     }
 
     fn interpolate(y_s: &[F]) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn zero(num_vars: usize) -> Self {
