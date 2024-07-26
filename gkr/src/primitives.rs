@@ -69,7 +69,22 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     }
 
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self {
-        todo!()
+        let mut eval_structure = self.clone();
+
+        if evaluation_points.len() != variable_indices.len() {
+            panic!(
+                "The length of evaluation_points and variable_indices should be the same: {}, {}",
+                evaluation_points.len(),
+                variable_indices.len()
+            );
+        }
+        
+        for i in 0..evaluation_points.len() {
+            eval_structure =
+                eval_structure.partial_evaluation(evaluation_points[i], variable_indices[i]);
+        }
+
+        eval_structure
     }
 
     // The parameter `Point` in this case is waht is expressed in the text ar `b, c`
