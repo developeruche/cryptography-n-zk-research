@@ -220,6 +220,25 @@ impl<F: PrimeField> Add for Multilinear<F> {
     }
 }
 
+impl<F: PrimeField> Add for &Multilinear<F> {
+    type Output = Multilinear<F>;
+
+    fn add(self, other: Self) -> Multilinear<F> {
+        let mut new_evaluations = Vec::new();
+        // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
+        if self.num_vars != other.num_vars {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(self.evaluations[i] + other.evaluations[i]);
+        }
+
+        let res = Multilinear::new(new_evaluations, self.num_vars);
+        res
+    }
+}
+
 impl<F: PrimeField> AddAssign for Multilinear<F> {
     fn add_assign(&mut self, other: Self) {
         // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same

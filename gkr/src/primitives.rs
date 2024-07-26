@@ -78,7 +78,7 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
                 variable_indices.len()
             );
         }
-        
+
         for i in 0..evaluation_points.len() {
             eval_structure =
                 eval_structure.partial_evaluation(evaluation_points[i], variable_indices[i]);
@@ -162,6 +162,16 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
         } else {
             let random_sampling = self.random_sampling.clone();
 
+            let add_i = match (&self.add_i, &rhs.add_i) {
+                (Some(add_i), Some(rhs_add_i)) => Some(add_i + rhs_add_i),
+                _ => None,
+            };
+
+            let mul_i = match (&self.mul_i, &rhs.mul_i) {
+                (Some(mul_i), Some(rhs_mul_i)) => Some(mul_i + rhs_mul_i),
+                _ => None,
+            };
+
             todo!()
             // return W {
             //     add_i,
@@ -231,5 +241,61 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
         }
 
         bytes
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+
+    #[test]
+    fn test_evaluiation() {
+        // f(a,b,c) = 2abc + 3b + 4
+        let add_i = Multilinear::<Fr>::new(
+            vec![
+                Fr::from(4),
+                Fr::from(4),
+                Fr::from(7),
+                Fr::from(7),
+                Fr::from(4),
+                Fr::from(4),
+                Fr::from(7),
+                Fr::from(9),
+            ],
+            3,
+        );
+        // f(b) = 4b
+        let w_b = Multilinear::<Fr>::new(vec![Fr::from(0), Fr::from(4)], 1);
+        // f(c) = 3c
+        let w_c = Multilinear::<Fr>::new(vec![Fr::from(0), Fr::from(3)], 1);
+        // f(a,b,c) = 2ab + bc + 3
+        let mul_i = Multilinear::<Fr>::new(
+            vec![
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(4),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(6),
+            ],
+            3,
+        );
+
+        let w = W {
+            add_i: Some(add_i),
+            mul_i: Some(mul_i),
+            w_b: Some(w_b),
+            w_c: Some(w_c),
+            random_sampling: vec![Fr::from(2u32)],
+        };
+
+        let expected_evaulation = Fr::from(1023u32);
+
+        let evaluation = w.evaluate(&[Fr::from(3), Fr::from(1)].to_vec());
+
+        assert_eq!(evaluation, Some(expected_evaulation));
     }
 }
