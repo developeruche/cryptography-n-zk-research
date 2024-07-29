@@ -17,7 +17,7 @@ This library provides an implementation of the Elliptic Curve Digital Signature 
 
 ## KZG polynomial commitment scheme
 
-This is a Rust implementation of the Kate Commitments (KZG) polynomial commitment scheme. KZG allows you to commit to a polynomial while keeping the contents hidden.
+This is a RUST implementation of the Kate Commitments (KZG) polynomial commitment scheme. KZG allows you to commit to a polynomial while keeping the contents hidden.
 
 **Features**
 
@@ -32,7 +32,7 @@ This is a Rust implementation of the Kate Commitments (KZG) polynomial commitmen
 
 ## KZG airdrop over bn254 Elliptic curve
 
-This is a Rust implementation of the KZG commitment scheme over the bn254 elliptic curve. Using this implementation to perform a token airdrop distribution using instead of using the regular `Merkle tree` commitment scheme.
+This is a RUST implementation of the KZG commitment scheme over the bn254 elliptic curve. Using this implementation to perform a token airdrop distribution using instead of using the regular `Merkle tree` commitment scheme.
 
 **Features**
 - [x] Toolkit for data preparation and formatting.
@@ -158,7 +158,7 @@ Suppose we are given a v-variate polynomial `g` defined over a finite field `F`.
 This is a library for creating and manipulating circuits. The library is designed to be modular and extensible. The library is designed to be used in the context of snarks, but can be used for any type of circuit.
 
 **Features**
-- [x] Arithemetic Circuit representation
+- [x] Arithmetic Circuit representation
 - [x] Boolean Circuit representation
 - [x] Circuit evaluation
 - [x] Circuit optimization
@@ -175,7 +175,7 @@ The Fiat-Shamir transcript is a cryptographic technique used to transform an int
 
 
 **Features**
-- [x] Extternally adadptable interface
+- [x] Externally adadptable interface
 - [x] Transcript implementation
 
 [codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/fiat_shamir)
@@ -184,7 +184,7 @@ The Fiat-Shamir transcript is a cryptographic technique used to transform an int
 
 
 ### GKR 
-The GKR protocol is very fascinating, fairly not so complicated compared to other protocols but heavily generic and useful. The GKR protocol involves running one protocol (Sum check) inside this protocol (GKR). The GKR protocol, named after Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum, is a zero-knowledge proof protocol that focuses on efficient delegation of computation. Specifically, it is designed to verify computations represented as layered arithmetic circuits with logarithmic depth in the number of inputs. The GKR protocol is known for its efficiency and ability to handle large-scale computations.
+The GKR protocol is fascinating, fairly not as complicated as other protocols but heavily generic and useful. The GKR protocol involves running one protocol (Sum check) inside this protocol (GKR). The GKR protocol, named after Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum, is a zero-knowledge proof protocol that focuses on efficient delegation of computation. Specifically, it is designed to verify computations represented as layered arithmetic circuits with logarithmic depth in the number of inputs. The GKR protocol is known for its efficiency and ability to handle large-scale computations.
 
 
 **Features**
@@ -218,7 +218,7 @@ This is a experimental project aiming to prove and verify a circom circuit using
 
 **Features**
 - [x] Circom circuit
-- [ ] Circom intermidate representation binding
+- [ ] Circom intermediate representation binding
 - [ ] Groth16 implementation (Prove and Vefier)
 
 [codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/circom-groth16)
