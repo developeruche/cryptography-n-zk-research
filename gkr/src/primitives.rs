@@ -15,9 +15,9 @@ pub struct W<F: PrimeField> {
     /// This is the multiplication multilinear extension
     mul_i: Option<Multilinear<F>>,
     /// This is the w_b equation
-    w_b: Option<Multilinear<F>>,
+    wb_add_wc: Multilinear<F>,
     /// This is the w_c equation
-    w_c: Option<Multilinear<F>>,
+    wb_mul_wc: Multilinear<F>,
     /// this is a vector of all random sampling
     random_sampling: Vec<F>,
 }
@@ -36,15 +36,15 @@ impl<F: PrimeField> W<F> {
     pub fn new(
         add_i: Option<Multilinear<F>>, //  add_i(a,b,c)
         mul_i: Option<Multilinear<F>>, //  mul_i(a,b,c)
-        w_b: Option<Multilinear<F>>,   // w_b(b)
-        w_c: Option<Multilinear<F>>,   // w_c(c)
+        wb_add_wc: Multilinear<F>,     // w_b(b) + w_c(c)
+        wb_mul_wc: Multilinear<F>,     // w_b(b) * w_c(c)
         r: Vec<F>,
     ) -> Self {
         W {
             add_i,
             mul_i,
-            w_b,
-            w_c,
+            wb_add_wc,
+            wb_mul_wc,
             random_sampling: r,
         }
     }
@@ -52,16 +52,15 @@ impl<F: PrimeField> W<F> {
 
 impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     fn num_vars(&self) -> usize {
-        let n_b_vars = match &self.w_b {
-            Some(w_b) => w_b.num_vars(),
-            None => 0,
-        };
-        let n_c_vars = match &self.w_c {
-            Some(w_c) => w_c.num_vars(),
-            None => 0,
+        let n_vars = match &self.wb_add_wc.is_zero() {
+            true => self.wb_add_wc.num_vars(),
+            false => match &self.wb_mul_wc.is_zero() {
+                true => self.wb_mul_wc.num_vars(),
+                false => 0,
+            },
         };
 
-        n_b_vars + n_c_vars
+        n_vars
     }
 
     fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self {
@@ -91,30 +90,23 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
     fn evaluate(&self, point: &Vec<F>) -> Option<F> {
         let r_b_c = [self.random_sampling.clone(), point.clone()].concat();
 
-        let w_b_eval = match &self.w_b {
-            Some(w_b) => w_b.evaluate(&point[0..w_b.num_vars()].to_vec()),
-            None => None,
-        }
-        .expect("w_b is None");
-        let w_c_eval = match &self.w_c {
-            Some(w_c) => w_c.evaluate(&point[w_c.num_vars()..].to_vec()),
-            None => None,
-        }
-        .expect("w_c is None");
+        let wb_add_wc_eval = &self.wb_add_wc.evaluate(&point.to_vec()).unwrap();
+        let wb_mul_wc_eval = &self.wb_mul_wc.evaluate(&point.to_vec()).unwrap();
 
         let add_i_eval = match &self.add_i {
             Some(add_i) => add_i.evaluate(&r_b_c),
             None => None,
         }
         .expect("add_i is None");
+
         let mul_i_eval = match &self.mul_i {
             Some(mul_i) => mul_i.evaluate(&r_b_c),
             None => None,
         }
         .expect("mul_i is None");
 
-        let add_section_eval = add_i_eval * (w_b_eval + w_c_eval);
-        let mul_section_eval = mul_i_eval * (w_b_eval * w_c_eval);
+        let add_section_eval = add_i_eval * wb_add_wc_eval;
+        let mul_section_eval = mul_i_eval * wb_mul_wc_eval;
 
         Some(add_section_eval + mul_section_eval)
     }
@@ -139,14 +131,17 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
         Self {
             add_i: None,
             mul_i: None,
-            w_b: None,
-            w_c: None,
+            wb_add_wc: Multilinear::zero(num_vars),
+            wb_mul_wc: Multilinear::zero(num_vars),
             random_sampling: vec![],
         }
     }
 
     fn is_zero(&self) -> bool {
-        if self.add_i.is_none() && self.mul_i.is_none() && self.w_b.is_none() && self.w_c.is_none()
+        if self.add_i.is_none()
+            && self.mul_i.is_none()
+            && self.wb_add_wc.is_zero()
+            && self.wb_mul_wc.is_zero()
         {
             return true;
         } else {
@@ -222,23 +217,9 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for W<F> {
             }
         }
 
-        match &self.w_b {
-            Some(w_b) => {
-                bytes.extend_from_slice(&w_b.to_bytes());
-            }
-            None => {
-                bytes.extend_from_slice(&[0u8; 32]);
-            }
-        }
+        bytes.extend_from_slice(&&self.wb_add_wc.to_bytes());
 
-        match &self.w_c {
-            Some(w_c) => {
-                bytes.extend_from_slice(&w_c.to_bytes());
-            }
-            None => {
-                bytes.extend_from_slice(&[0u8; 32]);
-            }
-        }
+        bytes.extend_from_slice(&&self.wb_mul_wc.to_bytes());
 
         bytes
     }
@@ -287,8 +268,8 @@ mod tests {
         let w = W {
             add_i: Some(add_i),
             mul_i: Some(mul_i),
-            w_b: Some(w_b),
-            w_c: Some(w_c),
+            wb_add_wc: w_b.add_distinct(&w_c),
+            wb_mul_wc: w_b.mul_distinct(&w_c),
             random_sampling: vec![Fr::from(2u32)],
         };
 
