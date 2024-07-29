@@ -26,7 +26,7 @@ This is a Rust implementation of the Kate Commitments (KZG) polynomial commitmen
 - [x] Opens a commitment at a specific point, revealing the evaluated value and proof.
 - [x] Verifies the opening proof for a commitment.
 
-[codebase]https://github.com/developeruche/kzg-commitment-rust)
+[codebase](https://github.com/developeruche/kzg-commitment-rust)
 <br>
 <br>
 
