@@ -198,6 +198,20 @@ The GKR protocol is very fascinating, fairly not so complicated compared to othe
 
 
 ### Groth16 
+The Groth16 protocol is a highly efficient zero-knowledge succinct non-interactive argument of knowledge (zk-SNARK) for general arithmetic circuit satisfiability. It was introduced by Jens Groth in 2016 and is notable for its concise proofs and efficient verification. 
+
+**Features**
+- [x] Circuit Pre-processing
+- [x] Trusted Setup
+- [x] Prover
+- [x] Verifer
+
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
+<br>
+<br>
+
+
 
 ### Circom Groth16
 This is a experimental project aiming to prove and verify a circom circuit using the Groth16 implemenation done in this reasearch project.
