@@ -8,6 +8,7 @@ members = [
     "gkr", 
     "circuits", 
     "groth16", 
+    "kzg-rust", 
 ]
 exclude = [
     "circom-groth16"

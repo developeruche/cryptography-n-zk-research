@@ -4,9 +4,6 @@
 [submodule "kzg-airdrop-bn254"]
 	path = kzg-airdrop-bn254
 	url = https://github.com/developeruche/kzg-airdrop-bn254
-[submodule "kzg-commitment-rust"]
-	path = kzg-commitment-rust
-	url = https://github.com/developeruche/kzg-commitment-rust
 [submodule "light-tornodo-cash"]
 	path = light-tornodo-cash
 	url = https://github.com/developeruche/light-tornodo-cash
