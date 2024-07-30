@@ -47,27 +47,35 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 
     fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn add_distinct(&self, rhs: &Self) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn mul_distinct(&self, rhs: &Self) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn interpolate(y_s: &[F]) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn zero(num_vars: usize) -> Self {
-        todo!()
+        Self { polys: vec![] }
     }
 
     fn is_zero(&self) -> bool {
-        todo!()
+        if self.polys.len() == 0 {
+            return true;
+        } else {
+            if self.polys.iter().all(|p| p.is_zero()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     fn internal_add(&self, rhs: &Self) -> Self {
@@ -79,7 +87,13 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        todo!()
+        let mut bytes = vec![];
+
+        for poly in &self.polys {
+            bytes.extend_from_slice(&poly.to_bytes());
+        }
+
+        bytes
     }
 }
 
