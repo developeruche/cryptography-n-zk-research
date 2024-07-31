@@ -124,12 +124,10 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
 impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
     fn elementwise_product(&self) -> Vec<F> {
         // Find the minimum length of the vectors
-        let min_length = self
-            .polys
-            .iter()
-            .map(|v| v.evaluations.len())
-            .min()
-            .unwrap_or(0);
+        let min_length = match self.polys.get(0) {
+            Some(poly) => poly.evaluations.len(),
+            None => 0,
+        };
 
         // Perform element-wise product
         (0..min_length)
