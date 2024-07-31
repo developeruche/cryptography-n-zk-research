@@ -1,3 +1,4 @@
+use crate::composed::interfaces::ComposedMultilinearInterface;
 use crate::interface::MultilinearPolynomialInterface;
 use crate::multilinear::Multilinear;
 use ark_ff::PrimeField;
@@ -120,6 +121,23 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 }
 
+impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
+    fn elementwise_product(&self) -> Vec<F> {
+        // Find the minimum length of the vectors
+        let min_length = self
+            .polys
+            .iter()
+            .map(|v| v.evaluations.len())
+            .min()
+            .unwrap_or(0);
+
+        // Perform element-wise product
+        (0..min_length)
+            .map(|i| self.polys.iter().map(|v| v.evaluations[i]).product())
+            .collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -156,5 +174,33 @@ mod tests {
 
         let eval = composed.partial_evaluations(vec![Fr::from(2)], vec![0]);
         assert_eq!(eval.evaluate(&vec![Fr::from(3)]), Some(Fr::from(42)));
+    }
+
+    #[test]
+    fn test_elementwise_product() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+
+        let eval = composed.elementwise_product();
+        assert_eq!(
+            eval,
+            vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(3)]
+        );
+    }
+
+    #[test]
+    fn test_elementwise_product_2() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(1), Fr::from(4), Fr::from(0), Fr::from(5)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+
+        let eval = composed.elementwise_product();
+        assert_eq!(
+            eval,
+            vec![Fr::from(0), Fr::from(4), Fr::from(0), Fr::from(15)]
+        );
     }
 }
