@@ -3,6 +3,7 @@ use crate::multilinear::Multilinear;
 use ark_ff::PrimeField;
 
 /// This is a composition of multilinear polynomials whose binding operation is multiplication
+#[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct ComposedMultilinear<F: PrimeField> {
     /// These are all the multilinear polynomials
     pub polys: Vec<Multilinear<F>>,
@@ -25,11 +26,18 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 
     fn partial_evaluation(&self, evaluation_point: F, variable_index: usize) -> Self {
-        todo!()
+        // this would perform partial evaluation on all the composing polynomials
+        let mut new_polys = Vec::new();
+
+        for poly in &self.polys {
+            new_polys.push(poly.partial_evaluation(evaluation_point, variable_index));
+        }
+
+        ComposedMultilinear { polys: new_polys }
     }
 
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self {
-        let mut eval_polynomial = *self.clone();
+        let mut eval_polynomial = self.clone();
 
         if evaluation_points.len() != variable_indices.len() {
             panic!(
