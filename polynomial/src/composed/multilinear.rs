@@ -135,4 +135,26 @@ mod tests {
         let eval = composed.evaluate(&vec![Fr::from(2), Fr::from(3)]);
         assert_eq!(eval, Some(Fr::from(42)));
     }
+
+    #[test]
+    fn test_partial_evaluation() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+
+        let eval = composed.partial_evaluation(Fr::from(2), 0);
+        assert_eq!(eval.evaluate(&vec![Fr::from(3)]), Some(Fr::from(42)));
+    }
+
+    #[test]
+    fn test_partial_evaluations() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+
+        let eval = composed.partial_evaluations(vec![Fr::from(2)], vec![0]);
+        assert_eq!(eval.evaluate(&vec![Fr::from(3)]), Some(Fr::from(42)));
+    }
 }
