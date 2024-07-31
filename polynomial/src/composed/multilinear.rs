@@ -29,7 +29,22 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self {
-        todo!()
+        let mut eval_polynomial = *self.clone();
+
+        if evaluation_points.len() != variable_indices.len() {
+            panic!(
+                "The length of evaluation_points and variable_indices should be the same: {}, {}",
+                evaluation_points.len(),
+                variable_indices.len()
+            );
+        }
+
+        for i in 0..evaluation_points.len() {
+            eval_polynomial =
+                eval_polynomial.partial_evaluation(evaluation_points[i], variable_indices[i]);
+        }
+
+        eval_polynomial
     }
 
     fn evaluate(&self, point: &Vec<F>) -> Option<F> {
