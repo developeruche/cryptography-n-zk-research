@@ -151,65 +151,63 @@ mod tests {
         assert_eq!(sum, sum_half_0 + sum_half_1);
     }
 
-    // #[test]
-    // fn test_compute_round_zero_poly_2() {
-    //     let poly = Multilinear::new(
-    //         vec![
-    //             Fr::from(0),
-    //             Fr::from(0),
-    //             Fr::from(0),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(4),
-    //         ],
-    //         3,
-    //     );
+    #[test]
+    fn test_compute_round_zero_poly_2() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(4),
+            ],
+            3,
+        );
 
-    //     let composed = ComposedMultilinear::new(vec![poly]);
+        let composed = ComposedMultilinear::new(vec![poly]);
 
-    //     let sum = ComposedProver::calculate_sum(&composed);
+        let sum = ComposedProver::calculate_sum(&composed);
 
-    //     let mut transcript = FiatShamirTranscript::default();
-    //     let round_0_poly = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
 
-    //     let sum_half_0 = round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
-    //     let sum_half_1 = round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap();
+        let sum_half_0 = round_0_poly.evaluate(&Fr::from(0));
+        let sum_half_1 = round_0_poly.evaluate(&Fr::from(1));
 
-    //     println!("round_0_poly_vec: {:?}", round_0_poly);
+        assert_eq!(sum, sum_half_0 + sum_half_1);
+    }
 
-    //     assert_eq!(sum, sum_half_0 + sum_half_1);
-    // }
+    #[test]
+    fn test_compute_round_zero_poly_3() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(4),
+            ],
+            3,
+        );
 
-    // #[test]
-    // fn test_compute_round_zero_poly_3() {
-    //     let poly = Multilinear::new(
-    //         vec![
-    //             Fr::from(0),
-    //             Fr::from(0),
-    //             Fr::from(0),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(2),
-    //             Fr::from(4),
-    //         ],
-    //         3,
-    //     );
+        let composed = ComposedMultilinear::new(vec![poly]);
 
-    //     let composed = ComposedMultilinear::new(vec![poly]);
+        let sum = ComposedProver::calculate_sum(&composed);
 
-    //     let sum = ComposedProver::calculate_sum(&composed);
+        let mut transcript = FiatShamirTranscript::default();
+        let round_0_poly = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
 
-    //     let mut transcript = FiatShamirTranscript::default();
-    //     let round_0_poly = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
+        let sum_half_0 = round_0_poly.evaluate(&Fr::from(0));
+        let sum_half_1 = round_0_poly.evaluate(&Fr::from(1));
 
-    //     let sum_half_0 = round_0_poly.evaluate(&vec![Fr::from(0)]).unwrap();
-    //     let sum_half_1 = round_0_poly.evaluate(&vec![Fr::from(1)]).unwrap();
+        println!("round_0_poly_vec: {:?}", round_0_poly);
 
-    //     println!("round_0_poly_vec: {:?}", round_0_poly);
-
-    //     assert_eq!(sum, sum_half_0 + sum_half_1);
-    // }
+        assert_eq!(sum, sum_half_0 + sum_half_1);
+    }
 }
