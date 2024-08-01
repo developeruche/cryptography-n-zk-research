@@ -1,4 +1,4 @@
-use crate::data_structure::SumCheckProof;
+use crate::{composed::RoundPoly, data_structure::SumCheckProof};
 use ark_ff::PrimeField;
 use fiat_shamir::FiatShamirTranscript;
 use polynomial::{
@@ -33,4 +33,9 @@ pub trait VerifierInterface<F: PrimeField> {
 pub trait ComposedProverInterface<F: PrimeField> {
     /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
     fn calculate_sum(poly: &ComposedMultilinear<F>) -> F;
+    /// This function returns the round zero computed polynomial
+    fn compute_round_zero_poly(
+        poly: &ComposedMultilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> Vec<F>;
 }

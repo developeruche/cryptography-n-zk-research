@@ -33,8 +33,14 @@ impl<F: PrimeField> RoundPoly<F> {
         Self { poly_vec }
     }
 
-    pub fn interpolate(&self, domain: Vec<F>) -> UnivariantPolynomial<F> {
+    pub fn interpolate(&self) -> UnivariantPolynomial<F> {
         let domain = compute_domain(self.poly_vec.len(), 0);
-        UnivariantPolynomial::interpolate(domain, self.poly_vec.clone())
+        println!("domain: {:?}", domain);
+        UnivariantPolynomial::interpolate(self.poly_vec.clone(), domain)
+    }
+
+    pub fn rep_in_eval(&self) -> Multilinear<F> {
+        println!("poly_vec: {:?}", self.poly_vec);
+        Multilinear::new(self.poly_vec.clone(), 1)
     }
 }

@@ -134,6 +134,10 @@ impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
             .map(|i| self.polys.iter().map(|v| v.evaluations[i]).product())
             .collect()
     }
+
+    fn max_degree(&self) -> usize {
+        self.polys.len()
+    }
 }
 
 #[cfg(test)]
