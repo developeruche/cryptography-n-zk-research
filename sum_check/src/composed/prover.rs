@@ -5,10 +5,11 @@ use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
     interface::{MultilinearPolynomialInterface, UnivariantPolynomialInterface},
     multilinear::Multilinear,
+    univariant::UnivariantPolynomial,
     utils::boolean_hypercube,
 };
 
-use super::RoundPoly;
+use super::{ComposedSumCheckProof, RoundPoly};
 
 #[derive(Clone, Default, Debug)]
 pub struct ComposedProver;
@@ -23,7 +24,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
     fn compute_round_zero_poly(
         poly: &ComposedMultilinear<F>,
         transcript: &mut FiatShamirTranscript,
-    ) -> Vec<F> {
+    ) -> UnivariantPolynomial<F> {
         let composed_poly_max_degree = poly.max_degree();
         let mut round_0_poly = Vec::new();
 
@@ -36,51 +37,51 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
             round_0_poly.push(instance);
         }
 
-        round_0_poly
+        RoundPoly::new(round_0_poly).interpolate()
     }
 
-    // /// This function computes sum check proof
-    // fn sum_check_proof<P: MultilinearPolynomialInterface<F> + Clone>(
-    //     poly: &P,
-    //     transcript: &mut FiatShamirTranscript,
-    //     sum: &F,
-    // ) -> SumCheckProof<F, P> {
-    //     let round_0_poly = Self::compute_round_zero_poly(poly, transcript);
-    //     let mut all_random_reponse = Vec::new();
-    //     let mut round_poly = Vec::new();
+    fn sum_check_proof(
+        poly_: &ComposedMultilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+        sum: &F,
+    ) -> (ComposedSumCheckProof<F>, Vec<F>) {
+        let mut poly = poly_.clone();
+        let round_0_poly = Self::compute_round_zero_poly(&poly, transcript);
+        let mut all_random_reponse = Vec::new();
+        let mut round_polys = Vec::new();
 
-    //     for i in 1..poly.num_vars() {
-    //         let number_of_round = poly.num_vars() - i - 1;
-    //         let bh = boolean_hypercube::<F>(number_of_round);
+        for _ in 1..poly.num_vars() {
+            let mut round_poly_vec = Vec::new();
 
-    //         let mut bh_partials = P::zero(1);
-    //         let verifier_random_reponse_f = F::from_be_bytes_mod_order(&transcript.sample());
-    //         all_random_reponse.push(verifier_random_reponse_f);
+            for i in 0..=poly.max_degree() {
+                let instance = poly
+                    .partial_evaluation(F::from(i as u128), 0)
+                    .elementwise_product()
+                    .iter()
+                    .sum();
+                round_poly_vec.push(instance);
+            }
 
-    //         for bh_i in bh {
-    //             let bh_len = bh_i.len();
-    //             let mut eval_vector = all_random_reponse.clone();
-    //             eval_vector.extend(bh_i);
-    //             let mut eval_index = vec![0; all_random_reponse.len()];
-    //             let suffix_eval_index = vec![1; bh_len];
-    //             eval_index.extend(suffix_eval_index);
+            let round_poly = RoundPoly::new(round_poly_vec).interpolate();
+            transcript.append(round_poly.to_bytes());
 
-    //             let current_partial = poly.partial_evaluations(eval_vector, eval_index);
+            let random_response = F::from_be_bytes_mod_order(&transcript.sample());
+            let poly = poly.partial_evaluation(random_response, 0);
 
-    //             bh_partials.internal_add_assign(&current_partial);
-    //         }
+            all_random_reponse.push(random_response);
+            round_polys.push(round_poly);
+        }
 
-    //         transcript.append(bh_partials.to_bytes());
-    //         round_poly.push(bh_partials);
-    //     }
-
-    //     SumCheckProof {
-    //         polynomial: poly.clone(),
-    //         round_poly: round_poly.clone(),
-    //         round_0_poly: round_0_poly.clone(),
-    //         sum: sum.clone(),
-    //     }
-    // }
+        (
+            ComposedSumCheckProof {
+                polynomial: poly_.clone(),
+                round_poly: round_polys,
+                round_0_poly,
+                sum: *sum,
+            },
+            all_random_reponse,
+        )
+    }
 }
 
 #[cfg(test)]
@@ -142,16 +143,10 @@ mod tests {
         let sum = ComposedProver::calculate_sum(&composed);
 
         let mut transcript = FiatShamirTranscript::default();
-        let round_0_poly_vec = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
-        println!("round_0_poly_vec: {:?}", round_0_poly_vec);
-
-        let round_0_poly_instance = RoundPoly::new(round_0_poly_vec);
-        let round_0_poly = round_0_poly_instance.interpolate();
+        let round_0_poly = ComposedProver::compute_round_zero_poly(&composed, &mut transcript);
 
         let sum_half_0 = round_0_poly.evaluate(&Fr::from(0));
         let sum_half_1 = round_0_poly.evaluate(&Fr::from(1));
-
-        println!("round_0_poly: {:?}", round_0_poly);
 
         assert_eq!(sum, sum_half_0 + sum_half_1);
     }

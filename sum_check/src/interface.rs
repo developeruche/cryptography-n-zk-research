@@ -1,9 +1,12 @@
-use crate::{composed::RoundPoly, data_structure::SumCheckProof};
+use crate::{
+    composed::{ComposedSumCheckProof, RoundPoly},
+    data_structure::SumCheckProof,
+};
 use ark_ff::PrimeField;
 use fiat_shamir::FiatShamirTranscript;
 use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
-    multilinear::Multilinear,
+    multilinear::Multilinear, univariant::UnivariantPolynomial,
 };
 
 /// This trait is used to define the prover interface
@@ -37,5 +40,11 @@ pub trait ComposedProverInterface<F: PrimeField> {
     fn compute_round_zero_poly(
         poly: &ComposedMultilinear<F>,
         transcript: &mut FiatShamirTranscript,
-    ) -> Vec<F>;
+    ) -> UnivariantPolynomial<F>;
+    /// This function computes sum check proof
+    fn sum_check_proof(
+        poly: &ComposedMultilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+        sum: &F,
+    ) -> (ComposedSumCheckProof<F>, Vec<F>);
 }

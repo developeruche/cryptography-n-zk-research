@@ -3,6 +3,7 @@ pub mod verifier;
 
 use ark_ff::PrimeField;
 use polynomial::{
+    composed::multilinear::ComposedMultilinear,
     interface::{MultilinearPolynomialInterface, UnivariantPolynomialInterface},
     multilinear::Multilinear,
     univariant::UnivariantPolynomial,
@@ -11,13 +12,13 @@ use polynomial::{
 
 /// This struct is used to store the sum check proof
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-pub struct SumCheckProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
+pub struct ComposedSumCheckProof<F: PrimeField> {
     /// This is the polynomial that is used to generate the sum check proof
-    pub polynomial: P,
+    pub polynomial: ComposedMultilinear<F>,
     /// This vector stores the round polynomials
-    pub round_poly: Vec<RoundPoly<F>>,
+    pub round_poly: Vec<UnivariantPolynomial<F>>,
     /// This vectors store the polynomial from the first round
-    pub round_0_poly: P,
+    pub round_0_poly: UnivariantPolynomial<F>,
     /// This holds the sum of the polynomial evaluation over the boolean hypercube
     pub sum: F,
 }
@@ -35,12 +36,10 @@ impl<F: PrimeField> RoundPoly<F> {
 
     pub fn interpolate(&self) -> UnivariantPolynomial<F> {
         let domain = compute_domain(self.poly_vec.len(), 0);
-        println!("domain: {:?}", domain);
         UnivariantPolynomial::interpolate(self.poly_vec.clone(), domain)
     }
 
     pub fn rep_in_eval(&self) -> Multilinear<F> {
-        println!("poly_vec: {:?}", self.poly_vec);
         Multilinear::new(self.poly_vec.clone(), 1)
     }
 }

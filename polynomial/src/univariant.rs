@@ -2,7 +2,7 @@ use crate::{
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
     utils::get_langrange_basis,
 };
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
 pub use ark_test_curves;
 use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, Neg, Rem, Sub, SubAssign};
 
@@ -153,6 +153,17 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
                 remainder,
             ))
         }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = vec![];
+
+        for coeff in &self.coefficients {
+            let big_int = coeff.into_bigint().to_bytes_be();
+            bytes.extend_from_slice(&big_int);
+        }
+
+        bytes
     }
 }
 
