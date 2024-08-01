@@ -1,7 +1,10 @@
 use crate::data_structure::SumCheckProof;
 use ark_ff::PrimeField;
 use fiat_shamir::FiatShamirTranscript;
-use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
+use polynomial::{
+    composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
+    multilinear::Multilinear,
+};
 
 /// This trait is used to define the prover interface
 pub trait ProverInterface<F: PrimeField> {
@@ -24,4 +27,10 @@ pub trait ProverInterface<F: PrimeField> {
 pub trait VerifierInterface<F: PrimeField> {
     /// This function verifies the sum check proof
     fn verify<P: MultilinearPolynomialInterface<F> + Clone>(proof: &SumCheckProof<F, P>) -> bool;
+}
+
+/// This trait is used to define the composed prover interface
+pub trait ComposedProverInterface<F: PrimeField> {
+    /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
+    fn calculate_sum(poly: &ComposedMultilinear<F>) -> F;
 }
