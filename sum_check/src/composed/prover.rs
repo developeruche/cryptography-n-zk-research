@@ -1,5 +1,5 @@
 use crate::{data_structure::SumCheckProof, interface::ComposedProverInterface};
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
@@ -26,7 +26,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
         transcript: &mut FiatShamirTranscript,
     ) -> UnivariantPolynomial<F> {
         let composed_poly_max_degree = poly.max_degree();
-        let mut round_0_poly = Vec::new();
+        let mut round_0_poly_vec = Vec::new();
 
         for i in 0..=composed_poly_max_degree {
             let instance = poly
@@ -34,10 +34,14 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
                 .elementwise_product()
                 .iter()
                 .sum();
-            round_0_poly.push(instance);
+            round_0_poly_vec.push(instance);
         }
 
-        RoundPoly::new(round_0_poly).interpolate()
+        let round_0_poly = RoundPoly::new(round_0_poly_vec).interpolate();
+
+        transcript.append(round_0_poly.to_bytes());
+
+        round_0_poly
     }
 
     fn sum_check_proof(
@@ -46,11 +50,13 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
         sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut poly = poly_.clone();
-        let round_0_poly = Self::compute_round_zero_poly(&poly, transcript);
         let mut all_random_reponse = Vec::new();
         let mut round_polys = Vec::new();
 
-        for _ in 1..poly.num_vars() {
+        transcript.append(poly.to_bytes());
+        transcript.append(sum.into_bigint().to_bytes_be());
+
+        for _ in 0..poly.num_vars() {
             let mut round_poly_vec = Vec::new();
 
             for i in 0..=poly.max_degree() {
@@ -59,6 +65,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
                     .elementwise_product()
                     .iter()
                     .sum();
+
                 round_poly_vec.push(instance);
             }
 
@@ -66,7 +73,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
             transcript.append(round_poly.to_bytes());
 
             let random_response = F::from_be_bytes_mod_order(&transcript.sample());
-            let poly = poly.partial_evaluation(random_response, 0);
+            poly = poly.partial_evaluation(random_response, 0);
 
             all_random_reponse.push(random_response);
             round_polys.push(round_poly);
@@ -74,9 +81,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
 
         (
             ComposedSumCheckProof {
-                polynomial: poly_.clone(),
                 round_poly: round_polys,
-                round_0_poly,
                 sum: *sum,
             },
             all_random_reponse,
@@ -86,6 +91,9 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
 
 #[cfg(test)]
 mod tests {
+    use crate::composed::verifier::ComposedVerifier;
+    use crate::interface::ComposedVerifierInterface;
+
     use super::*;
     use ark_test_curves::bls12_381::Fr;
     use polynomial::interface::{MultilinearPolynomialInterface, PolynomialInterface};
@@ -209,5 +217,29 @@ mod tests {
         println!("round_0_poly_vec: {:?}", round_0_poly);
 
         assert_eq!(sum, sum_half_0 + sum_half_1);
+    }
+
+    #[test]
+    fn test_sum_check_proof() {
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(0),
+                Fr::from(0),
+                Fr::from(2),
+                Fr::from(7),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(6),
+                Fr::from(11),
+            ],
+            3,
+        );
+        let composed = ComposedMultilinear::new(vec![poly]);
+        let sum = ComposedProver::calculate_sum(&composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+        let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+
+        assert!(ComposedVerifier::verify(&proof, &composed));
     }
 }

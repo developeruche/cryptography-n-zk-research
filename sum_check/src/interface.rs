@@ -48,3 +48,9 @@ pub trait ComposedProverInterface<F: PrimeField> {
         sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>);
 }
+
+/// The verifier interface is used to verify the sum check proof
+pub trait ComposedVerifierInterface<F: PrimeField> {
+    /// This function verifies the sum check proof
+    fn verify(proof: &ComposedSumCheckProof<F>, poly: &ComposedMultilinear<F>) -> bool;
+}

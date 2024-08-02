@@ -13,12 +13,8 @@ use polynomial::{
 /// This struct is used to store the sum check proof
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct ComposedSumCheckProof<F: PrimeField> {
-    /// This is the polynomial that is used to generate the sum check proof
-    pub polynomial: ComposedMultilinear<F>,
     /// This vector stores the round polynomials
     pub round_poly: Vec<UnivariantPolynomial<F>>,
-    /// This vectors store the polynomial from the first round
-    pub round_0_poly: UnivariantPolynomial<F>,
     /// This holds the sum of the polynomial evaluation over the boolean hypercube
     pub sum: F,
 }
