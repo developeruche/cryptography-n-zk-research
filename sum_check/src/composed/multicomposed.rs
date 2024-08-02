@@ -207,4 +207,62 @@ mod tests {
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
+
+    #[test]
+    fn test_multi_composed_sum_check_proof_2_on_gkr_example() {
+        // f(a,b,c) = 2abc + 3b + 4
+        let add_i = Multilinear::<Fr>::new(
+            vec![
+                Fr::from(4),
+                Fr::from(4),
+                Fr::from(7),
+                Fr::from(7),
+                Fr::from(4),
+                Fr::from(4),
+                Fr::from(7),
+                Fr::from(9),
+            ],
+            3,
+        );
+        // f(b) = 4b
+        let w_b = Multilinear::<Fr>::new(vec![Fr::from(0), Fr::from(4)], 1);
+        // f(c) = 3c
+        let w_c = Multilinear::<Fr>::new(vec![Fr::from(0), Fr::from(3)], 1);
+        // f(a,b,c) = 2ab + bc + 3
+        let mul_i = Multilinear::<Fr>::new(
+            vec![
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(4),
+                Fr::from(3),
+                Fr::from(3),
+                Fr::from(5),
+                Fr::from(6),
+            ],
+            3,
+        );
+
+        let lhs_poly = ComposedMultilinear::new(vec![
+            add_i.partial_evaluation(Fr::from(2), 0),
+            w_b.add_distinct(&w_c),
+        ]);
+        let rhs_poly = ComposedMultilinear::new(vec![
+            mul_i.partial_evaluation(Fr::from(2), 0),
+            w_b.mul_distinct(&w_c),
+        ]);
+
+        let multi_composed = vec![lhs_poly, rhs_poly];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+
+        let (proof, _) = MultiComposedProver::sum_check_proof(
+            &multi_composed,
+            &mut transcript,
+            &sum + Fr::from(1),
+        );
+
+        assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
+    }
 }
