@@ -1,3 +1,4 @@
+use super::{ComposedSumCheckProof, RoundPoly};
 use crate::{data_structure::SumCheckProof, interface::ComposedProverInterface};
 use ark_ff::{BigInteger, PrimeField};
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
@@ -8,8 +9,6 @@ use polynomial::{
     univariant::UnivariantPolynomial,
     utils::boolean_hypercube,
 };
-
-use super::{ComposedSumCheckProof, RoundPoly};
 
 #[derive(Clone, Default, Debug)]
 pub struct ComposedProver;
@@ -91,10 +90,9 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::composed::verifier::ComposedVerifier;
     use crate::interface::ComposedVerifierInterface;
-
-    use super::*;
     use ark_test_curves::bls12_381::Fr;
     use polynomial::interface::{MultilinearPolynomialInterface, PolynomialInterface};
     use polynomial::univariant::UnivariantPolynomial;
@@ -242,7 +240,7 @@ mod tests {
 
         assert!(ComposedVerifier::verify(&proof, &composed));
     }
-    
+
     #[test]
     fn test_sum_check_proof_2() {
         let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
