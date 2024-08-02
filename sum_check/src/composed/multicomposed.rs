@@ -1,12 +1,14 @@
 use super::{prover::ComposedProver, ComposedSumCheckProof, RoundPoly};
 use crate::{
     composed::utils::{compute_multi_composed_bytes, perform_multi_partial_eval},
-    interface::{ComposedProverInterface, MultiComposedProverInterface},
+    interface::{
+        ComposedProverInterface, MultiComposedProverInterface, MultiComposedVerifierInterface,
+    },
 };
 use ark_ff::{BigInteger, PrimeField};
 use fiat_shamir::interface::TranscriptInterface;
 use fiat_shamir::FiatShamirTranscript;
-use polynomial::interface::MultilinearPolynomialInterface;
+use polynomial::interface::{MultilinearPolynomialInterface, PolynomialInterface};
 use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
     univariant::UnivariantPolynomial,
@@ -14,6 +16,9 @@ use polynomial::{
 
 #[derive(Clone, Default, Debug)]
 pub struct MultiComposedProver;
+
+#[derive(Clone, Default, Debug)]
+pub struct MultiComposedVerifier;
 
 impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
     fn calculate_sum(poly: &[ComposedMultilinear<F>]) -> F {
@@ -76,6 +81,39 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
     }
 }
 
+impl<F: PrimeField> MultiComposedVerifierInterface<F> for MultiComposedVerifier {
+    fn verify(proof: &ComposedSumCheckProof<F>, poly: &[ComposedMultilinear<F>]) -> bool {
+        let mut transcript = FiatShamirTranscript::default();
+
+        transcript.append(compute_multi_composed_bytes(&poly));
+        transcript.append(proof.sum.into_bigint().to_bytes_be());
+
+        let mut all_rands = Vec::new();
+        let mut mutating_sum = proof.sum;
+
+        for r_poly in proof.round_poly.iter() {
+            transcript.append(r_poly.to_bytes());
+
+            // stage one assertion (see if current mutating sum was influenced by the passed mutating sum)
+            let untrusted_sum = r_poly.evaluate(&F::zero()) + r_poly.evaluate(&F::one());
+
+            if untrusted_sum != mutating_sum {
+                println!(
+                    "untrusted_sum != proof.sum --> {} - {}",
+                    untrusted_sum, proof.sum
+                );
+                return false;
+            }
+
+            let sample = F::from_be_bytes_mod_order(&transcript.sample());
+            mutating_sum = r_poly.evaluate(&sample);
+            all_rands.push(sample);
+        }
+
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -110,5 +148,63 @@ mod tests {
         let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
         assert_eq!(sum, Fr::from(8u32));
+    }
+
+    #[test]
+    fn test_multi_composed_sum_check_proof() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(3), Fr::from(0), Fr::from(3)], 2);
+
+        let composed_1 = ComposedMultilinear::new(vec![poly1]);
+        let composed_2 = ComposedMultilinear::new(vec![poly2]);
+
+        let multi_composed = vec![composed_1, composed_2];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+
+        let (proof, _) =
+            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+
+        assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
+    }
+
+    #[test]
+    fn test_multi_composed_sum_check_proof_1() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(3), Fr::from(0), Fr::from(3)], 2);
+
+        let composed_1 = ComposedMultilinear::new(vec![poly1]);
+        let composed_2 = ComposedMultilinear::new(vec![poly2.clone()]);
+        let composed_3 = ComposedMultilinear::new(vec![poly2]);
+
+        let multi_composed = vec![composed_1, composed_2, composed_3];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+
+        let (proof, _) =
+            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+
+        assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
+    }
+
+    #[test]
+    fn test_multi_composed_sum_check_proof_2() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(3), Fr::from(0), Fr::from(3)], 2);
+
+        let composed_1 = ComposedMultilinear::new(vec![poly1.clone(), poly2.clone()]);
+        let composed_2 = ComposedMultilinear::new(vec![poly2.clone(), poly1.clone()]);
+
+        let multi_composed = vec![composed_1, composed_2];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+
+        let (proof, _) =
+            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+
+        assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
 }
