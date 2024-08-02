@@ -242,4 +242,18 @@ mod tests {
 
         assert!(ComposedVerifier::verify(&proof, &composed));
     }
+    
+    #[test]
+    fn test_sum_check_proof_2() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+        let sum = ComposedProver::calculate_sum(&composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+        let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+
+        assert!(ComposedVerifier::verify(&proof, &composed));
+    }
 }
