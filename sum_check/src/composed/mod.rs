@@ -1,5 +1,6 @@
 pub mod multicomposed;
 pub mod prover;
+pub mod utils;
 pub mod verifier;
 
 use ark_ff::PrimeField;
