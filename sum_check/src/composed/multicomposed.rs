@@ -257,11 +257,8 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
 
-        let (proof, _) = MultiComposedProver::sum_check_proof(
-            &multi_composed,
-            &mut transcript,
-            &sum + Fr::from(1),
-        );
+        let (proof, _) =
+            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
