@@ -20,7 +20,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         evals: &CircuitEvaluation<F>,
     ) -> GKRProof<F, P> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
-        // let mut sumcheck_proofs = vec![];
+        let mut sumcheck_proofs = vec![];
         // let mut q_polynomials = vec![];
 
         let w_0_mle = gen_w_mle(&evals.layers, 0);
@@ -58,12 +58,16 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             let f_b_c = vec![f_b_c_add_section, f_b_c_mul_section];
 
+            // this prover that the `claim` is the result of the evalution of the preivous layer
             let (sumcheck_proof, random_challenges) =
                 MultiComposedProver::sum_check_proof_without_initial_polynomial(
                     &f_b_c,
                     &mut transcript,
                     &claim,
                 );
+
+            transcript.append(sumcheck_proof.to_bytes());
+            sumcheck_proofs.push(sumcheck_proof);
         }
 
         todo!()

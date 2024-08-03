@@ -3,7 +3,7 @@ pub mod prover;
 pub mod utils;
 pub mod verifier;
 
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
 use polynomial::{
     composed::multilinear::ComposedMultilinear,
     interface::{MultilinearPolynomialInterface, UnivariantPolynomialInterface},
@@ -39,5 +39,20 @@ impl<F: PrimeField> RoundPoly<F> {
 
     pub fn rep_in_eval(&self) -> Multilinear<F> {
         Multilinear::new(self.poly_vec.clone(), 1)
+    }
+}
+
+impl<F: PrimeField> ComposedSumCheckProof<F> {
+    pub fn new(round_poly: Vec<UnivariantPolynomial<F>>, sum: F) -> Self {
+        Self { round_poly, sum }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        for round_poly in self.round_poly.iter() {
+            bytes.extend_from_slice(&round_poly.to_bytes());
+        }
+        bytes.extend_from_slice(&self.sum.into_bigint().to_bytes_be());
+        bytes
     }
 }
