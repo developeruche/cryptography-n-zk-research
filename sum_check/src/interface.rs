@@ -65,6 +65,12 @@ pub trait MultiComposedProverInterface<F: PrimeField> {
         transcript: &mut FiatShamirTranscript,
         sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>);
+    /// This function computes sum check proof
+    fn sum_check_proof_without_initial_polynomial(
+        poly: &[ComposedMultilinear<F>],
+        transcript: &mut FiatShamirTranscript,
+        sum: &F,
+    ) -> (ComposedSumCheckProof<F>, Vec<F>);
 }
 
 /// The verifier interface is used to verify the sum check proof
