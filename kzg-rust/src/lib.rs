@@ -1,14 +1,12 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod interface;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub trait KZGInterface {
+    // random_setup
+    // setup_with_import
+    // commit
+    // compute witness polynomial
+    // open withness polynomial
+    // open
+    // check
+    // batch check
 }
