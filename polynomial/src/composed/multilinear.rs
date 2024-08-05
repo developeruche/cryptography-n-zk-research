@@ -103,11 +103,11 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
     }
 
     fn internal_add(&self, rhs: &Self) -> Self {
-        todo!()
+        unimplemented!()
     }
 
     fn internal_add_assign(&mut self, rhs: &Self) {
-        todo!()
+        unimplemented!()
     }
 
     fn to_bytes(&self) -> Vec<u8> {

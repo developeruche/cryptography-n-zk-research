@@ -3,16 +3,16 @@ use polynomial::{
     interface::MultilinearPolynomialInterface, multilinear::Multilinear,
     univariant::UnivariantPolynomial,
 };
-use sum_check::data_structure::SumCheckProof;
+use sum_check::composed::ComposedSumCheckProof;
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-pub struct GKRProof<F: PrimeField, P: MultilinearPolynomialInterface<F>> {
-    /// This is the output of the Circuit evaluation
-    pub output: Vec<F>,
+pub struct GKRProof<F: PrimeField> {
     /// This is the list of sum check proofs gotten during this protocol
-    pub sum_check_proofs: Vec<SumCheckProof<F, P>>,
-    /// This is the list of q polynomials
-    pub q_polynomials: Vec<UnivariantPolynomial<F>>,
+    pub sum_check_proofs: Vec<ComposedSumCheckProof<F>>,
+    /// This is a vector contain result of eval of w_i(b)
+    pub w_i_b: Vec<F>,
+    /// This is a vector contain result of eval of w_i(c)
+    pub w_i_c: Vec<F>,
 }
 
 #[cfg(test)]

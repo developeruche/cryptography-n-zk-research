@@ -6,15 +6,15 @@ use polynomial::interface::MultilinearPolynomialInterface;
 /// This is the interface for the GKR protocol
 pub trait GKRProtocolInterface<F: PrimeField> {
     /// This function is used to create GKR proofs
-    fn prove<P: MultilinearPolynomialInterface<F> + Clone>(
+    fn prove(
         circuit: &Circuit,
         evals: &CircuitEvaluation<F>,
-    ) -> GKRProof<F, P>;
+    ) -> GKRProof<F>;
 
     /// This function is used to verify GKR proofs
-    fn verify<P: MultilinearPolynomialInterface<F> + Clone>(
+    fn verify(
         circuit: &Circuit,
         input: &[F],
-        proof: &GKRProof<F, P>,
+        proof: &GKRProof<F>,
     ) -> bool;
 }

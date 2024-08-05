@@ -15,13 +15,14 @@ use sum_check::{
 pub struct GKRProtocol;
 
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
-    fn prove<P: MultilinearPolynomialInterface<F> + Clone>(
+    fn prove(
         circuit: &Circuit,
         evals: &CircuitEvaluation<F>,
-    ) -> GKRProof<F, P> {
+    ) -> GKRProof<F> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
-        let mut sumcheck_proofs = vec![];
-        // let mut q_polynomials = vec![];
+        let mut sum_check_proofs = vec![];
+        let mut w_i_b = vec![];
+        let mut w_i_c = vec![];
 
         let w_0_mle = gen_w_mle(&evals.layers, 0);
         transcript.append(w_0_mle.to_bytes());
@@ -68,16 +69,30 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
                 );
 
             transcript.append(sumcheck_proof.to_bytes());
-            sumcheck_proofs.push(sumcheck_proof);
+            sum_check_proofs.push(sumcheck_proof);
+
+            let (rand_b, rand_c) = random_challenges.split_at(random_challenges.len() / 2);
+
+            let eval_w_i_b = wb.evaluate(&rand_b.to_vec()).unwrap();
+            let eval_w_i_c = wc.evaluate(&rand_c.to_vec()).unwrap();
+
+            w_i_b.push(eval_w_i_b);
+            w_i_c.push(eval_w_i_c);
+
+            // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
         }
 
-        todo!()
+        GKRProof {
+            sum_check_proofs,
+            w_i_b,
+            w_i_c,
+        }
     }
 
-    fn verify<P: MultilinearPolynomialInterface<F> + Clone>(
+    fn verify(
         circuit: &Circuit,
         input: &[F],
-        proof: &GKRProof<F, P>,
+        proof: &GKRProof<F>,
     ) -> bool {
         unimplemented!()
     }
