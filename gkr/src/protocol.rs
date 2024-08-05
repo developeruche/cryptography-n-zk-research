@@ -56,6 +56,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             // mul(b, c)(w_i(b) * w_i(c))
             let f_b_c_mul_section = ComposedMultilinear::new(vec![mul_b_c, wb_mul_wc]);
 
+            // f(b, c) = add(r, b, c)(w_i(b) + w_i(c)) + mul(r, b, c)(w_i(b) * w_i(c))
             let f_b_c = vec![f_b_c_add_section, f_b_c_mul_section];
 
             // this prover that the `claim` is the result of the evalution of the preivous layer
