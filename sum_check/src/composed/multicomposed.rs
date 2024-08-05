@@ -1,4 +1,4 @@
-use super::{prover::ComposedProver, ComposedSumCheckProof, RoundPoly};
+use super::{prover::ComposedProver, utils::perform_multi_eval, ComposedSumCheckProof, RoundPoly};
 use crate::{
     composed::utils::{compute_multi_composed_bytes, perform_multi_partial_eval},
     interface::{
@@ -19,6 +19,12 @@ pub struct MultiComposedProver;
 
 #[derive(Clone, Default, Debug)]
 pub struct MultiComposedVerifier;
+
+#[derive(Clone, Default, Debug)]
+pub struct IntermidateClaimCheck<F: PrimeField> {
+    pub claimed_sum: F,
+    pub random_challenges: Vec<F>,
+}
 
 impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
     fn calculate_sum(poly: &[ComposedMultilinear<F>]) -> F {
@@ -91,10 +97,10 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
 }
 
 impl<F: PrimeField> MultiComposedVerifierInterface<F> for MultiComposedVerifier {
-    fn verify(proof: &ComposedSumCheckProof<F>, poly: &[ComposedMultilinear<F>]) -> bool {
-        let mut transcript = FiatShamirTranscript::default();
-
-        transcript.append(compute_multi_composed_bytes(&poly));
+    fn verify_internal(
+        proof: &ComposedSumCheckProof<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> Result<IntermidateClaimCheck<F>, &'static str> {
         transcript.append(proof.sum.into_bigint().to_bytes_be());
 
         let mut all_rands = Vec::new();
@@ -111,7 +117,7 @@ impl<F: PrimeField> MultiComposedVerifierInterface<F> for MultiComposedVerifier 
                     "untrusted_sum != proof.sum --> {} - {}",
                     untrusted_sum, proof.sum
                 );
-                return false;
+                return Err("untrusted_sum != proof.sum");
             }
 
             let sample = F::from_be_bytes_mod_order(&transcript.sample());
@@ -119,7 +125,32 @@ impl<F: PrimeField> MultiComposedVerifierInterface<F> for MultiComposedVerifier 
             all_rands.push(sample);
         }
 
-        true
+        Ok(IntermidateClaimCheck {
+            claimed_sum: mutating_sum,
+            random_challenges: all_rands,
+        })
+    }
+
+    fn verify_except_last_check(proof: &ComposedSumCheckProof<F>) -> IntermidateClaimCheck<F> {
+        let mut transcript = FiatShamirTranscript::default();
+        Self::verify_internal(proof, &mut transcript).unwrap()
+    }
+
+    fn verify(proof: &ComposedSumCheckProof<F>, poly: &[ComposedMultilinear<F>]) -> bool {
+        let mut transcript = FiatShamirTranscript::default();
+
+        transcript.append(compute_multi_composed_bytes(&poly));
+        let intermidate_claim = Self::verify_internal(proof, &mut transcript).unwrap();
+
+        intermidate_claim.complete(poly)
+    }
+}
+
+impl<F: PrimeField> IntermidateClaimCheck<F> {
+    pub fn complete(&self, poly: &[ComposedMultilinear<F>]) -> bool {
+        let eval = perform_multi_eval(poly, &self.random_challenges);
+
+        eval.iter().sum::<F>() == self.claimed_sum
     }
 }
 

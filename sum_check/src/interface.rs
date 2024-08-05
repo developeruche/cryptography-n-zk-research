@@ -1,5 +1,5 @@
 use crate::{
-    composed::{ComposedSumCheckProof, RoundPoly},
+    composed::{multicomposed::IntermidateClaimCheck, ComposedSumCheckProof, RoundPoly},
     data_structure::SumCheckProof,
 };
 use ark_ff::PrimeField;
@@ -77,4 +77,9 @@ pub trait MultiComposedProverInterface<F: PrimeField> {
 pub trait MultiComposedVerifierInterface<F: PrimeField> {
     /// This function verifies the sum check proof
     fn verify(proof: &ComposedSumCheckProof<F>, poly: &[ComposedMultilinear<F>]) -> bool;
+    fn verify_except_last_check(proof: &ComposedSumCheckProof<F>) -> IntermidateClaimCheck<F>;
+    fn verify_internal(
+        proof: &ComposedSumCheckProof<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> Result<IntermidateClaimCheck<F>, &'static str>;
 }
