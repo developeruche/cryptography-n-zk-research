@@ -15,7 +15,7 @@ impl<F: PrimeField> ComposedMultilinear<F> {
     pub fn new(polys: Vec<Multilinear<F>>) -> Self {
         // check to see that all the polynomials have the same number of variables
         let n_vars = polys[0].num_vars();
-        
+
         for poly in &polys {
             let len = poly.num_vars();
             println!("len: {}", len);

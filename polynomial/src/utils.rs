@@ -143,7 +143,7 @@ pub fn compute_number_of_variables(n: u128) -> u128 {
     if n == 1 {
         return 1;
     }
-    
+
     let log_base_2 = match n.checked_ilog2() {
         Some(log) => log,
         None => {
@@ -151,7 +151,7 @@ pub fn compute_number_of_variables(n: u128) -> u128 {
             i + 1
         }
     };
-    
+
     log_base_2 as u128
 }
 

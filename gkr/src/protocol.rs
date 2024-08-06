@@ -15,10 +15,7 @@ use sum_check::{
 pub struct GKRProtocol;
 
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
-    fn prove(
-        circuit: &Circuit,
-        evals: &CircuitEvaluation<F>,
-    ) -> GKRProof<F> {
+    fn prove(circuit: &Circuit, evals: &CircuitEvaluation<F>) -> GKRProof<F> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
         let mut sum_check_proofs = vec![];
         let mut w_i_b = vec![];
@@ -29,7 +26,6 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
         let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
         let claim = w_0_mle.evaluate(&n_r).unwrap();
-        
 
         // starting the GKR round reductions powered by sumcheck
         for l_index in 1..evals.layers.len() {
@@ -63,7 +59,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             println!("wc: {}", wc.num_vars());
             println!("wb_add_wc: {}", wb_add_wc.num_vars());
             println!("wb_mul_wc: {}", wb_mul_wc.num_vars());
-            
+
             //  add(b, c)(w_i(b) + w_i(c))
             let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
             // mul(b, c)(w_i(b) * w_i(c))
@@ -101,28 +97,20 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         }
     }
 
-    fn verify(
-        circuit: &Circuit,
-        input: &[F],
-        proof: &GKRProof<F>,
-    ) -> bool {
-        
+    fn verify(circuit: &Circuit, input: &[F], proof: &GKRProof<F>) -> bool {
         true
     }
 }
 
-
-
-
 #[cfg(test)]
 mod tests {
-    use circuits::{primitives::{CircuitLayer, Gate, GateType}, interfaces::CircuitInterface};
     use super::*;
     use ark_test_curves::bls12_381::Fr;
-    
+    use circuits::{
+        interfaces::CircuitInterface,
+        primitives::{CircuitLayer, Gate, GateType},
+    };
 
-    
-    
     // sample circuit evaluation
     //      100(*)    - layer 0
     //     /     \
@@ -144,8 +132,7 @@ mod tests {
             Fr::from(5u32),
         ];
         let evaluation = circuit.evaluate(&input);
-        
-        
+
         let proof = GKRProtocol::prove(&circuit, &evaluation);
     }
 }
