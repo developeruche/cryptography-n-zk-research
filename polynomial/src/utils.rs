@@ -140,7 +140,19 @@ pub fn compute_number_of_variables(n: u128) -> u128 {
     if n == 0 {
         return 0;
     }
-    128 - n.leading_zeros() as u128
+    if n == 1 {
+        return 1;
+    }
+    
+    let log_base_2 = match n.checked_ilog2() {
+        Some(log) => log,
+        None => {
+            let i = n.ilog2();
+            i + 1
+        }
+    };
+    
+    log_base_2 as u128
 }
 
 #[cfg(test)]

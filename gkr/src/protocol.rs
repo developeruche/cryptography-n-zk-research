@@ -29,6 +29,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
         let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
         let claim = w_0_mle.evaluate(&n_r).unwrap();
+        
 
         // starting the GKR round reductions powered by sumcheck
         for l_index in 1..evals.layers.len() {
@@ -52,6 +53,17 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             // w_i(b) * w_i(c)
             let wb_mul_wc = wb.mul_distinct(&wc);
 
+            println!("layer index: {}", l_index);
+            println!("add_b_c: {}", add_b_c.num_vars());
+            println!("add_b_c: {}", mul_b_c.num_vars());
+            println!("add_mle: {}", add_mle.num_vars());
+            println!("mul_mle: {}", mul_mle.num_vars());
+            println!("wb: {}", wb.num_vars());
+            println!("wb - raw: {:?}", evals.layers[l_index]);
+            println!("wc: {}", wc.num_vars());
+            println!("wb_add_wc: {}", wb_add_wc.num_vars());
+            println!("wb_mul_wc: {}", wb_mul_wc.num_vars());
+            
             //  add(b, c)(w_i(b) + w_i(c))
             let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
             // mul(b, c)(w_i(b) * w_i(c))
@@ -94,6 +106,46 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         input: &[F],
         proof: &GKRProof<F>,
     ) -> bool {
-        unimplemented!()
+        
+        true
+    }
+}
+
+
+
+
+#[cfg(test)]
+mod tests {
+    use circuits::{primitives::{CircuitLayer, Gate, GateType}, interfaces::CircuitInterface};
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+    
+
+    
+    
+    // sample circuit evaluation
+    //      100(*)    - layer 0
+    //     /     \
+    //   5(+)_0   20(*)_1 - layer 1
+    //   / \    /  \
+    //  2   3   4   5
+    #[test]
+    fn test_gkr_protocol() {
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+        let circuit = Circuit::new(vec![layer_0, layer_1]);
+        let input = [
+            Fr::from(2u32),
+            Fr::from(3u32),
+            Fr::from(4u32),
+            Fr::from(5u32),
+        ];
+        let evaluation = circuit.evaluate(&input);
+        
+        
+        let proof = GKRProtocol::prove(&circuit, &evaluation);
     }
 }
