@@ -136,23 +136,23 @@ pub fn compute_domain<F: PrimeField>(n: usize, pin: usize) -> Vec<F> {
     domain
 }
 
-pub fn compute_number_of_variables(n: u128) -> u128 {
+pub fn compute_number_of_variables(n: u128) -> (u128, u128) {
     if n == 0 {
-        return 0;
+        return (0, 0);
     }
     if n == 1 {
-        return 1;
+        return (1, 2);
     }
 
-    let log_base_2 = match n.checked_ilog2() {
-        Some(log) => log,
-        None => {
-            let i = n.ilog2();
-            i + 1
-        }
-    };
+    let mut log_base_2 = n.ilog2();
+    let mut n_power_2 = 1 << log_base_2;
 
-    log_base_2 as u128
+    if n != n_power_2 {
+        log_base_2 += 1;
+        n_power_2 = 1 << log_base_2;
+    }
+
+    (log_base_2 as u128, n_power_2)
 }
 
 #[cfg(test)]

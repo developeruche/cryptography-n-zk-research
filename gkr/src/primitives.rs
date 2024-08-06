@@ -13,6 +13,8 @@ pub struct GKRProof<F: PrimeField> {
     pub w_i_b: Vec<F>,
     /// This is a vector contain result of eval of w_i(c)
     pub w_i_c: Vec<F>,
+    /// This is a multilinear polynomial representing the output of the Circuit
+    pub w_0_mle: Multilinear<F>,
 }
 
 #[cfg(test)]

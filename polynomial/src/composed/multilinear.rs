@@ -18,7 +18,6 @@ impl<F: PrimeField> ComposedMultilinear<F> {
 
         for poly in &polys {
             let len = poly.num_vars();
-            println!("len: {}", len);
         }
         assert!(polys.iter().all(|p| p.num_vars() == n_vars));
 

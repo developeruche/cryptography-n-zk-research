@@ -142,9 +142,10 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
     }
 
     fn interpolate(y_s: &[F]) -> Self {
-        let number_of_vars = compute_number_of_variables(y_s.len() as u128);
+        let (number_of_vars, eval_size) = compute_number_of_variables(y_s.len() as u128);
+
         let mut y_s = y_s.to_vec();
-        y_s.resize(1 << number_of_vars as usize, F::ZERO);
+        y_s.resize(eval_size as usize, F::ZERO);
 
         Self::new(y_s, number_of_vars as usize)
     }

@@ -9,7 +9,8 @@ use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
 };
 use sum_check::{
-    composed::multicomposed::MultiComposedProver, interface::MultiComposedProverInterface,
+    composed::multicomposed::{MultiComposedProver, MultiComposedVerifier},
+    interface::{MultiComposedProverInterface, MultiComposedVerifierInterface},
 };
 
 pub struct GKRProtocol;
@@ -25,7 +26,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         transcript.append(w_0_mle.to_bytes());
 
         let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
-        let claim = w_0_mle.evaluate(&n_r).unwrap();
+        let mut claim = w_0_mle.evaluate(&n_r).unwrap();
 
         // starting the GKR round reductions powered by sumcheck
         for l_index in 1..evals.layers.len() {
@@ -49,17 +50,6 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             // w_i(b) * w_i(c)
             let wb_mul_wc = wb.mul_distinct(&wc);
 
-            println!("layer index: {}", l_index);
-            println!("add_b_c: {}", add_b_c.num_vars());
-            println!("add_b_c: {}", mul_b_c.num_vars());
-            println!("add_mle: {}", add_mle.num_vars());
-            println!("mul_mle: {}", mul_mle.num_vars());
-            println!("wb: {}", wb.num_vars());
-            println!("wb - raw: {:?}", evals.layers[l_index]);
-            println!("wc: {}", wc.num_vars());
-            println!("wb_add_wc: {}", wb_add_wc.num_vars());
-            println!("wb_mul_wc: {}", wb_mul_wc.num_vars());
-
             //  add(b, c)(w_i(b) + w_i(c))
             let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
             // mul(b, c)(w_i(b) * w_i(c))
@@ -70,11 +60,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             // this prover that the `claim` is the result of the evalution of the preivous layer
             let (sumcheck_proof, random_challenges) =
-                MultiComposedProver::sum_check_proof_without_initial_polynomial(
-                    &f_b_c,
-                    &mut transcript,
-                    &claim,
-                );
+                MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c, &claim);
 
             transcript.append(sumcheck_proof.to_bytes());
             sum_check_proofs.push(sumcheck_proof);
@@ -88,16 +74,83 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             w_i_c.push(eval_w_i_c);
 
             // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
+
+            n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
+            claim = w_i_mle.evaluate(&n_r).unwrap();
         }
 
         GKRProof {
             sum_check_proofs,
             w_i_b,
             w_i_c,
+            w_0_mle,
         }
     }
 
     fn verify(circuit: &Circuit, input: &[F], proof: &GKRProof<F>) -> bool {
+        // performing some sanity checks
+        if proof.sum_check_proofs.len() != proof.w_i_b.len()
+            || proof.sum_check_proofs.len() != proof.w_i_c.len()
+        {
+            println!("Invalid GKR proof");
+            return false;
+        }
+
+        let mut transcript = FiatShamirTranscript::default();
+        transcript.append(proof.w_0_mle.to_bytes());
+
+        let mut n_r = transcript.sample_n_as_field_elements(proof.w_0_mle.num_vars);
+        let mut claim = proof.w_0_mle.evaluate(&n_r).unwrap();
+
+        println!(
+            "Sumcheck proofs: {:?}",
+            proof
+                .sum_check_proofs
+                .iter()
+                .map(|x| x.sum)
+                .collect::<Vec<F>>()
+        );
+
+        for i in 0..proof.sum_check_proofs.len() {
+            if proof.sum_check_proofs[i].sum != claim {
+                println!("Invalid sumcheck proof");
+                return false;
+            }
+
+            transcript.append(proof.sum_check_proofs[i].to_bytes());
+            let intermidate_claim_check =
+                MultiComposedVerifier::verify_except_last_check(&proof.sum_check_proofs[i]);
+
+            // performing sum check last check
+            let (rand_b, rand_c) = intermidate_claim_check
+                .random_challenges
+                .split_at(intermidate_claim_check.random_challenges.len() / 2);
+            let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(i);
+            let mut r_b_c = n_r.clone();
+            r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
+
+            let w_b = proof.w_i_b[i];
+            let w_c = proof.w_i_c[i];
+
+            let add_b_c = add_mle.evaluate(&r_b_c).unwrap();
+            let mul_b_c = mul_mle.evaluate(&r_b_c).unwrap();
+
+            let add_section = add_b_c * (w_b + w_c);
+            let mul_section = mul_b_c * (w_b * w_c);
+
+            let f_b_c_eval = add_section + mul_section;
+
+            if f_b_c_eval != intermidate_claim_check.claimed_sum {
+                println!("Invalid sumcheck proof");
+                return false;
+            }
+
+            // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
+            // claim =
+
+            break;
+        }
+
         true
     }
 }
@@ -134,5 +187,7 @@ mod tests {
         let evaluation = circuit.evaluate(&input);
 
         let proof = GKRProtocol::prove(&circuit, &evaluation);
+
+        assert!(GKRProtocol::verify(&circuit, &input, &proof));
     }
 }

@@ -39,18 +39,28 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
 
     fn sum_check_proof(
         poly: &[ComposedMultilinear<F>],
-        transcript: &mut FiatShamirTranscript,
         sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
+        let mut transcript = FiatShamirTranscript::default();
+
         transcript.append(compute_multi_composed_bytes(&poly));
 
-        Self::sum_check_proof_without_initial_polynomial(poly, transcript, sum)
+        Self::sum_check_proof_internal(poly, sum, &mut transcript)
     }
 
     fn sum_check_proof_without_initial_polynomial(
         poly_: &[ComposedMultilinear<F>],
-        transcript: &mut FiatShamirTranscript,
         sum: &F,
+    ) -> (ComposedSumCheckProof<F>, Vec<F>) {
+        let mut transcript = FiatShamirTranscript::default();
+
+        Self::sum_check_proof_internal(poly_, sum, &mut transcript)
+    }
+
+    fn sum_check_proof_internal(
+        poly_: &[ComposedMultilinear<F>],
+        sum: &F,
+        transcript: &mut FiatShamirTranscript,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut poly = poly_.to_vec();
         let mut all_random_reponse = Vec::new();
@@ -201,10 +211,7 @@ mod tests {
         let multi_composed = vec![composed_1, composed_2];
         let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let mut transcript = FiatShamirTranscript::default();
-
-        let (proof, _) =
-            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -221,10 +228,7 @@ mod tests {
         let multi_composed = vec![composed_1, composed_2, composed_3];
         let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let mut transcript = FiatShamirTranscript::default();
-
-        let (proof, _) =
-            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -240,10 +244,7 @@ mod tests {
         let multi_composed = vec![composed_1, composed_2];
         let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let mut transcript = FiatShamirTranscript::default();
-
-        let (proof, _) =
-            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -295,11 +296,27 @@ mod tests {
         let multi_composed = vec![lhs_poly, rhs_poly];
         let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let mut transcript = FiatShamirTranscript::default();
-
-        let (proof, _) =
-            MultiComposedProver::sum_check_proof(&multi_composed, &mut transcript, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
+    }
+
+    #[test]
+    fn test_multi_composed_sum_check_proof_verify_except_last_check() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(3), Fr::from(0), Fr::from(3)], 2);
+
+        let composed_1 = ComposedMultilinear::new(vec![poly1]);
+        let composed_2 = ComposedMultilinear::new(vec![poly2]);
+
+        let multi_composed = vec![composed_1, composed_2];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let (proof, _) =
+            MultiComposedProver::sum_check_proof_without_initial_polynomial(&multi_composed, &sum);
+
+        let intermidate_claim_check = MultiComposedVerifier::verify_except_last_check(&proof);
+
+        assert!(intermidate_claim_check.complete(&multi_composed));
     }
 }
