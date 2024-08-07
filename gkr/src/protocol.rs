@@ -18,6 +18,7 @@ pub struct GKRProtocol;
 impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
     fn prove(circuit: &Circuit, evals: &CircuitEvaluation<F>) -> GKRProof<F> {
         let mut transcript = FiatShamirTranscript::new(vec![]);
+
         let mut sum_check_proofs = vec![];
         let mut w_i_b = vec![];
         let mut w_i_c = vec![];
