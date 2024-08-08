@@ -123,11 +123,11 @@ pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
     n_r: Vec<F>,
     add_mle: &Multilinear<F>,
     mul_mle: &Multilinear<F>,
-) -> bool {
+) -> (bool, F) {
     // check if the claim is the same as the expected claim
     if *layer_one_expected_claim != layer_one_sum_check_proof.sum {
         println!("Invalid sumcheck proof");
-        return false;
+        (false, F::ZERO);
     }
 
     transcript.append(layer_one_sum_check_proof.to_bytes());
@@ -153,8 +153,15 @@ pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
 
     if f_b_c_eval != intermidate_claim_check.claimed_sum {
         println!("Invalid sumcheck proof");
-        return false;
+        return (false, F::ZERO);
     }
+    
+    let alpha: F = transcript.sample_as_field_element();
+    let beta: F = transcript.sample_as_field_element();
 
-    true
+    let new_claim = alpha * w_b + beta * w_c;
+    
+    
+
+    (true, new_claim)
 }

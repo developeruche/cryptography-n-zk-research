@@ -159,14 +159,16 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             &mut transcript,
             proof.w_i_b[0],
             proof.w_i_c[0],
-            n_r,
+            n_r.clone(),
             &add_mle,
             &mul_mle,
-        ) {
+        ).0 {
             return false;
         }
-
-        // for i in 0..proof.sum_check_proofs.len() {
+        
+        
+        // running GKR verification logic excluding the first layer
+        // for i in 1..proof.sum_check_proofs.len() {
         //     if proof.sum_check_proofs[i].sum != claim {
         //         println!("Invalid sumcheck proof");
         //         return false;
