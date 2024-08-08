@@ -1,4 +1,8 @@
-use crate::{interfaces::GKRProtocolInterface, primitives::GKRProof, utils::gen_w_mle};
+use crate::{
+    interfaces::GKRProtocolInterface,
+    primitives::GKRProof,
+    utils::{gen_w_mle, perform_gkr_sumcheck_layer_one},
+};
 use ark_ff::PrimeField;
 use circuits::{
     interfaces::GKRProtocolCircuitInterface,
@@ -27,10 +31,28 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         transcript.append(w_0_mle.to_bytes());
 
         let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
-        let mut claim = w_0_mle.evaluate(&n_r).unwrap();
+        let claim = w_0_mle.evaluate(&n_r).unwrap();
+        
+        let mut last_rand_b = Vec::<F>::new();
+        let mut last_rand_c = Vec::<F>::new();
 
-        // starting the GKR round reductions powered by sumcheck
-        for l_index in 1..evals.layers.len() {
+        // Running sumcheck on layer one
+        let (add_mle_layer_one, mul_mle_layer_one) = circuit.get_add_n_mul_mle::<F>(0);
+        let w_1_mle = gen_w_mle(&evals.layers, 1);
+        let (layer_one_claim, layer_one_rand_b, layer_one_rand_c) = perform_gkr_sumcheck_layer_one(
+            &claim,
+            n_r.clone(),
+            &add_mle_layer_one,
+            &mul_mle_layer_one,
+            &w_1_mle,
+            &mut transcript,
+            &mut sum_check_proofs,
+            &mut w_i_b,
+            &mut w_i_c,
+        );
+
+        // starting the GKR round reductions powered by sumcheck (layer 2 to n-1(excluding the input layer))
+        for l_index in 2..evals.layers.len() - 1 {
             let n_r_internal = n_r.clone();
             let number_of_round = n_r_internal.len();
 
@@ -61,7 +83,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             // this prover that the `claim` is the result of the evalution of the preivous layer
             let (sumcheck_proof, random_challenges) =
-                MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c, &claim);
+                MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c);
 
             transcript.append(sumcheck_proof.to_bytes());
             sum_check_proofs.push(sumcheck_proof);
@@ -76,8 +98,8 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
 
-            n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
-            claim = w_i_mle.evaluate(&n_r).unwrap();
+            // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
+            // claim = w_i_mle.evaluate(&n_r).unwrap();
         }
 
         GKRProof {

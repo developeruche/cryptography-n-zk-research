@@ -39,33 +39,31 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
 
     fn sum_check_proof(
         poly: &[ComposedMultilinear<F>],
-        sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut transcript = FiatShamirTranscript::default();
 
         transcript.append(compute_multi_composed_bytes(&poly));
 
-        Self::sum_check_proof_internal(poly, sum, &mut transcript)
+        Self::sum_check_proof_internal(poly, &mut transcript)
     }
 
     fn sum_check_proof_without_initial_polynomial(
-        poly_: &[ComposedMultilinear<F>],
-        sum: &F,
+        poly: &[ComposedMultilinear<F>],
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut transcript = FiatShamirTranscript::default();
 
-        Self::sum_check_proof_internal(poly_, sum, &mut transcript)
+        Self::sum_check_proof_internal(poly, &mut transcript)
     }
 
     fn sum_check_proof_internal(
         poly_: &[ComposedMultilinear<F>],
-        sum: &F,
         transcript: &mut FiatShamirTranscript,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut poly = poly_.to_vec();
         let mut all_random_reponse = Vec::new();
         let mut round_polys = Vec::new();
-
+        
+        let sum = Self::calculate_sum(&poly);
         transcript.append(sum.into_bigint().to_bytes_be());
 
         for _ in 0..poly[0].num_vars() {
@@ -99,7 +97,7 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
         (
             ComposedSumCheckProof {
                 round_poly: round_polys,
-                sum: *sum,
+                sum,
             },
             all_random_reponse,
         )
@@ -209,9 +207,8 @@ mod tests {
         let composed_2 = ComposedMultilinear::new(vec![poly2]);
 
         let multi_composed = vec![composed_1, composed_2];
-        let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -226,9 +223,8 @@ mod tests {
         let composed_3 = ComposedMultilinear::new(vec![poly2]);
 
         let multi_composed = vec![composed_1, composed_2, composed_3];
-        let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -242,9 +238,8 @@ mod tests {
         let composed_2 = ComposedMultilinear::new(vec![poly2.clone(), poly1.clone()]);
 
         let multi_composed = vec![composed_1, composed_2];
-        let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -294,9 +289,8 @@ mod tests {
         ]);
 
         let multi_composed = vec![lhs_poly, rhs_poly];
-        let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
-        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed);
 
         assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
     }
@@ -310,10 +304,9 @@ mod tests {
         let composed_2 = ComposedMultilinear::new(vec![poly2]);
 
         let multi_composed = vec![composed_1, composed_2];
-        let sum = MultiComposedProver::calculate_sum(&multi_composed);
 
         let (proof, _) =
-            MultiComposedProver::sum_check_proof_without_initial_polynomial(&multi_composed, &sum);
+            MultiComposedProver::sum_check_proof_without_initial_polynomial(&multi_composed);
 
         let intermidate_claim_check = MultiComposedVerifier::verify_except_last_check(&proof);
 
