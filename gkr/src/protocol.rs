@@ -119,6 +119,9 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             last_alpha = transcript.sample_as_field_element();
             last_beta = transcript.sample_as_field_element();
+            
+            last_rand_b = rand_b.to_vec();
+            last_rand_c = rand_c.to_vec();
 
             claim = last_alpha * eval_w_i_b + last_beta * eval_w_i_c;
         }
@@ -216,27 +219,54 @@ mod tests {
         primitives::{CircuitLayer, Gate, GateType},
     };
 
-    // sample circuit evaluation
-    //      100(*)    - layer 0
-    //     /     \
-    //   5(+)_0   20(*)_1 - layer 1
-    //   / \    /  \
-    //  2   3   4   5
+
     #[test]
     fn test_gkr_protocol() {
-        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
         let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Mul, [0, 1]),
+            Gate::new(GateType::Add, [2, 3]),
+        ]);
+        let layer_3 = CircuitLayer::new(vec![
             Gate::new(GateType::Add, [0, 1]),
             Gate::new(GateType::Mul, [2, 3]),
+            Gate::new(GateType::Mul, [4, 5]),
+            Gate::new(GateType::Mul, [6, 7])
         ]);
-        let circuit = Circuit::new(vec![layer_0, layer_1]);
+        let layer_4 = CircuitLayer::new(vec![
+            Gate::new(GateType::Mul, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+            Gate::new(GateType::Mul, [4, 5]),
+            Gate::new(GateType::Add, [6, 7]),
+            Gate::new(GateType::Mul, [8, 9]),
+            Gate::new(GateType::Add, [10, 11]),
+            Gate::new(GateType::Mul, [12, 13]),
+            Gate::new(GateType::Mul, [14, 15]),
+        ]);
+        
+        let circuit = Circuit::new(vec![layer_0, layer_1, layer_3, layer_4]);
         let input = [
             Fr::from(2u32),
+            Fr::from(1u32),
+            Fr::from(3u32),
+            Fr::from(1u32),
+            Fr::from(4u32),
+            Fr::from(1u32),
+            Fr::from(2u32),
+            Fr::from(2u32),
+            Fr::from(3u32),
             Fr::from(3u32),
             Fr::from(4u32),
-            Fr::from(5u32),
+            Fr::from(4u32),
+            Fr::from(2u32),
+            Fr::from(3u32),
+            Fr::from(3u32),
+            Fr::from(4u32),
         ];
+        
         let evaluation = circuit.evaluate(&input);
+        
+        assert_eq!(evaluation.layers[0][0], Fr::from(224u32));
 
         let proof = GKRProtocol::prove(&circuit, &evaluation);
 
