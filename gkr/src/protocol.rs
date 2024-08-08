@@ -65,23 +65,26 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(l_index - 1);
             let w_i_mle = gen_w_mle(&evals.layers, l_index);
 
-            let number_of_round = layer_one_rand_b.len();
+            let number_of_round = last_rand_b.len();
 
             // add(r_b, b, c) ---> add(b, c)
-            let add_r_b_c =
-                add_mle.partial_evaluations(layer_one_rand_b.clone(), vec![0; number_of_round]);
+            let add_rb_b_c =
+                add_mle.partial_evaluations(last_rand_b.clone(), vec![0; number_of_round]);
             // mul(r_b, b, c) ---> mul(b, c)
-            let mul_b_c =
-                mul_mle.partial_evaluations(layer_one_rand_b.clone(), vec![0; number_of_round]);
+            let mul_rb_b_c =
+                mul_mle.partial_evaluations(last_rand_b.clone(), vec![0; number_of_round]);
 
             // add(r_c, b, c) ---> add(b, c)
-            let add_r_c =
-                add_mle.partial_evaluations(layer_one_rand_c.clone(), vec![0; number_of_round]);
+            let add_rc_b_c =
+                add_mle.partial_evaluations(last_rand_c.clone(), vec![0; number_of_round]);
             // mul(r_c, b, c) ---> mul(b, c)
-            let mul_b_c =
-                mul_mle.partial_evaluations(layer_one_rand_c.clone(), vec![0; number_of_round]);
+            let mul_rc_b_c =
+                mul_mle.partial_evaluations(last_rand_c.clone(), vec![0; number_of_round]);
 
-            // let alpha_beta_add_b_c =
+            // alpha * add(r_b, b, c) + beta * add(r_c, b, c)
+            let alpha_beta_add_b_c = (add_rb_b_c * last_alpha) + (add_rc_b_c * last_beta);
+            // alpha * mul(r_b, b, c) + beta * mul(r_c, b, c)
+            let alpha_beta_mul_b_c = (mul_rb_b_c * last_alpha) + (mul_rc_b_c * last_beta);
 
             let wb = w_i_mle.clone();
             let wc = w_i_mle.clone();
@@ -91,12 +94,12 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             // w_i(b) * w_i(c)
             let wb_mul_wc = wb.mul_distinct(&wc);
 
-            //  add(b, c)(w_i(b) + w_i(c))
-            let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
-            // mul(b, c)(w_i(b) * w_i(c))
-            let f_b_c_mul_section = ComposedMultilinear::new(vec![mul_b_c, wb_mul_wc]);
+            // alpha * add(r_b, b, c) + beta * add(r_c, b, c)(w_i(b) + w_i(c))
+            let f_b_c_add_section = ComposedMultilinear::new(vec![alpha_beta_add_b_c, wb_add_wc]);
+            // alpha * mul(r_b, b, c) + beta * mul(r_c, b, c)(w_i(b) * w_i(c))
+            let f_b_c_mul_section = ComposedMultilinear::new(vec![alpha_beta_mul_b_c, wb_mul_wc]);
 
-            // f(b, c) = add(r, b, c)(w_i(b) + w_i(c)) + mul(r, b, c)(w_i(b) * w_i(c))
+            // f(b, c) = alpha * add(r_b, b, c) + beta * add(r_c, b, c)(w_i(b) + w_i(c)) + alpha * mul(r_b, b, c) + beta * mul(r_c, b, c)(w_i(b) * w_i(c))
             let f_b_c = vec![f_b_c_add_section, f_b_c_mul_section];
 
             // this prover that the `claim` is the result of the evalution of the preivous layer
@@ -114,11 +117,13 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             w_i_b.push(eval_w_i_b);
             w_i_c.push(eval_w_i_c);
 
-            // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
+            last_alpha = transcript.sample_as_field_element();
+            last_beta = transcript.sample_as_field_element();
 
-            // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
-            // claim = w_i_mle.evaluate(&n_r).unwrap();
+            claim = last_alpha * eval_w_i_b + last_beta * eval_w_i_c;
         }
+
+        // performing verification for the input layer
 
         GKRProof {
             sum_check_proofs,
