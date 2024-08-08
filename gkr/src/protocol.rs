@@ -31,75 +31,94 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         transcript.append(w_0_mle.to_bytes());
 
         let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
-        let claim = w_0_mle.evaluate(&n_r).unwrap();
+        let mut claim = w_0_mle.evaluate(&n_r).unwrap();
 
         let mut last_rand_b = Vec::<F>::new();
         let mut last_rand_c = Vec::<F>::new();
+        let mut last_alpha = F::zero();
+        let mut last_beta = F::zero();
 
         // Running sumcheck on layer one
         let (add_mle_layer_one, mul_mle_layer_one) = circuit.get_add_n_mul_mle::<F>(0);
         let w_1_mle = gen_w_mle(&evals.layers, 1);
-        let (layer_one_claim, layer_one_rand_b, layer_one_rand_c) = perform_gkr_sumcheck_layer_one(
-            n_r.clone(),
-            &add_mle_layer_one,
-            &mul_mle_layer_one,
-            &w_1_mle,
-            &mut transcript,
-            &mut sum_check_proofs,
-            &mut w_i_b,
-            &mut w_i_c,
-        );
+        let (layer_one_claim, layer_one_rand_b, layer_one_rand_c, layer_one_alpha, layer_one_beta) =
+            perform_gkr_sumcheck_layer_one(
+                claim,
+                n_r.clone(),
+                &add_mle_layer_one,
+                &mul_mle_layer_one,
+                &w_1_mle,
+                &mut transcript,
+                &mut sum_check_proofs,
+                &mut w_i_b,
+                &mut w_i_c,
+            );
+
+        claim = layer_one_claim;
+        last_rand_b = layer_one_rand_b;
+        last_rand_c = layer_one_rand_c;
+        last_alpha = layer_one_alpha;
+        last_beta = layer_one_beta;
 
         // starting the GKR round reductions powered by sumcheck (layer 2 to n-1(excluding the input layer))
-        // for l_index in 2..evals.layers.len() - 1 {
-        //     let n_r_internal = n_r.clone();
-        //     let number_of_round = n_r_internal.len();
+        for l_index in 2..evals.layers.len() {
+            let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(l_index - 1);
+            let w_i_mle = gen_w_mle(&evals.layers, l_index);
 
-        //     let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(l_index - 1);
-        //     let w_i_mle = gen_w_mle(&evals.layers, l_index);
-        //     // f(b, c) = add(r, b, c)(w_i(b) + w_i(c)) + mul(r, b, c)(w_i(b) * w_i(c))
-        //     // add(r, b, c) ---> add(b, c)
-        //     let add_b_c =
-        //         add_mle.partial_evaluations(n_r_internal.clone(), vec![0; number_of_round]);
-        //     // mul(r, b, c) ---> mul(b, c)
-        //     let mul_b_c = mul_mle.partial_evaluations(n_r_internal, vec![0; number_of_round]);
+            let number_of_round = layer_one_rand_b.len();
 
-        //     let wb = w_i_mle.clone();
-        //     let wc = w_i_mle.clone();
+            // add(r_b, b, c) ---> add(b, c)
+            let add_r_b_c =
+                add_mle.partial_evaluations(layer_one_rand_b.clone(), vec![0; number_of_round]);
+            // mul(r_b, b, c) ---> mul(b, c)
+            let mul_b_c =
+                mul_mle.partial_evaluations(layer_one_rand_b.clone(), vec![0; number_of_round]);
 
-        //     // w_i(b) + w_i(c)
-        //     let wb_add_wc = wb.add_distinct(&wc);
-        //     // w_i(b) * w_i(c)
-        //     let wb_mul_wc = wb.mul_distinct(&wc);
+            // add(r_c, b, c) ---> add(b, c)
+            let add_r_c =
+                add_mle.partial_evaluations(layer_one_rand_c.clone(), vec![0; number_of_round]);
+            // mul(r_c, b, c) ---> mul(b, c)
+            let mul_b_c =
+                mul_mle.partial_evaluations(layer_one_rand_c.clone(), vec![0; number_of_round]);
 
-        //     //  add(b, c)(w_i(b) + w_i(c))
-        //     let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
-        //     // mul(b, c)(w_i(b) * w_i(c))
-        //     let f_b_c_mul_section = ComposedMultilinear::new(vec![mul_b_c, wb_mul_wc]);
+            // let alpha_beta_add_b_c =
 
-        //     // f(b, c) = add(r, b, c)(w_i(b) + w_i(c)) + mul(r, b, c)(w_i(b) * w_i(c))
-        //     let f_b_c = vec![f_b_c_add_section, f_b_c_mul_section];
+            let wb = w_i_mle.clone();
+            let wc = w_i_mle.clone();
 
-        //     // this prover that the `claim` is the result of the evalution of the preivous layer
-        //     let (sumcheck_proof, random_challenges) =
-        //         MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c);
+            // w_i(b) + w_i(c)
+            let wb_add_wc = wb.add_distinct(&wc);
+            // w_i(b) * w_i(c)
+            let wb_mul_wc = wb.mul_distinct(&wc);
 
-        //     transcript.append(sumcheck_proof.to_bytes());
-        //     sum_check_proofs.push(sumcheck_proof);
+            //  add(b, c)(w_i(b) + w_i(c))
+            let f_b_c_add_section = ComposedMultilinear::new(vec![add_b_c, wb_add_wc]);
+            // mul(b, c)(w_i(b) * w_i(c))
+            let f_b_c_mul_section = ComposedMultilinear::new(vec![mul_b_c, wb_mul_wc]);
 
-        //     let (rand_b, rand_c) = random_challenges.split_at(random_challenges.len() / 2);
+            // f(b, c) = add(r, b, c)(w_i(b) + w_i(c)) + mul(r, b, c)(w_i(b) * w_i(c))
+            let f_b_c = vec![f_b_c_add_section, f_b_c_mul_section];
 
-        //     let eval_w_i_b = wb.evaluate(&rand_b.to_vec()).unwrap();
-        //     let eval_w_i_c = wc.evaluate(&rand_c.to_vec()).unwrap();
+            // this prover that the `claim` is the result of the evalution of the preivous layer
+            let (sumcheck_proof, random_challenges) =
+                MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c, &claim);
 
-        //     w_i_b.push(eval_w_i_b);
-        //     w_i_c.push(eval_w_i_c);
+            transcript.append(sumcheck_proof.to_bytes());
+            sum_check_proofs.push(sumcheck_proof);
 
-        //     // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
+            let (rand_b, rand_c) = random_challenges.split_at(random_challenges.len() / 2);
 
-        //     // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
-        //     // claim = w_i_mle.evaluate(&n_r).unwrap();
-        // }
+            let eval_w_i_b = wb.evaluate(&rand_b.to_vec()).unwrap();
+            let eval_w_i_c = wc.evaluate(&rand_c.to_vec()).unwrap();
+
+            w_i_b.push(eval_w_i_b);
+            w_i_c.push(eval_w_i_c);
+
+            // TODO: perform mathematical proof bindings for the eval_w_i_b and eval_w_i_c
+
+            // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
+            // claim = w_i_mle.evaluate(&n_r).unwrap();
+        }
 
         GKRProof {
             sum_check_proofs,

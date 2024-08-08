@@ -58,6 +58,7 @@ pub fn gen_q<F: PrimeField>(
 }
 
 pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
+    claim: F,
     layer_one_r: Vec<F>,
     add_mle: &Multilinear<F>,
     mul_mle: &Multilinear<F>,
@@ -66,7 +67,7 @@ pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
     sum_check_proofs: &mut Vec<ComposedSumCheckProof<F>>,
     w_i_b: &mut Vec<F>,
     w_i_c: &mut Vec<F>,
-) -> (F, Vec<F>, Vec<F>) {
+) -> (F, Vec<F>, Vec<F>, F, F) {
     let number_of_round = layer_one_r.len();
 
     // add(r, b, c) ---> add(b, c)
@@ -92,7 +93,7 @@ pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
 
     // this prover that the `claim` is the result of the evalution of the preivous layer
     let (sumcheck_proof, random_challenges) =
-        MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c);
+        MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c, &claim);
 
     transcript.append(sumcheck_proof.to_bytes());
     sum_check_proofs.push(sumcheck_proof);
@@ -105,7 +106,12 @@ pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
     w_i_b.push(eval_w_i_b);
     w_i_c.push(eval_w_i_c);
 
-    (F::ZERO, rand_b.to_vec(), rand_c.to_vec())
+    let alpha: F = transcript.sample_as_field_element();
+    let beta: F = transcript.sample_as_field_element();
+
+    let new_claim = alpha * eval_w_i_b + beta * eval_w_i_c;
+
+    (new_claim, rand_b.to_vec(), rand_c.to_vec(), alpha, beta)
 }
 
 pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
