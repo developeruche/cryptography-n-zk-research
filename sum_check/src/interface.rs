@@ -60,9 +60,7 @@ pub trait MultiComposedProverInterface<F: PrimeField> {
     /// This function returns the sum of the multilinear polynomial evaluation over the boolean hypercube.
     fn calculate_sum(poly: &[ComposedMultilinear<F>]) -> F;
     /// This function computes sum check proof
-    fn sum_check_proof(
-        poly: &[ComposedMultilinear<F>],
-    ) -> (ComposedSumCheckProof<F>, Vec<F>);
+    fn sum_check_proof(poly: &[ComposedMultilinear<F>]) -> (ComposedSumCheckProof<F>, Vec<F>);
     /// This function computes sum check proof
     fn sum_check_proof_without_initial_polynomial(
         poly: &[ComposedMultilinear<F>],

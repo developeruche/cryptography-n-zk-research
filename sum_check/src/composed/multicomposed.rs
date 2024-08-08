@@ -37,9 +37,7 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
         sum
     }
 
-    fn sum_check_proof(
-        poly: &[ComposedMultilinear<F>],
-    ) -> (ComposedSumCheckProof<F>, Vec<F>) {
+    fn sum_check_proof(poly: &[ComposedMultilinear<F>]) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut transcript = FiatShamirTranscript::default();
 
         transcript.append(compute_multi_composed_bytes(&poly));
@@ -62,7 +60,7 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
         let mut poly = poly_.to_vec();
         let mut all_random_reponse = Vec::new();
         let mut round_polys = Vec::new();
-        
+
         let sum = Self::calculate_sum(&poly);
         transcript.append(sum.into_bigint().to_bytes_be());
 

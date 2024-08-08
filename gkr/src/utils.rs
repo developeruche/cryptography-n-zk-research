@@ -7,8 +7,11 @@ use polynomial::{
     univariant::UnivariantPolynomial,
 };
 use sum_check::{
-    composed::{multicomposed::MultiComposedProver, ComposedSumCheckProof},
-    interface::MultiComposedProverInterface,
+    composed::{
+        multicomposed::{MultiComposedProver, MultiComposedVerifier},
+        ComposedSumCheckProof,
+    },
+    interface::{MultiComposedProverInterface, MultiComposedVerifierInterface},
 };
 
 pub fn gen_w_mle<F: PrimeField>(evals: &[Vec<F>], layer_index: usize) -> Multilinear<F> {
@@ -55,7 +58,6 @@ pub fn gen_q<F: PrimeField>(
 }
 
 pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
-    layer_claim: &F,
     layer_one_r: Vec<F>,
     add_mle: &Multilinear<F>,
     mul_mle: &Multilinear<F>,
@@ -91,9 +93,7 @@ pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
     // this prover that the `claim` is the result of the evalution of the preivous layer
     let (sumcheck_proof, random_challenges) =
         MultiComposedProver::sum_check_proof_without_initial_polynomial(&f_b_c);
-    
 
-    
     transcript.append(sumcheck_proof.to_bytes());
     sum_check_proofs.push(sumcheck_proof);
 
@@ -105,5 +105,50 @@ pub fn perform_gkr_sumcheck_layer_one<F: PrimeField>(
     w_i_b.push(eval_w_i_b);
     w_i_c.push(eval_w_i_c);
 
-    (layer_claim.clone(), rand_b.to_vec(), rand_c.to_vec())
+    (F::ZERO, rand_b.to_vec(), rand_c.to_vec())
+}
+
+pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
+    layer_one_expected_claim: &F, // this should be the excecution of layer zero
+    layer_one_sum_check_proof: &ComposedSumCheckProof<F>, // this is the sum check proof from layer one excecuted by the prover
+    transcript: &mut FiatShamirTranscript,
+    w_b: F,
+    w_c: F,
+    n_r: Vec<F>,
+    add_mle: &Multilinear<F>,
+    mul_mle: &Multilinear<F>,
+) -> bool {
+    // check if the claim is the same as the expected claim
+    if *layer_one_expected_claim != layer_one_sum_check_proof.sum {
+        println!("Invalid sumcheck proof");
+        return false;
+    }
+
+    transcript.append(layer_one_sum_check_proof.to_bytes());
+
+    let intermidate_claim_check =
+        MultiComposedVerifier::verify_except_last_check(&layer_one_sum_check_proof);
+
+    // performing sum check last check
+    let (rand_b, rand_c) = intermidate_claim_check
+        .random_challenges
+        .split_at(intermidate_claim_check.random_challenges.len() / 2);
+
+    let mut r_b_c = n_r;
+    r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
+
+    let add_b_c = add_mle.evaluate(&r_b_c).unwrap();
+    let mul_b_c = mul_mle.evaluate(&r_b_c).unwrap();
+
+    let add_section = add_b_c * (w_b + w_c);
+    let mul_section = mul_b_c * (w_b * w_c);
+
+    let f_b_c_eval = add_section + mul_section;
+
+    if f_b_c_eval != intermidate_claim_check.claimed_sum {
+        println!("Invalid sumcheck proof");
+        return false;
+    }
+
+    true
 }
