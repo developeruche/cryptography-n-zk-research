@@ -6,7 +6,7 @@ use crate::{
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Mul};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
@@ -250,6 +250,20 @@ impl<F: PrimeField> AddAssign for Multilinear<F> {
         for i in 0..self.evaluations.len() {
             self.evaluations[i] += other.evaluations[i];
         }
+    }
+}
+
+impl<F: PrimeField> Mul<F> for Multilinear<F> {
+    type Output = Self;
+
+    fn mul(self, rhs: F) -> Self::Output {
+        let mut new_evaluations = Vec::new();
+
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(self.evaluations[i] * rhs);
+        }
+
+        Self::new(new_evaluations, self.num_vars)
     }
 }
 
@@ -598,5 +612,19 @@ mod tests {
                 .unwrap(),
             Fr::from(0)
         );
+    }
+
+    #[test]
+    fn test_mul() {
+        let poly = Multilinear::new(vec![Fr::from(3), Fr::from(6), Fr::from(7), Fr::from(12)], 2);
+
+        let result = poly * Fr::from(2);
+
+        let expected = Multilinear::new(
+            vec![Fr::from(6), Fr::from(12), Fr::from(14), Fr::from(24)],
+            2,
+        );
+
+        assert_eq!(result, expected);
     }
 }

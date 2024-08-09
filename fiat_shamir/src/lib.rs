@@ -43,4 +43,8 @@ impl TranscriptInterface for FiatShamirTranscript {
         }
         response
     }
+
+    fn sample_as_field_element<F: ark_ff::prelude::PrimeField>(&mut self) -> F {
+        F::from_be_bytes_mod_order(&self.sample())
+    }
 }

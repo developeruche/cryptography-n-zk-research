@@ -10,4 +10,6 @@ pub trait TranscriptInterface {
     fn sample_n(&mut self, n: usize) -> Vec<[u8; 32]>;
     /// This is used to sample n challenges from the transcript as  field elements.
     fn sample_n_as_field_elements<F: PrimeField>(&mut self, n: usize) -> Vec<F>;
+    /// This is used to sample a challenge from the transcript as a field element.
+    fn sample_as_field_element<F: PrimeField>(&mut self) -> F;
 }

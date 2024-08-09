@@ -71,8 +71,8 @@ pub trait MultiComposedProverInterface<F: PrimeField> {
     ) -> (ComposedSumCheckProof<F>, Vec<F>);
     fn sum_check_proof_internal(
         poly_: &[ComposedMultilinear<F>],
-        sum: &F,
         transcript: &mut FiatShamirTranscript,
+        sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>);
 }
 

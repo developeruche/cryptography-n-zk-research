@@ -45,22 +45,22 @@ impl<F: PrimeField> MultiComposedProverInterface<F> for MultiComposedProver {
 
         transcript.append(compute_multi_composed_bytes(&poly));
 
-        Self::sum_check_proof_internal(poly, sum, &mut transcript)
+        Self::sum_check_proof_internal(poly, &mut transcript, sum)
     }
 
     fn sum_check_proof_without_initial_polynomial(
-        poly_: &[ComposedMultilinear<F>],
+        poly: &[ComposedMultilinear<F>],
         sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut transcript = FiatShamirTranscript::default();
 
-        Self::sum_check_proof_internal(poly_, sum, &mut transcript)
+        Self::sum_check_proof_internal(poly, &mut transcript, sum)
     }
 
     fn sum_check_proof_internal(
         poly_: &[ComposedMultilinear<F>],
-        sum: &F,
         transcript: &mut FiatShamirTranscript,
+        sum: &F,
     ) -> (ComposedSumCheckProof<F>, Vec<F>) {
         let mut poly = poly_.to_vec();
         let mut all_random_reponse = Vec::new();
