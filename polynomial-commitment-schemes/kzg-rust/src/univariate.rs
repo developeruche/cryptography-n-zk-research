@@ -61,3 +61,35 @@ impl<P: Pairing> KZGUnivariateInterface<P> for UnivariateKZG {
         left_pairing == right_pairing
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::{Bls12_381, Fr};
+
+    #[test]
+    fn test_univariate_kzg() {
+        let tau = Fr::from(10u64);
+        let poly_degree = 4;
+        let srs: SRS<Bls12_381> = UnivariateKZG::generate_srs(&tau, poly_degree);
+
+        let poly = UnivariantPolynomial::new(vec![
+            Fr::from(1u64),
+            Fr::from(2u64),
+            Fr::from(3u64),
+            Fr::from(4u64),
+            Fr::from(5u64),
+        ]);
+        let commitment = UnivariateKZG::commit(&srs, &poly);
+        let (point_evaluation, proof) = UnivariateKZG::open::<Fr>(&srs, &poly, &Fr::from(2u64));
+        let is_valid = UnivariateKZG::verify::<Fr>(
+            &srs,
+            &commitment,
+            &Fr::from(2u64),
+            &point_evaluation,
+            &proof,
+        );
+
+        assert!(is_valid);
+    }
+}
