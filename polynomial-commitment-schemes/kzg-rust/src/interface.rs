@@ -1,5 +1,6 @@
 use crate::primitives::SRS;
 use ark_ec::{pairing::Pairing, Group};
+use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
 
 /// This trait is used by it implementing struct to create a new SRS, taking in the string representation of the SRS or the fs-path to the SRS file.
@@ -13,17 +14,13 @@ pub trait KZGUnivariateInterface<P: Pairing> {
     /// Commit to a polynomial would degree is less than the degree of the SRS
     fn commit(srs: &SRS<P>, poly: &UnivariantPolynomial<P::ScalarField>) -> P::G1;
     /// Open a polynomial at a point
-    fn open(
-        srs: &SRS<P>,
-        poly: &UnivariantPolynomial<P::ScalarField>,
-        point: &P::ScalarField,
-    ) -> (P::ScalarField, P::G1);
+    fn open<F: PrimeField>(srs: &SRS<P>, poly: &UnivariantPolynomial<F>, point: &F) -> (F, P::G1);
     /// Verify polynomial evaluation
-    fn verify(
+    fn verify<F: PrimeField>(
         srs: &SRS<P>,
         commitment: &P::G1,
-        point: &P::ScalarField,
-        point_evaluation: &P::ScalarField,
+        point: &F,
+        point_evaluation: &F,
         proof: &P::G1,
     ) -> bool;
 }

@@ -224,6 +224,54 @@ impl<F: PrimeField> Mul<F> for UnivariantPolynomial<F> {
     }
 }
 
+impl<F: PrimeField> Add<F> for UnivariantPolynomial<F> {
+    type Output = Self;
+
+    fn add(self, other: F) -> Self {
+        // check for zero polynomials
+        if self.is_zero() {
+            return UnivariantPolynomial::new(vec![other]);
+        }
+
+        let mut sum_coefficients = self.coefficients.clone();
+        sum_coefficients[0] += other;
+
+        UnivariantPolynomial::new(sum_coefficients)
+    }
+}
+
+impl<F: PrimeField> Sub<F> for UnivariantPolynomial<F> {
+    type Output = Self;
+
+    fn sub(self, other: F) -> Self {
+        // check for zero polynomials
+        if self.is_zero() {
+            return UnivariantPolynomial::new(vec![other]);
+        }
+
+        let mut sub_coefficients = self.coefficients.clone();
+        sub_coefficients[0] -= other;
+
+        UnivariantPolynomial::new(sub_coefficients)
+    }
+}
+
+impl<F: PrimeField> Sub<F> for &UnivariantPolynomial<F> {
+    type Output = UnivariantPolynomial<F>;
+
+    fn sub(self, other: F) -> Self::Output {
+        // check for zero polynomials
+        if self.is_zero() {
+            return UnivariantPolynomial::new(vec![other]);
+        }
+
+        let mut sub_coefficients = self.coefficients.clone();
+        sub_coefficients[0] -= other;
+
+        UnivariantPolynomial::new(sub_coefficients)
+    }
+}
+
 impl<F: PrimeField> Mul for &UnivariantPolynomial<F> {
     type Output = UnivariantPolynomial<F>;
 

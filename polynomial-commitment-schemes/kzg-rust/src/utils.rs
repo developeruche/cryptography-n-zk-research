@@ -36,3 +36,21 @@ pub fn generate_powers_of_tau_g1<P: Pairing>(tau: &P::ScalarField, n: usize) -> 
 
     powers_of_tau_g1
 }
+
+pub fn linear_combination_homomorphic_poly_eval_g1_primefield<P, F>(
+    poly: &UnivariantPolynomial<F>,
+    powers_of_secret_gx: &[P::G1],
+) -> P::G1
+where
+    P: Pairing,
+    F: PrimeField,
+{
+    poly.coefficients
+        .iter()
+        .enumerate()
+        .fold(P::G1::default(), |mut acc, (index, coeff)| {
+            let res = powers_of_secret_gx[index].mul_bigint(coeff.into_bigint());
+            acc = acc + res;
+            acc
+        })
+}
