@@ -11,6 +11,7 @@ use circuits::{
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
+    multilinear::Multilinear,
 };
 use sum_check::{
     composed::multicomposed::{MultiComposedProver, MultiComposedVerifier},
@@ -119,14 +120,12 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             last_alpha = transcript.sample_as_field_element();
             last_beta = transcript.sample_as_field_element();
-            
+
             last_rand_b = rand_b.to_vec();
             last_rand_c = rand_c.to_vec();
 
             claim = last_alpha * eval_w_i_b + last_beta * eval_w_i_c;
         }
-
-        // performing verification for the input layer
 
         GKRProof {
             sum_check_proofs,
@@ -151,9 +150,15 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         let mut n_r = transcript.sample_n_as_field_elements(proof.w_0_mle.num_vars);
         let mut claim = proof.w_0_mle.evaluate(&n_r).unwrap();
 
+        let mut last_rand_b = vec![];
+        let mut last_rand_c = vec![];
+
+        let mut last_alpha = F::ZERO;
+        let mut last_beta = F::ZERO;
+
         // layer one verification logic
         let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(0);
-        if !verifiy_gkr_sumcheck_layer_one(
+        let (layer_one_verification_status, layer_one_sum) = verifiy_gkr_sumcheck_layer_one(
             &claim,
             &proof.sum_check_proofs[0],
             &mut transcript,
@@ -162,51 +167,76 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             n_r.clone(),
             &add_mle,
             &mul_mle,
-        ).0 {
+        );
+
+        if !layer_one_verification_status {
             return false;
         }
-        
-        
+
+        claim = layer_one_sum;
+
         // running GKR verification logic excluding the first layer
-        // for i in 1..proof.sum_check_proofs.len() {
-        //     if proof.sum_check_proofs[i].sum != claim {
-        //         println!("Invalid sumcheck proof");
-        //         return false;
-        //     }
+        for i in 1..proof.sum_check_proofs.len() {
+            if proof.sum_check_proofs[i].sum != claim {
+                println!("Invalid sumcheck proof");
+                return false;
+            }
 
-        //     transcript.append(proof.sum_check_proofs[i].to_bytes());
-        //     let intermidate_claim_check =
-        //         MultiComposedVerifier::verify_except_last_check(&proof.sum_check_proofs[i]);
+            transcript.append(proof.sum_check_proofs[i].to_bytes());
+            let intermidate_claim_check =
+                MultiComposedVerifier::verify_except_last_check(&proof.sum_check_proofs[i]);
 
-        //     // performing sum check last check
-        //     let (rand_b, rand_c) = intermidate_claim_check
-        //         .random_challenges
-        //         .split_at(intermidate_claim_check.random_challenges.len() / 2);
-        //     let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(i);
-        //     let mut r_b_c = n_r.clone();
-        //     r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
+            // performing sum check last check
+            let (rand_b, rand_c) = intermidate_claim_check
+                .random_challenges
+                .split_at(intermidate_claim_check.random_challenges.len() / 2);
 
-        //     let w_b = proof.w_i_b[i];
-        //     let w_c = proof.w_i_c[i];
+            last_rand_b = rand_b.to_vec();
+            last_rand_c = rand_c.to_vec();
 
-        //     let add_b_c = add_mle.evaluate(&r_b_c).unwrap();
-        //     let mul_b_c = mul_mle.evaluate(&r_b_c).unwrap();
+            // let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(i);
+            // let mut r_b_c = n_r.clone();
+            // r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
 
-        //     let add_section = add_b_c * (w_b + w_c);
-        //     let mul_section = mul_b_c * (w_b * w_c);
+            let w_b = proof.w_i_b[i];
+            let w_c = proof.w_i_c[i];
 
-        //     let f_b_c_eval = add_section + mul_section;
+            // let add_b_c = add_mle.evaluate(&r_b_c).unwrap();
+            // let mul_b_c = mul_mle.evaluate(&r_b_c).unwrap();
 
-        //     if f_b_c_eval != intermidate_claim_check.claimed_sum {
-        //         println!("Invalid sumcheck proof");
-        //         return false;
-        //     }
+            // let add_section = add_b_c * (w_b + w_c);
+            // let mul_section = mul_b_c * (w_b * w_c);
 
-        //     // n_r = transcript.sample_n_as_field_elements(w_i_mle.num_vars);
-        //     // claim =
+            // let f_b_c_eval = add_section + mul_section;
 
-        //     break;
-        // }
+            // if f_b_c_eval != intermidate_claim_check.claimed_sum {
+            //     println!("Invalid sumcheck proof (f_b_c_eval != intermidate_claim_check.claimed_sum)");
+            //     return false;
+            // }
+
+            let alpha: F = transcript.sample_as_field_element();
+            let beta: F = transcript.sample_as_field_element();
+
+            claim = alpha * w_b + beta * w_c;
+
+            last_alpha = alpha;
+            last_beta = beta;
+
+            // assert!(intermidate_claim_check.claimed_sum == claim);
+        }
+
+        // performing verification for the input layer
+        let w_in = Multilinear::interpolate(input);
+
+        let w_in_b = w_in.evaluate(&last_rand_b).unwrap();
+        let w_in_c = w_in.evaluate(&last_rand_c).unwrap();
+
+        let expected_claim = last_alpha * w_in_b + last_beta * w_in_c;
+
+        if expected_claim != claim {
+            println!("Invalid sumcheck proof (expected_claim != claim)");
+            return false;
+        }
 
         true
     }
@@ -221,7 +251,6 @@ mod tests {
         primitives::{CircuitLayer, Gate, GateType},
     };
 
-
     #[test]
     fn test_gkr_protocol() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
@@ -233,7 +262,7 @@ mod tests {
             Gate::new(GateType::Add, [0, 1]),
             Gate::new(GateType::Mul, [2, 3]),
             Gate::new(GateType::Mul, [4, 5]),
-            Gate::new(GateType::Mul, [6, 7])
+            Gate::new(GateType::Mul, [6, 7]),
         ]);
         let layer_4 = CircuitLayer::new(vec![
             Gate::new(GateType::Mul, [0, 1]),
@@ -245,7 +274,7 @@ mod tests {
             Gate::new(GateType::Mul, [12, 13]),
             Gate::new(GateType::Mul, [14, 15]),
         ]);
-        
+
         let circuit = Circuit::new(vec![layer_0, layer_1, layer_3, layer_4]);
         let input = [
             Fr::from(2u32),
@@ -265,9 +294,9 @@ mod tests {
             Fr::from(3u32),
             Fr::from(4u32),
         ];
-        
+
         let evaluation = circuit.evaluate(&input);
-        
+
         assert_eq!(evaluation.layers[0][0], Fr::from(224u32));
 
         let proof = GKRProtocol::prove(&circuit, &evaluation);

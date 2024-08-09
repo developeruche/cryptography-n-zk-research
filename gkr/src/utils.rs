@@ -155,13 +155,11 @@ pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
         println!("Invalid sumcheck proof");
         return (false, F::ZERO);
     }
-    
+
     let alpha: F = transcript.sample_as_field_element();
     let beta: F = transcript.sample_as_field_element();
 
     let new_claim = alpha * w_b + beta * w_c;
-    
-    
 
     (true, new_claim)
 }
