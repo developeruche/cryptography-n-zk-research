@@ -1,8 +1,5 @@
 use ark_ff::PrimeField;
-use polynomial::{
-    interface::MultilinearPolynomialInterface, multilinear::Multilinear,
-    univariant::UnivariantPolynomial,
-};
+use polynomial::multilinear::Multilinear;
 use sum_check::composed::ComposedSumCheckProof;
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]

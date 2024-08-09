@@ -1,13 +1,11 @@
 use super::{ComposedSumCheckProof, RoundPoly};
-use crate::{data_structure::SumCheckProof, interface::ComposedProverInterface};
+use crate::interface::ComposedProverInterface;
 use ark_ff::{BigInteger, PrimeField};
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
-    interface::{MultilinearPolynomialInterface, UnivariantPolynomialInterface},
-    multilinear::Multilinear,
+    interface::MultilinearPolynomialInterface,
     univariant::UnivariantPolynomial,
-    utils::boolean_hypercube,
 };
 
 #[derive(Clone, Default, Debug)]
@@ -94,8 +92,8 @@ mod tests {
     use crate::composed::verifier::ComposedVerifier;
     use crate::interface::ComposedVerifierInterface;
     use ark_test_curves::bls12_381::Fr;
-    use polynomial::interface::{MultilinearPolynomialInterface, PolynomialInterface};
-    use polynomial::univariant::UnivariantPolynomial;
+    use polynomial::interface::PolynomialInterface;
+    use polynomial::multilinear::Multilinear;
 
     #[test]
     fn test_calculate_sum() {

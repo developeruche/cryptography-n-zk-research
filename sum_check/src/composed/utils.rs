@@ -1,5 +1,4 @@
 use ark_ff::PrimeField;
-use polynomial::interface::PolynomialInterface;
 use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
 };

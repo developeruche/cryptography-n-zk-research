@@ -61,7 +61,7 @@ impl<P: Pairing> ProtocolInterface<P> for Groth16Protocol<P> {
         let b_g1 = s_delta_g1 + trusted_setup.beta_g1 + qap_b_at_tau;
 
         let witness_vec = witness.render();
-        let x_g1 = internal_product_g1::<P>(
+        let _x_g1 = internal_product_g1::<P>(
             &trusted_setup.c_tau_plus_beta_a_tau_plus_alpha_b_tau_g1_public,
             &witness_vec[..PRIVATE_VARIABLES_INDEX].to_vec(),
         );

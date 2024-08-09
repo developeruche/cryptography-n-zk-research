@@ -1,7 +1,4 @@
 use ark_ff::PrimeField;
-use ark_poly::domain;
-
-use crate::multilinear::Multilinear;
 
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field

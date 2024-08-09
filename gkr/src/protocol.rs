@@ -1,3 +1,5 @@
+#![allow(unused_assignments)]
+
 use crate::{
     interfaces::GKRProtocolInterface,
     primitives::GKRProof,
@@ -31,13 +33,13 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         let w_0_mle = gen_w_mle(&evals.layers, 0);
         transcript.append(w_0_mle.to_bytes());
 
-        let mut n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
+        let n_r = transcript.sample_n_as_field_elements(w_0_mle.num_vars);
         let mut claim = w_0_mle.evaluate(&n_r).unwrap();
 
-        let mut last_rand_b = Vec::<F>::new();
-        let mut last_rand_c = Vec::<F>::new();
-        let mut last_alpha = F::zero();
-        let mut last_beta = F::zero();
+        let mut last_rand_b;
+        let mut last_rand_c;
+        let mut last_alpha;
+        let mut last_beta;
 
         // Running sumcheck on layer one
         let (add_mle_layer_one, mul_mle_layer_one) = circuit.get_add_n_mul_mle::<F>(0);
@@ -147,7 +149,7 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
         let mut transcript = FiatShamirTranscript::default();
         transcript.append(proof.w_0_mle.to_bytes());
 
-        let mut n_r = transcript.sample_n_as_field_elements(proof.w_0_mle.num_vars);
+        let n_r = transcript.sample_n_as_field_elements(proof.w_0_mle.num_vars);
         let mut claim = proof.w_0_mle.evaluate(&n_r).unwrap();
 
         let mut last_rand_b = vec![];
@@ -194,25 +196,8 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
             last_rand_b = rand_b.to_vec();
             last_rand_c = rand_c.to_vec();
 
-            // let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<F>(i);
-            // let mut r_b_c = n_r.clone();
-            // r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
-
             let w_b = proof.w_i_b[i];
             let w_c = proof.w_i_c[i];
-
-            // let add_b_c = add_mle.evaluate(&r_b_c).unwrap();
-            // let mul_b_c = mul_mle.evaluate(&r_b_c).unwrap();
-
-            // let add_section = add_b_c * (w_b + w_c);
-            // let mul_section = mul_b_c * (w_b * w_c);
-
-            // let f_b_c_eval = add_section + mul_section;
-
-            // if f_b_c_eval != intermidate_claim_check.claimed_sum {
-            //     println!("Invalid sumcheck proof (f_b_c_eval != intermidate_claim_check.claimed_sum)");
-            //     return false;
-            // }
 
             let alpha: F = transcript.sample_as_field_element();
             let beta: F = transcript.sample_as_field_element();
@@ -221,8 +206,6 @@ impl<F: PrimeField> GKRProtocolInterface<F> for GKRProtocol {
 
             last_alpha = alpha;
             last_beta = beta;
-
-            // assert!(intermidate_claim_check.claimed_sum == claim);
         }
 
         // performing verification for the input layer

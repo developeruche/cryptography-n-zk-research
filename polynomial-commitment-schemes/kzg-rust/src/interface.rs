@@ -1,5 +1,5 @@
 use crate::primitives::SRS;
-use ark_ec::{pairing::Pairing, Group};
+use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
 

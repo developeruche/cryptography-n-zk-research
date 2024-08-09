@@ -1,4 +1,4 @@
-use ark_ec::{pairing::Pairing, Group};
+use ark_ec::pairing::Pairing;
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SRS<P: Pairing> {

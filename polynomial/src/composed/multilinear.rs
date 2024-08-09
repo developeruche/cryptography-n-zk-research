@@ -15,10 +15,6 @@ impl<F: PrimeField> ComposedMultilinear<F> {
     pub fn new(polys: Vec<Multilinear<F>>) -> Self {
         // check to see that all the polynomials have the same number of variables
         let n_vars = polys[0].num_vars();
-
-        for poly in &polys {
-            let len = poly.num_vars();
-        }
         assert!(polys.iter().all(|p| p.num_vars() == n_vars));
 
         ComposedMultilinear { polys }
@@ -74,23 +70,23 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
         Some(result)
     }
 
-    fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
+    fn extend_with_new_variables(&self, _: usize) -> Self {
         unimplemented!()
     }
 
-    fn add_distinct(&self, rhs: &Self) -> Self {
+    fn add_distinct(&self, _: &Self) -> Self {
         unimplemented!()
     }
 
-    fn mul_distinct(&self, rhs: &Self) -> Self {
+    fn mul_distinct(&self, _: &Self) -> Self {
         unimplemented!()
     }
 
-    fn interpolate(y_s: &[F]) -> Self {
+    fn interpolate(_: &[F]) -> Self {
         unimplemented!()
     }
 
-    fn zero(num_vars: usize) -> Self {
+    fn zero(_: usize) -> Self {
         Self { polys: vec![] }
     }
 
@@ -106,11 +102,11 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
         }
     }
 
-    fn internal_add(&self, rhs: &Self) -> Self {
+    fn internal_add(&self, _: &Self) -> Self {
         unimplemented!()
     }
 
-    fn internal_add_assign(&mut self, rhs: &Self) {
+    fn internal_add_assign(&mut self, _: &Self) {
         unimplemented!()
     }
 

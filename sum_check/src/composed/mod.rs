@@ -5,11 +5,8 @@ pub mod verifier;
 
 use ark_ff::{BigInteger, PrimeField};
 use polynomial::{
-    composed::multilinear::ComposedMultilinear,
-    interface::{MultilinearPolynomialInterface, UnivariantPolynomialInterface},
-    multilinear::Multilinear,
-    univariant::UnivariantPolynomial,
-    utils::compute_domain,
+    interface::UnivariantPolynomialInterface, multilinear::Multilinear,
+    univariant::UnivariantPolynomial, utils::compute_domain,
 };
 
 /// This struct is used to store the sum check proof

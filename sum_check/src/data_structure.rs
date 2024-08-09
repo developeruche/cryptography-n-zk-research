@@ -1,5 +1,5 @@
 use ark_ff::PrimeField;
-use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
+use polynomial::interface::MultilinearPolynomialInterface;
 
 /// This struct is used to store the sum check proof
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]

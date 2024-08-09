@@ -35,7 +35,7 @@ pub fn gen_l<F: PrimeField>(
     Ok(b.iter()
         .zip(c.iter())
         .map(|(b, c)| {
-            let mut coeffs = vec![*b, *c - b];
+            let coeffs = vec![*b, *c - b];
             UnivariantPolynomial::new(coeffs)
         })
         .collect())
@@ -136,10 +136,6 @@ pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
         MultiComposedVerifier::verify_except_last_check(&layer_one_sum_check_proof);
 
     // performing sum check last check
-    let (rand_b, rand_c) = intermidate_claim_check
-        .random_challenges
-        .split_at(intermidate_claim_check.random_challenges.len() / 2);
-
     let mut r_b_c = n_r;
     r_b_c.extend_from_slice(&intermidate_claim_check.random_challenges);
 

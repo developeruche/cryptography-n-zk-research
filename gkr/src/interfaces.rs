@@ -1,7 +1,6 @@
 use crate::primitives::GKRProof;
 use ark_ff::PrimeField;
 use circuits::primitives::{Circuit, CircuitEvaluation};
-use polynomial::interface::MultilinearPolynomialInterface;
 
 /// This is the interface for the GKR protocol
 pub trait GKRProtocolInterface<F: PrimeField> {

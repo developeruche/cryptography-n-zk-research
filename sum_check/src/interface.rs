@@ -1,5 +1,5 @@
 use crate::{
-    composed::{multicomposed::IntermidateClaimCheck, ComposedSumCheckProof, RoundPoly},
+    composed::{multicomposed::IntermidateClaimCheck, ComposedSumCheckProof},
     data_structure::SumCheckProof,
 };
 use ark_ff::PrimeField;
