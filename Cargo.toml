@@ -13,3 +13,8 @@ members = [
 exclude = [
     "circom-groth16"
 ]
+
+
+[workspace.dependencies]
+polynomial = { path = "polynomial" }
+circuits = { path = "circuits" }

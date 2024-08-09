@@ -311,6 +311,15 @@ dependencies = [
 [[package]]
 name = "kzg-rust"
 version = "0.1.0"
+dependencies = [
+ "ark-bls12-381",
+ "ark-ec",
+ "ark-ff",
+ "ark-test-curves",
+ "circuits",
+ "polynomial",
+ "rand",
+]
 
 [[package]]
 name = "libc"

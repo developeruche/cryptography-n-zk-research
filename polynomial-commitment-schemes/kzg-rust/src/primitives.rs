@@ -1,3 +1,5 @@
+use ark_ec::{pairing::Pairing, Group};
+
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct ImportSRSParams;
 
@@ -5,4 +7,7 @@ pub struct ImportSRSParams;
 pub struct RandomSRSParams;
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
-pub struct SRS;
+pub struct SRS<P: Pairing> {
+    pub g1_power_of_taus: Vec<P::G1>,
+    pub g2_power_of_tau: P::G2,
+}
