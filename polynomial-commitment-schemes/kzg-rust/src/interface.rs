@@ -24,6 +24,6 @@ pub trait KZGUnivariateInterface<P: Pairing> {
         commitment: &P::G1,
         point: &P::ScalarField,
         point_evaluation: &P::ScalarField,
-        proof: P::G1,
+        proof: &P::G1,
     ) -> bool;
 }

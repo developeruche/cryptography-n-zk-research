@@ -60,7 +60,7 @@ where
 
 /// This function generates the powers of tau for the circuit
 /// tau = 5;
-/// powers_of_tau_g1 = [g^5^0 g^5, g^10, g^15, g^20, g^25, g^30, g^35]
+/// powers_of_tau_g1 = [g.5^0 g.5^1, g.5^2, g.5^3, g.5^4, g.5^5, g.5^6, g.5^7]
 pub fn generate_powers_of_tau_g1<P: Pairing>(tau: P::ScalarField, n: usize) -> Vec<P::G1> {
     let mut powers_of_tau_g1 = Vec::with_capacity(n);
     let mut tau_power = tau;
