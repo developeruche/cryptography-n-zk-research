@@ -1,4 +1,4 @@
-use crate::primitives::SRS;
+use crate::primitives::{MultiLinearSRS, SRS};
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
@@ -23,4 +23,9 @@ pub trait KZGUnivariateInterface<P: Pairing> {
         point_evaluation: &F,
         proof: &P::G1,
     ) -> bool;
+}
+
+pub trait KZGMultiLinearInterface<P: Pairing> {
+    /// This function is used to generate a new SRS.
+    fn generate_srs<F: PrimeField>(taus: &[F]) -> MultiLinearSRS<P>;
 }

@@ -48,3 +48,5 @@ impl<F: PrimeField> Multivariate<F> {
         m_ploy_bytes
     }
 }
+
+// NOTE: This implemenation is not complete yet!

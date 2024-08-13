@@ -91,15 +91,6 @@ pub fn boolean_hypercube<F: PrimeField>(n: usize) -> Vec<Vec<F>> {
     result
 }
 
-pub fn boolean_hypercube_2(n: usize) -> Vec<Vec<u8>> {
-    let mut result = Vec::new();
-    for i in 0..1u128 << n {
-        result.push(return_binary(i));
-    }
-
-    result
-}
-
 /// This is a function for doubling the evauation points,
 /// this is used for MLE addtion when the evauation length is not same
 pub fn double_elements<T>(arr: &[T], times: usize) -> Vec<T>
@@ -281,14 +272,6 @@ mod tests {
         let result = boolean_hypercube::<Fr>(3);
         println!("Time taken Hypercube 1: {:?}", now.elapsed());
         println!("Result: {:?}", result);
-    }
-
-    #[test]
-    #[ignore]
-    fn test_boolean_hypercube_2() {
-        let now = Instant::now();
-        let _ = boolean_hypercube_2(4);
-        println!("Time taken for hypercube 2: {:?}", now.elapsed());
     }
 
     #[test]
