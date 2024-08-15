@@ -1,7 +1,7 @@
 use crate::primitives::{MultiLinearSRS, SRS};
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
-use polynomial::univariant::UnivariantPolynomial;
+use polynomial::{multilinear::Multilinear, univariant::UnivariantPolynomial};
 
 /// This trait is used by it implementing struct to create a new SRS, taking in the string representation of the SRS or the fs-path to the SRS file.
 pub trait FromStringToSRS<P: Pairing> {
@@ -28,4 +28,6 @@ pub trait KZGUnivariateInterface<P: Pairing> {
 pub trait KZGMultiLinearInterface<P: Pairing> {
     /// This function is used to generate a new SRS.
     fn generate_srs<F: PrimeField>(taus: &[F]) -> MultiLinearSRS<P>;
+    /// This function is used to commit to the poly using a provided SRS
+    fn commit<F: PrimeField>(srs: &MultiLinearSRS<P>, poly: &Multilinear<F>) -> P::G1;
 }

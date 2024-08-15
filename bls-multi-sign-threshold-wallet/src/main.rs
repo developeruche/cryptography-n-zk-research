@@ -4,7 +4,6 @@ use polynomial::{
     interface::{PolynomialInterface, UnivariantPolynomialInterface},
     univariant::UnivariantPolynomial,
 };
-// use polynomial::univariant::
 
 fn main() {
     //testing the shamir secret sharing

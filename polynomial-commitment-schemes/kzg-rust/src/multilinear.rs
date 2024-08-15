@@ -1,6 +1,6 @@
-use ark_ec::pairing::Pairing;
+use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
-use polynomial::utils::boolean_hypercube;
+use polynomial::{multilinear::Multilinear, utils::boolean_hypercube};
 
 use crate::{
     interface::KZGMultiLinearInterface,
@@ -22,5 +22,13 @@ impl<P: Pairing> KZGMultiLinearInterface<P> for MultilinearKZG {
             g1_power_of_taus,
             g2_power_of_taus,
         }
+    }
+
+    fn commit<F: PrimeField>(srs: &MultiLinearSRS<P>, poly: &Multilinear<F>) -> P::G1 {
+        poly.evaluations
+            .iter()
+            .zip(srs.g1_power_of_taus.iter())
+            .map(|(eval, p1)| p1.mul_bigint(eval.into_bigint()))
+            .sum()
     }
 }
