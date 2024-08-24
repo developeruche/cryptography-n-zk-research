@@ -1,9 +1,12 @@
 [package]
-name = "groth16"
+name = "playground"
 version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [dependencies]
+ark-secp256k1 = "0.4.0"
 ark-ff = "0.4.2"
 ark-ec = "0.4.2"
 ark-bls12-381 = "0.4.0"
@@ -11,4 +14,3 @@ ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls
 polynomial = {path = "../polynomial"}
 circuits = {path = "../circuits"}
 rand = "0.8.4"
-hex-literal = "0.4.1"

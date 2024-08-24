@@ -7,6 +7,7 @@ use crate::{
     protocol::Groth16Protocol,
 };
 use ark_test_curves::bls12_381::Fr;
+
 use circuits::{
     interfaces::ExtractConstraintsInterface,
     primitives::{Circuit, CircuitLayer, Gate, GateType, Witness, R1CS},

@@ -8,7 +8,7 @@ members = [
     "gkr", 
     "circuits", 
     "groth16", 
-    "polynomial-commitment-schemes/kzg-rust", 
+    "polynomial-commitment-schemes/kzg-rust", "playground", 
 ]
 exclude = [
     "circom-groth16"
