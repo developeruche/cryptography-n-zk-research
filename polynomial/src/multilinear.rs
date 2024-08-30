@@ -36,6 +36,20 @@ impl<F: PrimeField> Multilinear<F> {
     pub fn self_zero(&self) -> Self {
         Self::zero(self.num_vars)
     }
+
+    /// This function returns a ramdom multilinear polynomial
+    pub fn random(num_vars: usize) -> Self {
+        let rand_engine = &mut ark_std::test_rng();
+        // let num_evaluations = 1u128 << num_vars;
+        let num_evaluations = 2u128.pow(num_vars as u32);
+        let mut evaluations = Vec::new();
+
+        for _ in 0..num_evaluations {
+            evaluations.push(F::rand(rand_engine));
+        }
+
+        Self::new(evaluations, num_vars)
+    }
 }
 
 impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
@@ -626,5 +640,12 @@ mod tests {
         );
 
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_create_random() {
+        let poly = Multilinear::<Fr>::random(20);
+        println!("Poly RANDOM ->  {:?}", poly);
+        let _ = poly.evaluate(&vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
     }
 }

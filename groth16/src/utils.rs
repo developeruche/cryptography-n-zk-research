@@ -236,7 +236,6 @@ mod tests {
     use ark_ec::AffineRepr;
     use ark_test_curves::bls12_381::Fr;
     use polynomial::interface::PolynomialInterface;
-    
 
     #[test]
     fn test_generate_t_poly() {

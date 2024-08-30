@@ -18,3 +18,4 @@ exclude = [
 [workspace.dependencies]
 polynomial = { path = "polynomial" }
 circuits = { path = "circuits" }
+ark-std = "0.4.0"
