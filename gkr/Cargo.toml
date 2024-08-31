@@ -10,3 +10,13 @@ polynomial = {path = "../polynomial"}
 fiat_shamir = {path = "../fiat_shamir"}
 sum_check = {path = "../sum_check"}
 circuits = {path = "../circuits"}
+
+
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+
+[[bench]]
+name = "gkr_protocol_benchmark"
+harness = false

@@ -286,4 +286,19 @@ mod tests {
 
         assert!(GKRProtocol::verify(&circuit, &input, &proof));
     }
+
+    #[test]
+    fn test_gkr_protocol_random_circuit() {
+        let circuit = Circuit::random(8);
+        let input = (0u64..256)
+            .into_iter()
+            .map(|x| Fr::from(x))
+            .collect::<Vec<Fr>>();
+
+        let evaluation = circuit.evaluate(&input);
+
+        let proof = GKRProtocol::prove(&circuit, &evaluation);
+
+        assert!(GKRProtocol::verify(&circuit, &input, &proof));
+    }
 }

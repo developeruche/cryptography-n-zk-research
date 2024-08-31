@@ -90,6 +90,31 @@ impl Circuit {
     pub fn new(layers: Vec<CircuitLayer>) -> Self {
         Circuit { layers }
     }
+
+    pub fn random(num_of_layers: usize) -> Self {
+        let mut layers = Vec::new();
+
+        for layer_index in 0..num_of_layers {
+            let mut layer = Vec::new();
+            let number_of_gates = 2usize.pow(layer_index as u32);
+            let number_of_inputs = 2usize.pow((layer_index + 1) as u32);
+
+            for gate_index in 0..number_of_gates {
+                let input_1 = (gate_index * 2) % number_of_inputs;
+                let input_2 = (gate_index * 2 + 1) % number_of_inputs;
+                let g_type = if layer_index % 2 == 0 {
+                    GateType::Add
+                } else {
+                    GateType::Mul
+                };
+                layer.push(Gate::new(g_type, [input_1, input_2]));
+            }
+
+            layers.push(CircuitLayer::new(layer));
+        }
+
+        Circuit::new(layers)
+    }
 }
 
 impl<F> CircuitEvaluation<F> {

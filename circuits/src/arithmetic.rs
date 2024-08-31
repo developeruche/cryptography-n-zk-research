@@ -477,4 +477,21 @@ mod tests {
             Some(Fr::from(1u32))
         );
     }
+
+    #[test]
+    #[ignore]
+    fn test_random_circuit_evaluation() {
+        let circuit = Circuit::random(20);
+        let input = (0u64..1048576)
+            .into_iter()
+            .map(|x| Fr::from(x))
+            .collect::<Vec<Fr>>();
+
+        println!("Currently evaluating the circuit");
+
+        let eval = circuit.evaluate(&input);
+
+        println!("Circuit: {:?}", circuit);
+        println!("Circuit details: {:?}", eval.layers[0])
+    }
 }

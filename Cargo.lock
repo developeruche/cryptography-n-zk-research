@@ -426,6 +426,7 @@ dependencies = [
  "ark-ff",
  "ark-test-curves",
  "circuits",
+ "criterion",
  "fiat_shamir",
  "polynomial",
  "sum_check",
