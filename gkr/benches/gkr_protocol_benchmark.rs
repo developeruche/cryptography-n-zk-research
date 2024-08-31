@@ -1,27 +1,8 @@
-//! This file contains the benchmarking code for the sum_check function.
-//! 1. Normal sum check benchmarking
-//! 2. Running sum check on a composed polynomial
-//! 3. Running sum check on a multi-composed polynomial
-
+//! This file contains the benchmarking code for the gkr protocol.
 use ark_test_curves::bls12_381::Fr;
 use circuits::{interfaces::CircuitInterface, primitives::Circuit};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use fiat_shamir::FiatShamirTranscript;
 use gkr::{interfaces::GKRProtocolInterface, protocol::GKRProtocol};
-use polynomial::{composed::multilinear::ComposedMultilinear, multilinear::Multilinear};
-use sum_check::{
-    composed::{
-        multicomposed::{MultiComposedProver, MultiComposedVerifier},
-        prover::ComposedProver,
-        verifier::ComposedVerifier,
-    },
-    interface::{
-        ComposedProverInterface, ComposedVerifierInterface, MultiComposedProverInterface,
-        MultiComposedVerifierInterface, ProverInterface, VerifierInterface,
-    },
-    prover::Prover,
-    verifier::Verifier,
-};
 
 fn gkr_protocol_benchmark(c: &mut Criterion) {
     let circuit = black_box(Circuit::random(8));
