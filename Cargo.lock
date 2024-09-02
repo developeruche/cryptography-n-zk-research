@@ -832,6 +832,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "succinct-gkr"
+version = "0.1.0"
+
+[[package]]
 name = "sum_check"
 version = "0.1.0"
 dependencies = [

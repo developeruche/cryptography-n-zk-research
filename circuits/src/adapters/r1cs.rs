@@ -1,3 +1,5 @@
+//! This goal of the module is to provide a way to transpile a circuit into a R1CS representation.
+
 use crate::{
     interfaces::ExtractConstraintsInterface,
     primitives::{Circuit, Constraint, ConstraintRaw, ConstraintsWithLabelSize, GateType},
@@ -6,6 +8,7 @@ use crate::{
 use std::collections::HashMap;
 
 impl ExtractConstraintsInterface for Circuit {
+    /// Extracts the constraints from the circuit and returns them as a vector of constraints.
     fn extract_constraints(&self) -> ConstraintsWithLabelSize {
         let mut label_to_index_mapping = HashMap::new();
         let mut latest_constraint_index = 1;
