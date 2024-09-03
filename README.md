@@ -28,18 +28,34 @@ A Cryptography and Zero Knowledge Proof Research Repo Implementing Research pape
 
 
 ## Primitives and Toolkits
+-------------------------------
 These are a collection of cryptographic primitives and toolkits that I have implemented in Rust. They are designed to be modular, 
-efficient, and easy to use. The goal is to provide a solid foundation for building secure, succinct and privacy-preserving applications.
+efficient, and easy to use. The goal is to provide a solid foundation for building secure, succinct, and privacy-preserving applications.
 
+<br>
+
+### Circuits 
+This is a library for creating and manipulating circuits. The library is designed to be modular and extensible. The library is designed to be used in the context of snarks, but can be used for any type of circuit.
+
+**Features**
+- [x] Arithmetic Circuit representation
+- [x] Boolean Circuit representation
+- [x] Circuit evaluation
+- [x] Circuit optimization
+- [x] Arithmetic Circuit to R1CS conversion
+- [x] GKR `Add` and `Mul` Multilinear Extension (MLE)
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/circuits)
+<br>
 <br>
 
 ### Polynomial
 This is the implementation of a polynomial in Rust. The Polynomial struct allows you to create a polynomial, evaluate it at a specific point, and add or multiply two polynomials together.
 
 The variations of polynomials built in here are;
-- Univariate Polynomial
-- Multivariate Polynomial
-- Multilinear Polynomial
+- [x] Univariate Polynomial
+- [x] Multivariate Polynomial
+- [x] Multilinear Polynomial
 
 ... the last two could give a man 2^N complexity nightmare :).
 
@@ -59,33 +75,49 @@ In the realm of cybersecurity, ensuring data integrity and authenticity is param
 <br>
 <br>
 
-### Circuits 
-This is a library for creating and manipulating circuits. The library is designed to be modular and extensible. The library is designed to be used in the context of snarks, but can be used for any type of circuit.
-
-**Features**
-- [x] Arithmetic Circuit representation
-- [x] Boolean Circuit representation
-- [x] Circuit evaluation
-- [x] Circuit optimization
-- [x] Arithmetic Circuit to R1CS conversion
-- [x] GKR `Add` and `Mul` Multilinear Extension (MLE)
-
-[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/circuits)
-<br>
-<br>
-
 
 
 <br>
 <br>
 
 ### Protocol Implementations
+-------------------------------
 These are implementations of cryptographic protocols that I have implemented in Rust. 
 These protocols are built using the primitives and toolkits mentioned above as building blocks.
-This implemantations follows research papers and are designed to be efficient, secure, and easy to use,
-But with the primary pourpose for research and education.
+These implementations follows research papers and are designed to be efficient, secure, and easy to use,
+But with the primary purpose of research and education.
 
 <br>
+
+
+### GKR 
+The GKR protocol is fascinating, fairly not as complicated as other protocols but heavily generic and useful. The GKR protocol involves running one protocol (Sum check) inside this protocol (GKR). The GKR protocol, named after Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum, is a zero-knowledge proof protocol that focuses on efficient delegation of computation. Specifically, it is designed to verify computations represented as layered arithmetic circuits with logarithmic depth in the number of inputs. The GKR protocol is known for its efficiency and ability to handle large-scale computations.
+
+
+**Features**
+- [x] In Progress
+
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
+<br>
+<br>
+
+
+
+### Groth16 
+The Groth16 protocol is a highly efficient zero-knowledge succinct non-interactive argument of knowledge (zk-SNARK) for general arithmetic circuit satisfiability. It was introduced by Jens Groth in 2016 and is notable for its concise proofs and efficient verification. 
+
+**Features**
+- [x] Circuit Pre-processing
+- [x] Trusted Setup
+- [x] Prover
+- [x] Verifer
+
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
+<br>
+<br>
+
 ### ECDSA
 
 This library provides an implementation of the Elliptic Curve Digital Signature Algorithm (ECDSA) in Rust. It allows you to:
@@ -182,33 +214,7 @@ The Fiat-Shamir transcript is a cryptographic technique used to transform an int
 <br>
 
 
-### GKR 
-The GKR protocol is fascinating, fairly not as complicated as other protocols but heavily generic and useful. The GKR protocol involves running one protocol (Sum check) inside this protocol (GKR). The GKR protocol, named after Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum, is a zero-knowledge proof protocol that focuses on efficient delegation of computation. Specifically, it is designed to verify computations represented as layered arithmetic circuits with logarithmic depth in the number of inputs. The GKR protocol is known for its efficiency and ability to handle large-scale computations.
 
-
-**Features**
-- [x] In Progress
-
-
-[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
-<br>
-<br>
-
-
-
-### Groth16 
-The Groth16 protocol is a highly efficient zero-knowledge succinct non-interactive argument of knowledge (zk-SNARK) for general arithmetic circuit satisfiability. It was introduced by Jens Groth in 2016 and is notable for its concise proofs and efficient verification. 
-
-**Features**
-- [x] Circuit Pre-processing
-- [x] Trusted Setup
-- [x] Prover
-- [x] Verifer
-
-
-[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
-<br>
-<br>
 
 
 <br>
