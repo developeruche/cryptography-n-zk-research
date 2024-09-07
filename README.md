@@ -190,7 +190,8 @@ A Schnorr signature is a digital signature produced by the Schnorr signature alg
 
 
 ### Sum Check Protocol
-Suppose we are given a v-variate polynomial `g` defined over a finite field `F`. The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
+Suppose we are given a v-variate polynomial `g` defined over a finite field `F`. 
+The purpose of the sum-check protocol is for the prover to provide the verifier with the sum of evaluations over the boolean hypercube.
 
 **Features**
 - [x] Technical documentation
