@@ -127,6 +127,14 @@ pub fn compute_domain<F: PrimeField>(n: usize, pin: usize) -> Vec<F> {
     domain
 }
 
+pub fn compute_domain_root_of_unity<F: PrimeField>(n: usize) -> Vec<F> {
+    todo!("During FFT implemenations")
+}
+
+pub fn compute_domain_root_of_unity_with_radix2_check<F: PrimeField>(n: usize) -> Vec<F> {
+    todo!("During FFT implemenations")
+}
+
 pub fn compute_number_of_variables(n: u128) -> (u128, u128) {
     if n == 0 {
         return (0, 0);

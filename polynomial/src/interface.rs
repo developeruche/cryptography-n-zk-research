@@ -74,3 +74,5 @@ pub trait MultivariatePolynomialInterface<F: PrimeField> {
     /// This function allows for multiple parial evaluations
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
 }
+
+
