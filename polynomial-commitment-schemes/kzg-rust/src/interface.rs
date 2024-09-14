@@ -36,4 +36,12 @@ pub trait KZGMultiLinearInterface<P: Pairing> {
         poly: &Multilinear<F>,
         point: &[F],
     ) -> (F, Vec<P::G1>);
+    /// This function is used to verify the polynomial evaluation
+    fn verify<F: PrimeField>(
+        srs: &MultiLinearSRS<P>,
+        commitment: &P::G1,
+        point: &[F],
+        point_evaluation: &F,
+        proof: &Vec<P::G1>,
+    ) -> bool;
 }

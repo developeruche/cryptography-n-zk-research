@@ -1,4 +1,7 @@
-use ark_ec::{pairing::Pairing, Group};
+use ark_ec::{
+    pairing::{Pairing, PairingOutput},
+    Group,
+};
 use ark_ff::PrimeField;
 use polynomial::{
     interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,
@@ -48,12 +51,36 @@ impl<P: Pairing> KZGMultiLinearInterface<P> for MultilinearKZG {
             last_reminder = r;
 
             // commit to the quotient polynomial
-            let scaled_quotient = q.leftappend_with_new_variables(1);
+            let scaled_quotient = q.leftappend_with_new_variables(1 + i);
             let quotient_commitment = Self::commit(srs, &scaled_quotient);
             quotient_proofs.push(quotient_commitment);
         }
 
         (points_evaluations.unwrap(), quotient_proofs)
+    }
+
+    fn verify<F: PrimeField>(
+        srs: &MultiLinearSRS<P>,
+        commitment: &<P as Pairing>::G1,
+        point: &[F],
+        point_evaluation: &F,
+        proof: &Vec<<P as Pairing>::G1>,
+    ) -> bool {
+        let g2_generator = P::G2::generator();
+        let g1_point_evalauation = P::G1::generator().mul_bigint(point_evaluation.into_bigint());
+
+        let left_pairing = P::pairing(*commitment - g1_point_evalauation, g2_generator);
+        let mut right_pairing = P::pairing(
+            proof[0],
+            srs.g2_power_of_taus[0] - g2_generator.mul_bigint(point[0].into_bigint()),
+        );
+
+        for i in 1..proof.len() {
+            let g2_point = g2_generator.mul_bigint(point[i].into_bigint());
+            right_pairing += P::pairing(proof[i], srs.g2_power_of_taus[i] - g2_point);
+        }
+
+        left_pairing == right_pairing
     }
 }
 
@@ -64,10 +91,6 @@ mod tests {
 
     fn group_unit_operation_g1<P: Pairing>(oprand: P::ScalarField) -> P::G1 {
         P::G1::generator().mul_bigint(oprand.into_bigint())
-    }
-
-    fn group_unit_operation_g2<P: Pairing>(oprand: P::ScalarField) -> P::G2 {
-        P::G2::generator().mul_bigint(oprand.into_bigint())
     }
 
     #[test]
@@ -94,5 +117,84 @@ mod tests {
         let expected_commitment = group_unit_operation_g1::<Bls12_381>(Fr::from(128));
 
         assert_eq!(commitment, expected_commitment);
+    }
+
+    #[test]
+    fn test_multilinear_kzg_open_two_variable_poly() {
+        let srs: MultiLinearSRS<Bls12_381> =
+            MultilinearKZG::generate_srs(&[Fr::from(5u32), Fr::from(7u32)]);
+        let poly = Multilinear::new(vec![Fr::from(3), Fr::from(3), Fr::from(7), Fr::from(10)], 2);
+        let point = vec![Fr::from(2), Fr::from(3)];
+        let (_, _) = MultilinearKZG::open(&srs, &poly, &point);
+    }
+
+    #[test]
+    fn test_multilinear_kzg_verify_two_variable_poly() {
+        let srs: MultiLinearSRS<Bls12_381> =
+            MultilinearKZG::generate_srs(&[Fr::from(5u32), Fr::from(7u32)]);
+        let poly = Multilinear::new(vec![Fr::from(3), Fr::from(3), Fr::from(7), Fr::from(10)], 2);
+        let point = vec![Fr::from(2), Fr::from(3)];
+        let (point_evaluation, proof) = MultilinearKZG::open(&srs, &poly, &point);
+        let commitment = MultilinearKZG::commit(&srs, &poly);
+        let result = MultilinearKZG::verify(&srs, &commitment, &point, &point_evaluation, &proof);
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_multilinear_kzg_verify_three_variable_poly() {
+        let srs: MultiLinearSRS<Bls12_381> =
+            MultilinearKZG::generate_srs(&[Fr::from(5u32), Fr::from(7u32), Fr::from(11u32)]);
+        let poly = Multilinear::new(
+            vec![
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(4),
+                Fr::from(5),
+                Fr::from(6),
+                Fr::from(7),
+                Fr::from(9),
+                Fr::from(10),
+            ],
+            3,
+        );
+        let point = vec![Fr::from(2), Fr::from(3), Fr::from(4)];
+        let (point_evaluation, proof) = MultilinearKZG::open(&srs, &poly, &point);
+        let commitment = MultilinearKZG::commit(&srs, &poly);
+        let result = MultilinearKZG::verify(&srs, &commitment, &point, &point_evaluation, &proof);
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_multilinear_kzg_verify_10_variable_poly() {
+        let srs: MultiLinearSRS<Bls12_381> = MultilinearKZG::generate_srs(&[
+            Fr::from(5u32),
+            Fr::from(7u32),
+            Fr::from(11u32),
+            Fr::from(13u32),
+            Fr::from(17u32),
+            Fr::from(19u32),
+            Fr::from(23u32),
+            Fr::from(29u32),
+            Fr::from(31u32),
+            Fr::from(37u32),
+        ]);
+        let poly = Multilinear::random(10);
+        let point = vec![
+            Fr::from(2),
+            Fr::from(3),
+            Fr::from(4),
+            Fr::from(5),
+            Fr::from(6),
+            Fr::from(7),
+            Fr::from(8),
+            Fr::from(9),
+            Fr::from(10),
+            Fr::from(11),
+        ];
+        let (point_evaluation, proof) = MultilinearKZG::open(&srs, &poly, &point);
+        let commitment = MultilinearKZG::commit(&srs, &poly);
+        let result = MultilinearKZG::verify(&srs, &commitment, &point, &point_evaluation, &proof);
+        assert_eq!(result, true);
     }
 }

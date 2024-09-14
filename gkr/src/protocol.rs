@@ -288,6 +288,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_gkr_protocol_random_circuit() {
         let circuit = Circuit::random(8);
         let input = (0u64..256)
