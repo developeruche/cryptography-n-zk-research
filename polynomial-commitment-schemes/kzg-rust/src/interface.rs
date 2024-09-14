@@ -30,4 +30,10 @@ pub trait KZGMultiLinearInterface<P: Pairing> {
     fn generate_srs<F: PrimeField>(taus: &[F]) -> MultiLinearSRS<P>;
     /// This function is used to commit to the poly using a provided SRS
     fn commit<F: PrimeField>(srs: &MultiLinearSRS<P>, poly: &Multilinear<F>) -> P::G1;
+    /// This function is used to open the polynomial at various a point
+    fn open<F: PrimeField>(
+        srs: &MultiLinearSRS<P>,
+        poly: &Multilinear<F>,
+        point: &[F],
+    ) -> (F, Vec<P::G1>);
 }

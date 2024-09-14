@@ -1,5 +1,7 @@
 use ark_ff::PrimeField;
 
+use crate::multilinear::Multilinear;
+
 /// Describes the common interface for univariate and multivariate polynomials
 /// This F generic parameter should be a field
 pub trait PolynomialInterface<F: PrimeField> {
@@ -40,6 +42,9 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     /// Extend polynomials with new variables
     /// given f(x,y) = 2xy + 3y + 4x + 5 this function can extend it to f(x,y,z) = 2xy + 3y + 4x + 5 + 0z
     fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self;
+    /// Left append new variables to the polynomial
+    /// given f(x,y) = 2xy + 3y + 4x + 5 this function can extend it to f(z,x,y) = 0z + 2xy + 3y + 4x + 5
+    fn leftappend_with_new_variables(&self, num_of_new_variables: usize) -> Self;
     /// Addition for multilinear polynomials with 2 distinict variables
     /// given f(x,y) = 2xy + 3y + 4x + 5 and f(a,b) = 2ab + 3b + 4a + 5
     /// f(x,y) + f(a,b) = 2xy + 3y + 4x + 5 + 2ab + 3b + 4a + 5
@@ -60,6 +65,15 @@ pub trait MultilinearPolynomialInterface<F: PrimeField> {
     fn internal_add_assign(&mut self, rhs: &Self);
     /// This function is used to return the bytes representation of the polynomial
     fn to_bytes(&self) -> Vec<u8>;
+    /// this is used to divide the ploynomial by a single varaible linear polynomial
+    /// given f(x,y,z) = 4xy + 7z -2yz divided by x-5 ==> (4y, 20y + 7z -2yz)
+    /// returns:
+    /// (quotent, reminder)
+    fn divide_by_single_variable_linear(
+        &self,
+        linear_poly_constant_term: &F,
+        operation_index: usize,
+    ) -> (Multilinear<F>, Multilinear<F>);
 }
 
 pub trait MultivariatePolynomialInterface<F: PrimeField> {
@@ -74,5 +88,3 @@ pub trait MultivariatePolynomialInterface<F: PrimeField> {
     /// This function allows for multiple parial evaluations
     fn partial_evaluations(&self, evaluation_points: Vec<F>, variable_indices: Vec<usize>) -> Self;
 }
-
-

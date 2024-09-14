@@ -119,6 +119,18 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for ComposedMultilinear<F>
 
         bytes
     }
+
+    fn leftappend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
+        todo!()
+    }
+
+    fn divide_by_single_variable_linear(
+        &self,
+        linear_poly_constant_term: &F,
+        operation_index: usize,
+    ) -> (Multilinear<F>, Multilinear<F>) {
+        todo!()
+    }
 }
 
 impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {

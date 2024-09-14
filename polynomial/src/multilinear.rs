@@ -6,7 +6,7 @@ use crate::{
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::ops::{Add, AddAssign, Mul};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
@@ -40,7 +40,6 @@ impl<F: PrimeField> Multilinear<F> {
     /// This function returns a ramdom multilinear polynomial
     pub fn random(num_vars: usize) -> Self {
         let rand_engine = &mut ark_std::test_rng();
-        // let num_evaluations = 1u128 << num_vars;
         let num_evaluations = 2u128.pow(num_vars as u32);
         let mut evaluations = Vec::new();
 
@@ -116,6 +115,7 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
         eval_result
     }
 
+    /// confused? check the interface docs :)
     fn extend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
         let repeat_length = 1 << num_of_new_variables;
         let mut new_evaluations = Vec::new();
@@ -215,6 +215,28 @@ impl<F: PrimeField> MultilinearPolynomialInterface<F> for Multilinear<F> {
 
         m_ploy_bytes
     }
+
+    fn divide_by_single_variable_linear(
+        &self,
+        linear_poly_constant_term: &F,
+        operation_index: usize,
+    ) -> (Self, Self) {
+        let reminder = self.partial_evaluation(*linear_poly_constant_term, operation_index);
+        let quotient = self.partial_evaluation(F::ONE, operation_index)
+            - self.partial_evaluation(F::ZERO, operation_index);
+
+        (quotient, reminder)
+    }
+
+    fn leftappend_with_new_variables(&self, num_of_new_variables: usize) -> Self {
+        let mut new_evaluations = self.evaluations.clone();
+
+        for _ in 0..num_of_new_variables {
+            new_evaluations = [new_evaluations.clone(), new_evaluations.clone()].concat();
+        }
+
+        Self::new(new_evaluations, self.num_vars + num_of_new_variables)
+    }
 }
 
 impl<F: PrimeField> Add for Multilinear<F> {
@@ -275,6 +297,24 @@ impl<F: PrimeField> Mul<F> for Multilinear<F> {
 
         for i in 0..self.evaluations.len() {
             new_evaluations.push(self.evaluations[i] * rhs);
+        }
+
+        Self::new(new_evaluations, self.num_vars)
+    }
+}
+
+impl<F: PrimeField> Sub for Multilinear<F> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let mut new_evaluations = Vec::new();
+        // TODO: come up with an algo for handling the case where the number of variables in the two polynomials are not the same
+        if self.num_vars != other.num_vars {
+            panic!("The number of variables in the two polynomials must be the same");
+        }
+
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(self.evaluations[i] - other.evaluations[i]);
         }
 
         Self::new(new_evaluations, self.num_vars)
