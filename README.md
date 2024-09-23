@@ -143,12 +143,13 @@ This is a RUST implementation of the Kate Commitments (KZG) polynomial commitmen
   - [x] Commits to a polynomial of a specified degree.
   - [x] Opens a commitment at a specific point, revealing the evaluated value and proof.
   - [x] Verifies the opening proof for a commitment.
+  - [] Open and Verifer bacth on single polynomial multiple points.
 
 2. Multilinear Polynomial Commitment
   - [x] Creates KZG parameters for a given number of variables.
   - [x] Commits to a polynomial of a specified number of variables.
-  - [] Opens a commitment at a specific point, revealing the evaluated value and proof.
-  - [] Verifies the opening proof for a commitment.
+  - [x] Opens a commitment at a specific point, revealing the evaluated value and proof.
+  - [x] Verifies the opening proof for a commitment.
 
 [codebase](https://github.com/developeruche/kzg-commitment-rust)
 <br>
