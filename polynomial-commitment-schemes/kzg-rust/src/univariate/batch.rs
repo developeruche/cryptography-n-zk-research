@@ -109,4 +109,78 @@ mod tests {
 
         assert!(is_valid);
     }
+
+    #[test]
+    fn test_batch_univariate_kzg_invalid() {
+        let tau = Fr::from(10u64);
+        let poly_degree = 4;
+        let srs: SRS<Bls12_381> = UnivariateKZG::generate_srs(&tau, poly_degree);
+
+        let poly = UnivariantPolynomial::new(vec![
+            Fr::from(1u64),
+            Fr::from(2u64),
+            Fr::from(3u64),
+            Fr::from(4u64),
+            Fr::from(5u64),
+        ]);
+        let commitment = UnivariateKZG::commit(&srs, &poly);
+        let (point_evaluation, proof) =
+            <UnivariateKZG as BatchKZGUnivariateInterface<Bls12_381>>::open::<Fr>(
+                &srs,
+                &poly,
+                &vec![Fr::from(2u64), Fr::from(3u64)],
+            );
+        let is_valid = <UnivariateKZG as BatchKZGUnivariateInterface<Bls12_381>>::verify::<Fr>(
+            &srs,
+            &commitment,
+            &vec![Fr::from(2u64), Fr::from(5u64)],
+            &point_evaluation,
+            &proof,
+        );
+
+        assert!(!is_valid);
+    }
+
+    #[test]
+    fn test_batch_univariate_kzg_nunber_of_opening_higher_than_degree() {
+        let tau = Fr::from(10u64);
+        let poly_degree = 6;
+        let srs: SRS<Bls12_381> = UnivariateKZG::generate_srs(&tau, poly_degree);
+
+        let poly = UnivariantPolynomial::new(vec![
+            Fr::from(1u64),
+            Fr::from(2u64),
+            Fr::from(3u64),
+            Fr::from(4u64),
+            Fr::from(5u64),
+        ]);
+        let commitment = UnivariateKZG::commit(&srs, &poly);
+        let (point_evaluation, proof) =
+            <UnivariateKZG as BatchKZGUnivariateInterface<Bls12_381>>::open::<Fr>(
+                &srs,
+                &poly,
+                &vec![
+                    Fr::from(2u64),
+                    Fr::from(3u64),
+                    Fr::from(4u64),
+                    Fr::from(5u64),
+                    Fr::from(6u64),
+                ],
+            );
+        let is_valid = <UnivariateKZG as BatchKZGUnivariateInterface<Bls12_381>>::verify::<Fr>(
+            &srs,
+            &commitment,
+            &vec![
+                Fr::from(2u64),
+                Fr::from(3u64),
+                Fr::from(4u64),
+                Fr::from(5u64),
+                Fr::from(6u64),
+            ],
+            &point_evaluation,
+            &proof,
+        );
+
+        assert!(is_valid);
+    }
 }
