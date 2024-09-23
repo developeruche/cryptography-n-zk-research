@@ -131,7 +131,7 @@ pub fn generate_vanishing_polynomial<F: PrimeField>(data: &Vec<F>) -> Univariant
     let mut v_poly = UnivariantPolynomial::one();
 
     for c in data {
-        v_poly *= UnivariantPolynomial::new(vec![F::one(), -*c]);
+        v_poly *= UnivariantPolynomial::new(vec![-*c, F::one()]);
     }
 
     v_poly
@@ -204,7 +204,7 @@ mod tests {
 
         assert_eq!(
             v_poly.coefficients,
-            vec![Fr::from(1u8), Fr::from(-6), Fr::from(8u8)]
+            vec![Fr::from(8u8), Fr::from(-6), Fr::from(1u8)]
         );
     }
 }

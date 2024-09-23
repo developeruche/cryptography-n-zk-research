@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use crate::{
     interface::BatchKZGUnivariateInterface,
     primitives::SRS,
@@ -21,12 +23,14 @@ impl<P: Pairing> BatchKZGUnivariateInterface<P> for UnivariateKZG {
         poly: &UnivariantPolynomial<F>,
         point: &Vec<F>,
     ) -> (Vec<F>, <P as Pairing>::G1) {
-        let point_evaluations = point.iter().map(|point| poly.evaluate(point)).collect();
+        let point_evaluations: Vec<F> = point.iter().map(|point| poly.evaluate(point)).collect();
+        let i_poly = UnivariantPolynomial::interpolate(point_evaluations.clone(), point.clone());
         let vanishing_polynomial = generate_vanishing_polynomial(&point);
-        let q = poly.divide_with_q_and_r(&vanishing_polynomial).unwrap().0;
+        let quotient =
+            <UnivariantPolynomial<F> as Sub>::sub(poly.clone(), i_poly) / vanishing_polynomial;
 
         let proof = linear_combination_homomorphic_poly_eval_g1_primefield::<P, F>(
-            &q,
+            &quotient,
             &srs.g1_power_of_taus,
         );
 
