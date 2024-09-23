@@ -38,6 +38,22 @@ pub fn generate_powers_of_tau_g1<P: Pairing>(tau: &P::ScalarField, n: usize) -> 
     powers_of_tau_g1
 }
 
+pub fn generate_powers_of_tau_g2<P: Pairing>(tau: &P::ScalarField, n: usize) -> Vec<P::G2> {
+    let n = n + 1;
+    let mut powers_of_tau_g2 = Vec::with_capacity(n);
+    let mut tau_power = *tau;
+    let generator = P::G2::generator();
+
+    powers_of_tau_g2.push(generator);
+
+    for _ in 1..n {
+        powers_of_tau_g2.push(generator.mul_bigint(tau_power.into_bigint()));
+        tau_power = tau_power * *tau;
+    }
+
+    powers_of_tau_g2
+}
+
 pub fn linear_combination_homomorphic_poly_eval_g1_primefield<P, F>(
     poly: &UnivariantPolynomial<F>,
     powers_of_secret_gx: &[P::G1],
@@ -50,6 +66,24 @@ where
         .iter()
         .enumerate()
         .fold(P::G1::default(), |mut acc, (index, coeff)| {
+            let res = powers_of_secret_gx[index].mul_bigint(coeff.into_bigint());
+            acc = acc + res;
+            acc
+        })
+}
+
+pub fn linear_combination_homomorphic_poly_eval_g2_primefield<P, F>(
+    poly: &UnivariantPolynomial<F>,
+    powers_of_secret_gx: &[P::G2],
+) -> P::G2
+where
+    P: Pairing,
+    F: PrimeField,
+{
+    poly.coefficients
+        .iter()
+        .enumerate()
+        .fold(P::G2::default(), |mut acc, (index, coeff)| {
             let res = powers_of_secret_gx[index].mul_bigint(coeff.into_bigint());
             acc = acc + res;
             acc
@@ -92,7 +126,6 @@ pub fn g2_operation<F: PrimeField, P: Pairing>(oprands: &[F]) -> Vec<P::G2> {
 
     result
 }
-
 
 pub fn generate_vanishing_polynomial<F: PrimeField>(data: &Vec<F>) -> UnivariantPolynomial<F> {
     let mut v_poly = UnivariantPolynomial::one();
@@ -163,12 +196,15 @@ mod tests {
             ])
         );
     }
-    
+
     #[test]
     fn test_generate_vanishing_polynomial() {
         let data = vec![Fr::from(2u8), Fr::from(4u8)];
         let v_poly = generate_vanishing_polynomial::<Fr>(&data);
 
-        assert_eq!(v_poly.coefficients, vec![Fr::from(1u8), Fr::from(-6), Fr::from(8u8)]);
+        assert_eq!(
+            v_poly.coefficients,
+            vec![Fr::from(1u8), Fr::from(-6), Fr::from(8u8)]
+        );
     }
 }

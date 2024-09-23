@@ -3,7 +3,7 @@ use ark_ec::pairing::Pairing;
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SRS<P: Pairing> {
     pub g1_power_of_taus: Vec<P::G1>,
-    pub g2_power_of_tau: P::G2,
+    pub g2_power_of_tau: Vec<P::G2>,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
