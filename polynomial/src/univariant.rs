@@ -4,7 +4,7 @@ use crate::{
 };
 use ark_ff::{BigInteger, PrimeField};
 pub use ark_test_curves;
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct UnivariantPolynomial<F> {
@@ -294,6 +294,56 @@ impl<F: PrimeField> Mul for &UnivariantPolynomial<F> {
         }
 
         UnivariantPolynomial::new(poly_product_coefficients)
+    }
+}
+
+impl<F: PrimeField> MulAssign<&UnivariantPolynomial<F>> for UnivariantPolynomial<F> {
+    fn mul_assign(&mut self, other: &UnivariantPolynomial<F>) {
+        // check for zero polynomials
+        if self.is_zero() || other.is_zero() {
+            *self = UnivariantPolynomial::new(vec![]);
+            return;
+        }
+
+        // Create a new polynomial with the degree of the two polynomials
+        let poly_product_degree = self.degree() + other.degree();
+
+        // during poly mul we would need d + 1 element to represent a polynomial of degree d
+        let mut poly_product_coefficients = vec![F::zero(); poly_product_degree + 1];
+
+        for i in 0..=self.degree() {
+            for j in 0..=other.degree() {
+                poly_product_coefficients[i + j] += self.coefficients[i] * other.coefficients[j];
+            }
+        }
+
+        // Assign the result back to self
+        *self = UnivariantPolynomial::new(poly_product_coefficients);
+    }
+}
+
+impl<F: PrimeField> MulAssign<UnivariantPolynomial<F>> for UnivariantPolynomial<F> {
+    fn mul_assign(&mut self, other: UnivariantPolynomial<F>) {
+        // check for zero polynomials
+        if self.is_zero() || other.is_zero() {
+            *self = UnivariantPolynomial::new(vec![]);
+            return;
+        }
+
+        // Create a new polynomial with the degree of the two polynomials
+        let poly_product_degree = self.degree() + other.degree();
+
+        // during poly mul we would need d + 1 element to represent a polynomial of degree d
+        let mut poly_product_coefficients = vec![F::zero(); poly_product_degree + 1];
+
+        for i in 0..=self.degree() {
+            for j in 0..=other.degree() {
+                poly_product_coefficients[i + j] += self.coefficients[i] * other.coefficients[j];
+            }
+        }
+
+        // Assign the result back to self
+        *self = UnivariantPolynomial::new(poly_product_coefficients);
     }
 }
 

@@ -45,3 +45,20 @@ pub trait KZGMultiLinearInterface<P: Pairing> {
         proof: &Vec<P::G1>,
     ) -> bool;
 }
+
+pub trait BatchKZGUnivariateInterface<P: Pairing> {
+    /// This function is used to generate a new SRS.
+    fn generate_srs(tau: &P::ScalarField, poly_degree: usize) -> SRS<P>;
+    /// Commit to a polynomial would degree is less than the degree of the SRS
+    fn commit(srs: &SRS<P>, poly: &UnivariantPolynomial<P::ScalarField>) -> P::G1;
+    /// Open a polynomial at a point
+    fn open<F: PrimeField>(srs: &SRS<P>, poly: &UnivariantPolynomial<F>, point: &F) -> (F, P::G1);
+    /// Verify polynomial evaluation
+    fn verify<F: PrimeField>(
+        srs: &SRS<P>,
+        commitment: &P::G1,
+        point: &F,
+        point_evaluation: &F,
+        proof: &P::G1,
+    ) -> bool;
+}

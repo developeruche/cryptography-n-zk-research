@@ -64,8 +64,11 @@ impl<P: Pairing> KZGUnivariateInterface<P> for UnivariateKZG {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::generate_vanishing_polynomial;
+
     use super::*;
     use ark_test_curves::bls12_381::{Bls12_381, Fr};
+    use polynomial::interface::UnivariantPolynomialInterface;
 
     #[test]
     fn test_univariate_kzg() {
@@ -91,5 +94,62 @@ mod tests {
         );
 
         assert!(is_valid);
+    }
+    
+    #[test]
+    fn test_univariate_kzg_invalid_opening() {
+        let tau = Fr::from(10u64);
+        let poly_degree = 4;
+        let srs: SRS<Bls12_381> = UnivariateKZG::generate_srs(&tau, poly_degree);
+
+        let poly = UnivariantPolynomial::new(vec![
+            Fr::from(1u64),
+            Fr::from(2u64),
+            Fr::from(3u64),
+            Fr::from(4u64),
+            Fr::from(5u64),
+        ]);
+        let commitment = UnivariateKZG::commit(&srs, &poly);
+        let (point_evaluation, proof) = UnivariateKZG::open::<Fr>(&srs, &poly, &Fr::from(2u64));
+        let is_valid = UnivariateKZG::verify::<Fr>(
+            &srs,
+            &commitment,
+            &Fr::from(4u64),
+            &point_evaluation,
+            &proof,
+        );
+
+        assert_eq!(is_valid, false);
+    }
+    
+    #[test]
+    fn exp_test_univariate_kzg_invalid_opening() {
+        let poly = UnivariantPolynomial::new(vec![
+            Fr::from(3u64),
+            Fr::from(2u64),
+            Fr::from(4u64),
+        ]);
+        let opening = vec![Fr::from(1u64), Fr::from(5u64), Fr::from(3u64)];
+        let opening_evaluautions = vec![Fr::from(9u64), Fr::from(113u64), Fr::from(45u64)];
+        
+        let vanishing_poly = generate_vanishing_polynomial(&opening);
+        
+        let (q, r) = poly.divide_with_q_and_r(&vanishing_poly).unwrap();
+        
+        let t_eval_0 = r.evaluate(&opening[0]);
+        let t_eval_1 = r.evaluate(&opening[1]);
+        let t_eval_2 = r.evaluate(&opening[2]);
+        
+        let f_eval_opening_0 = opening_evaluautions[0];
+        let f_eval_opening_1 = opening_evaluautions[1];
+        let f_eval_opening_2 = opening_evaluautions[2];
+        
+        assert_eq!(t_eval_0, f_eval_opening_0);
+        assert_eq!(t_eval_1, f_eval_opening_1);
+        assert_eq!(t_eval_2, f_eval_opening_2);
+        
+        let expected_r = UnivariantPolynomial::interpolate(opening_evaluautions, opening);
+        
+        assert_eq!(r, expected_r);
     }
 }

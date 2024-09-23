@@ -93,6 +93,17 @@ pub fn g2_operation<F: PrimeField, P: Pairing>(oprands: &[F]) -> Vec<P::G2> {
     result
 }
 
+
+pub fn generate_vanishing_polynomial<F: PrimeField>(data: &Vec<F>) -> UnivariantPolynomial<F> {
+    let mut v_poly = UnivariantPolynomial::one();
+
+    for c in data {
+        v_poly *= UnivariantPolynomial::new(vec![F::one(), -*c]);
+    }
+
+    v_poly
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,5 +162,13 @@ mod tests {
                 Fr::from(8u8)
             ])
         );
+    }
+    
+    #[test]
+    fn test_generate_vanishing_polynomial() {
+        let data = vec![Fr::from(2u8), Fr::from(4u8)];
+        let v_poly = generate_vanishing_polynomial::<Fr>(&data);
+
+        assert_eq!(v_poly.coefficients, vec![Fr::from(1u8), Fr::from(-6), Fr::from(8u8)]);
     }
 }
