@@ -165,6 +165,17 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
 
         bytes
     }
+
+    pub fn random(size: usize) -> Self {
+        let mut rng = ark_std::test_rng();
+        let mut coeffs = vec![];
+
+        for _ in 0..size {
+            coeffs.push(F::rand(&mut rng));
+        }
+
+        UnivariantPolynomial::from_coefficients_vec(coeffs)
+    }
 }
 
 impl<F: PrimeField> Deref for UnivariantPolynomial<F> {
