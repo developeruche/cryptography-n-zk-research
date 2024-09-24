@@ -6,7 +6,7 @@ use kzg_rust::{
     primitives::SRS,
     univariate::UnivariateKZG,
 };
-use polynomial::{multilinear::Multilinear, univariant::UnivariantPolynomial};
+use polynomial::univariant::UnivariantPolynomial;
 
 const SIZE: usize = 256;
 
@@ -150,7 +150,7 @@ criterion_group!(
     kzg_univariant_protocol_benchmark_only_commit,
     kzg_univariant_protocol_benchmark_only_open,
     kzg_univariant_protocol_benchmark_only_open_three_point,
-    kzg_univariant_protocol_benchmark_only_open_three_point_batch
+    kzg_univariant_protocol_benchmark_only_open_three_point_batch,
 );
 
 criterion_main!(benches);

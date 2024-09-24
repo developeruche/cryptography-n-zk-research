@@ -21,3 +21,7 @@ criterion = "0.5.1"
 [[bench]]
 name = "kzg_pcs_benchmark"
 harness = false
+
+[[bench]]
+name = "kzg_multilinear_pcs_benchmark"
+harness = false
