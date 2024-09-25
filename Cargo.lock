@@ -423,11 +423,13 @@ dependencies = [
 name = "gkr"
 version = "0.1.0"
 dependencies = [
+ "ark-ec",
  "ark-ff",
  "ark-test-curves",
  "circuits",
  "criterion",
  "fiat_shamir",
+ "kzg-rust",
  "polynomial",
  "sum_check",
 ]

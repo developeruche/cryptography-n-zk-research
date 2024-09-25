@@ -2,12 +2,9 @@
 use ark_bls12_381::{Bls12_381, Fr};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use kzg_rust::{
-    interface::{self, KZGMultiLinearInterface, KZGUnivariateInterface},
-    multilinear::MultilinearKZG,
-    primitives::{MultiLinearSRS, SRS},
-    univariate::UnivariateKZG,
+    interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,
 };
-use polynomial::{multilinear::Multilinear, univariant::UnivariantPolynomial};
+use polynomial::multilinear::Multilinear;
 
 fn kzg_multilinear_protocol_benchmark(c: &mut Criterion) {
     let poly = Multilinear::random(10);
@@ -119,7 +116,6 @@ fn kzg_multilinear_protocol_benchmark_only_open(c: &mut Criterion) {
         })
     });
 }
-
 
 criterion_group!(
     benches,
