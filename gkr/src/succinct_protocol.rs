@@ -290,6 +290,8 @@ impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for SuccinctG
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::gen_random_taus;
+
     use super::*;
     use ark_test_curves::bls12_381::{Bls12_381, Fr};
     use circuits::{
@@ -297,11 +299,6 @@ mod tests {
         primitives::{CircuitLayer, Gate, GateType},
     };
     use polynomial::multilinear::Multilinear;
-
-    fn gen_random_taus<F: PrimeField>(size: usize) -> Vec<F> {
-        let mut rng = ark_std::test_rng();
-        (0..size).map(|_| F::rand(&mut rng)).collect()
-    }
 
     #[test]
     fn test_succinct_gkr_protocol() {
@@ -365,19 +362,29 @@ mod tests {
         ));
     }
 
-    // #[test]
-    // #[ignore]
-    // fn test_gkr_protocol_random_circuit() {
-    //     let circuit = Circuit::random(8);
-    //     let input = (0u64..256)
-    //         .into_iter()
-    //         .map(|x| Fr::from(x))
-    //         .collect::<Vec<Fr>>();
+    #[test]
+    #[ignore]
+    fn test_succinct_gkr_protocol_random_circuit() {
+        let circuit = Circuit::random(8);
+        let input = (0u64..256)
+            .into_iter()
+            .map(|x| Fr::from(x))
+            .collect::<Vec<Fr>>();
 
-    //     let evaluation = circuit.evaluate(&input);
+        let input_in_poly_form = Multilinear::interpolate(&input);
+        let tau_s = gen_random_taus::<Fr>(input_in_poly_form.num_vars);
+        let srs: MultiLinearSRS<Bls12_381> = MultilinearKZG::generate_srs(&tau_s);
+        let commitment = MultilinearKZG::commit(&srs, &input_in_poly_form);
 
-    //     let proof = GKRProtocol::prove(&circuit, &evaluation);
+        let evaluation = circuit.evaluate(&input);
 
-    //     assert!(GKRProtocol::verify(&circuit, &input, &proof));
-    // }
+        let proof = SuccinctGKRProtocol::prove(&circuit, &evaluation, &commitment, &srs);
+
+        assert!(SuccinctGKRProtocol::verify(
+            &circuit,
+            &proof,
+            &commitment,
+            &srs
+        ));
+    }
 }

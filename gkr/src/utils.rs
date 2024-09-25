@@ -159,3 +159,8 @@ pub fn verifiy_gkr_sumcheck_layer_one<F: PrimeField>(
 
     (true, new_claim)
 }
+
+pub fn gen_random_taus<F: PrimeField>(size: usize) -> Vec<F> {
+    let mut rng = ark_std::test_rng();
+    (0..size).map(|_| F::rand(&mut rng)).collect()
+}
