@@ -425,6 +425,7 @@ version = "0.1.0"
 dependencies = [
  "ark-ec",
  "ark-ff",
+ "ark-std",
  "ark-test-curves",
  "circuits",
  "criterion",
@@ -833,10 +834,6 @@ dependencies = [
  "digest",
  "keccak",
 ]
-
-[[package]]
-name = "succinct-gkr"
-version = "0.1.0"
 
 [[package]]
 name = "sum_check"

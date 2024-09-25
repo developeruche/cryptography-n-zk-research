@@ -1,15 +1,15 @@
 #![allow(unused_assignments)]
 
 use crate::{
-    interfaces::{GKRProtocolInterface, SuccinctGKRProtocolInterface},
-    primitives::{GKRProof, SuccinctGKRMultilinearKZGOPenningProof, SuccinctGKRProof},
+    interfaces::SuccinctGKRProtocolInterface,
+    primitives::{SuccinctGKRMultilinearKZGOPenningProof, SuccinctGKRProof},
     utils::{gen_w_mle, perform_gkr_sumcheck_layer_one, verifiy_gkr_sumcheck_layer_one},
 };
 use ark_ec::{
     pairing::{Pairing, PairingOutput},
     Group,
 };
-use ark_ff::{BigInteger, PrimeField};
+use ark_ff::PrimeField;
 use circuits::{
     interfaces::GKRProtocolCircuitInterface,
     primitives::{Circuit, CircuitEvaluation},
@@ -20,17 +20,15 @@ use kzg_rust::{
 };
 use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,
-    multilinear::Multilinear,
 };
 use sum_check::{
     composed::multicomposed::{MultiComposedProver, MultiComposedVerifier},
     interface::{MultiComposedProverInterface, MultiComposedVerifierInterface},
 };
 
-// pub struct SuccinctGKRProtocol;
-pub struct GKRProtocol;
+pub struct SuccinctGKRProtocol;
 
-impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for GKRProtocol {
+impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for SuccinctGKRProtocol {
     fn prove(
         circuit: &Circuit,
         evals: &CircuitEvaluation<F>,
@@ -196,6 +194,7 @@ impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for GKRProtoc
 
         let mut transcript = FiatShamirTranscript::default();
         transcript.append(proof.w_0_mle.to_bytes());
+        transcript.append(input_poly_commitment.to_string().as_bytes().to_vec()); // Appending the commitment to the poly to ensure soundness
 
         let n_r = transcript.sample_n_as_field_elements(proof.w_0_mle.num_vars);
         let mut claim = proof.w_0_mle.evaluate(&n_r).unwrap();
@@ -292,14 +291,20 @@ impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for GKRProtoc
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ark_test_curves::bls12_381::Fr;
+    use ark_test_curves::bls12_381::{Bls12_381, Fr};
     use circuits::{
         interfaces::CircuitInterface,
         primitives::{CircuitLayer, Gate, GateType},
     };
+    use polynomial::multilinear::Multilinear;
+
+    fn gen_random_taus<F: PrimeField>(size: usize) -> Vec<F> {
+        let mut rng = ark_std::test_rng();
+        (0..size).map(|_| F::rand(&mut rng)).collect()
+    }
 
     #[test]
-    fn test_gkr_protocol() {
+    fn test_succinct_gkr_protocol() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
         let layer_1 = CircuitLayer::new(vec![
             Gate::new(GateType::Mul, [0, 1]),
@@ -341,29 +346,38 @@ mod tests {
             Fr::from(3u32),
             Fr::from(4u32),
         ];
+        let input_in_poly_form = Multilinear::interpolate(&input);
+        let tau_s = gen_random_taus::<Fr>(input_in_poly_form.num_vars);
+        let srs: MultiLinearSRS<Bls12_381> = MultilinearKZG::generate_srs(&tau_s);
+        let commitment = MultilinearKZG::commit(&srs, &input_in_poly_form);
 
         let evaluation = circuit.evaluate(&input);
 
         assert_eq!(evaluation.layers[0][0], Fr::from(224u32));
 
-        let proof = GKRProtocol::prove(&circuit, &evaluation);
+        let proof = SuccinctGKRProtocol::prove(&circuit, &evaluation, &commitment, &srs);
 
-        assert!(GKRProtocol::verify(&circuit, &input, &proof));
+        assert!(SuccinctGKRProtocol::verify(
+            &circuit,
+            &proof,
+            &commitment,
+            &srs
+        ));
     }
 
-    #[test]
-    #[ignore]
-    fn test_gkr_protocol_random_circuit() {
-        let circuit = Circuit::random(8);
-        let input = (0u64..256)
-            .into_iter()
-            .map(|x| Fr::from(x))
-            .collect::<Vec<Fr>>();
+    // #[test]
+    // #[ignore]
+    // fn test_gkr_protocol_random_circuit() {
+    //     let circuit = Circuit::random(8);
+    //     let input = (0u64..256)
+    //         .into_iter()
+    //         .map(|x| Fr::from(x))
+    //         .collect::<Vec<Fr>>();
 
-        let evaluation = circuit.evaluate(&input);
+    //     let evaluation = circuit.evaluate(&input);
 
-        let proof = GKRProtocol::prove(&circuit, &evaluation);
+    //     let proof = GKRProtocol::prove(&circuit, &evaluation);
 
-        assert!(GKRProtocol::verify(&circuit, &input, &proof));
-    }
+    //     assert!(GKRProtocol::verify(&circuit, &input, &proof));
+    // }
 }

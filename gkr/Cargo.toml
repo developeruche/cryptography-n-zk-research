@@ -12,7 +12,7 @@ fiat_shamir = {path = "../fiat_shamir"}
 sum_check = {path = "../sum_check"}
 circuits = {path = "../circuits"}
 kzg-rust = {path = "../polynomial-commitment-schemes/kzg-rust"}
-
+ark-std.workspace = true
 
 
 [dev-dependencies]
