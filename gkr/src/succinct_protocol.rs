@@ -5,10 +5,7 @@ use crate::{
     primitives::{SuccinctGKRMultilinearKZGOPenningProof, SuccinctGKRProof},
     utils::{gen_w_mle, perform_gkr_sumcheck_layer_one, verifiy_gkr_sumcheck_layer_one},
 };
-use ark_ec::{
-    pairing::{Pairing, PairingOutput},
-    Group,
-};
+use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use circuits::{
     interfaces::GKRProtocolCircuitInterface,

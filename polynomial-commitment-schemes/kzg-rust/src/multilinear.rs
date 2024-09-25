@@ -1,5 +1,5 @@
 use ark_ec::{
-    pairing::{Pairing, PairingOutput},
+    pairing::Pairing,
     Group,
 };
 use ark_ff::PrimeField;
