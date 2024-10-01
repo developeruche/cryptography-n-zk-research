@@ -13,7 +13,7 @@ sum_check = {path = "../sum_check"}
 circuits = {path = "../circuits"}
 kzg-rust = {path = "../polynomial-commitment-schemes/kzg-rust"}
 ark-std.workspace = true
-
+field-tracker.workspace = true
 
 [dev-dependencies]
 criterion = "0.5.1"

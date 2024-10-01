@@ -4,8 +4,7 @@ use crate::{
     interface::BatchKZGUnivariateInterface,
     primitives::SRS,
     utils::{
-        generate_vanishing_polynomial,
-        linear_combination_homomorphic_poly_eval_g1_primefield,
+        generate_vanishing_polynomial, linear_combination_homomorphic_poly_eval_g1_primefield,
         linear_combination_homomorphic_poly_eval_g2_primefield,
     },
 };

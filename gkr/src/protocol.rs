@@ -233,6 +233,9 @@ mod tests {
         interfaces::CircuitInterface,
         primitives::{CircuitLayer, Gate, GateType},
     };
+    use field_tracker::Ft;
+
+    type Fot = Ft<4, Fr>;
 
     #[test]
     fn test_gkr_protocol() {
@@ -301,5 +304,28 @@ mod tests {
         let proof = GKRProtocol::prove(&circuit, &evaluation);
 
         assert!(GKRProtocol::verify(&circuit, &input, &proof));
+    }
+
+    #[test]
+    fn test_gkr_protocol_random_n_ops_tracker_circuit() {
+        let circuit = Circuit::random(3);
+        let input = (0u64..8)
+            .into_iter()
+            .map(|x| Fot::from(x))
+            .collect::<Vec<Fot>>();
+
+        println!("{}", Fot::summary());
+
+        let evaluation = circuit.evaluate(&input);
+
+        println!("{}", Fot::summary());
+
+        let proof = GKRProtocol::prove(&circuit, &evaluation);
+
+        println!("{}", Fot::summary());
+
+        assert!(GKRProtocol::verify(&circuit, &input, &proof));
+
+        println!("{}", Fot::summary());
     }
 }

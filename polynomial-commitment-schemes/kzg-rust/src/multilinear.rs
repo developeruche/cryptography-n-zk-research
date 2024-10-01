@@ -1,7 +1,4 @@
-use ark_ec::{
-    pairing::Pairing,
-    Group,
-};
+use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 use polynomial::{
     interface::MultilinearPolynomialInterface, multilinear::Multilinear, utils::boolean_hypercube,

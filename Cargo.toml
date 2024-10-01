@@ -12,7 +12,7 @@ members = [
     "playground",
 ]
 exclude = [
-    "circom-groth16"
+    "circom-groth16",
 ]
 
 
@@ -21,3 +21,4 @@ polynomial = { path = "polynomial" }
 circuits = { path = "circuits" }
 ark-std = "0.4.0"
 rand = "0.8.5"
+field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
