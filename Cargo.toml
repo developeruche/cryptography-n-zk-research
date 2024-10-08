@@ -2,14 +2,15 @@
 members = [
     "polynomial",
     "bls-multi-sign-threshold-wallet", 
-    "fiat_shamir", 
+    "transcripts/fiat_shamir", 
     "sum_check", 
     "sha256-hash-function",
     "gkr", 
     "circuits", 
     "groth16", 
     "polynomial-commitment-schemes/kzg-rust", 
-    "playground",
+    "plonk/compiler", 
+    "plonk/protocol", "plonk/core", "transcripts/merlin",
 ]
 exclude = [
     "circom-groth16",
