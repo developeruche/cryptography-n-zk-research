@@ -10,7 +10,9 @@ members = [
     "groth16", 
     "polynomial-commitment-schemes/kzg-rust", 
     "plonk/compiler", 
-    "plonk/protocol", "plonk/core", "transcripts/merlin",
+    "plonk/protocol", 
+    "plonk/core", 
+    "transcripts/merlin",
 ]
 exclude = [
     "circom-groth16",
@@ -23,3 +25,13 @@ circuits = { path = "circuits" }
 ark-std = "0.4.0"
 rand = "0.8.5"
 field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
+ark-ff = "0.4.2"
+ark-ec = "0.4.2"
+ark-bls12-381 = "0.4.0"
+ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381", "secp256k1"]}
+hex-literal = "0.4.1"
+fiat_shamir = {path = "transcripts/fiat_shamir"}
+sum_check = {path = "sum_check"}
+kzg-rust = {path = "polynomial-commitment-schemes/kzg-rust"}
+ark-serialize = "0.4.2"
+digest = "0.10.7"

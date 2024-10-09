@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ark-ff = "0.4.2"
-ark-ec = "0.4.2"
-ark-bls12-381 = "0.4.0"
-ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381", "secp256k1"]}
-polynomial = {path = "../polynomial"}
-circuits = {path = "../circuits"}
-rand = "0.8.4"
-hex-literal = "0.4.1"
+ark-ff.workspace = true
+ark-ec.workspace = true
+ark-bls12-381 .workspace = true
+ark-test-curves.workspace = true
+polynomial.workspace = true
+circuits.workspace = true
+rand.workspace = true
+hex-literal.workspace = true
