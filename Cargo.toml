@@ -35,3 +35,6 @@ sum_check = {path = "sum_check"}
 kzg-rust = {path = "polynomial-commitment-schemes/kzg-rust"}
 ark-serialize = "0.4.2"
 digest = "0.10.7"
+plonk_protocol = { path = "plonk/protocol" }
+plonk_core = { path = "plonk/core" }
+plonk_compiler = { path = "plonk/compiler" }

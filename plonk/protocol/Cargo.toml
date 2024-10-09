@@ -1,6 +1,13 @@
 [package]
-name = "protocol"
+name = "plonk_protocol"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+plonk_core.workspace = true
+ark-ff.workspace = true
+ark-ec.workspace = true
+ark-test-curves.workspace = true
+polynomial.workspace = true
+fiat_shamir.workspace = true
+kzg-rust.workspace = true

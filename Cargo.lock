@@ -273,14 +273,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
 
 [[package]]
-name = "compiler"
-version = "0.1.0"
-
-[[package]]
-name = "core"
-version = "0.1.0"
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -404,12 +396,13 @@ dependencies = [
 [[package]]
 name = "field-tracker"
 version = "0.1.0"
-source = "git+https://github.com/sublinearlabs/field-tracker?branch=main#8a35c931b5bf8494b8803560b0a39f621c8590c4"
+source = "git+https://github.com/sublinearlabs/field-tracker?branch=main#3e646ca0256e344b0d9daf448f33c9d15ccde643"
 dependencies = [
  "ark-ff",
  "ark-serialize",
  "num-bigint",
  "rand",
+ "treeline",
  "zeroize",
 ]
 
@@ -626,6 +619,44 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
+name = "plonk_compiler"
+version = "0.1.0"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-test-curves",
+ "fiat_shamir",
+ "plonk_core",
+ "polynomial",
+ "regex",
+]
+
+[[package]]
+name = "plonk_core"
+version = "0.1.0"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-test-curves",
+ "fiat_shamir",
+ "kzg-rust",
+ "polynomial",
+]
+
+[[package]]
+name = "plonk_protocol"
+version = "0.1.0"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-test-curves",
+ "fiat_shamir",
+ "kzg-rust",
+ "plonk_core",
+ "polynomial",
+]
+
+[[package]]
 name = "plotters"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -687,10 +718,6 @@ checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
 dependencies = [
  "unicode-ident",
 ]
-
-[[package]]
-name = "protocol"
-version = "0.1.0"
 
 [[package]]
 name = "quote"
@@ -898,6 +925,12 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "treeline"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7f741b240f1a48843f9b8e0444fb55fb2a4ff67293b50a9179dfd5ea67f8d41"
 
 [[package]]
 name = "typenum"
