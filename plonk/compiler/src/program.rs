@@ -1,12 +1,13 @@
-use std::collections::HashMap;
+#![allow(non_snake_case)]
 
 use ark_ff::PrimeField;
 use plonk_core::primitives::CommonPreprocessedInput;
-use polynomial::univariant::UnivariantPolynomial;
+use polynomial::evaluation::univariate::UnivariateEval;
+use std::collections::HashMap;
 
 use crate::{
     assembly::{eq_to_assembly, AssembleEquation, GateWire},
-    utils::{roots_of_unity, Cell, Column},
+    utils::{get_product_key, roots_of_unity, Cell, Column},
 };
 
 pub struct Program<F: PrimeField> {
@@ -35,28 +36,51 @@ impl<F: PrimeField> Program<F> {
     }
 
     pub fn common_preproccessed_input(&self) -> CommonPreprocessedInput<F> {
-        todo!()
+        let (L, R, M, O, C) = self.make_gate_polynomials();
+        let (S1, S2, S3) = self.make_s_polynomials();
+
+        CommonPreprocessedInput {
+            QM: M,
+            QL: L,
+            QR: R,
+            QO: O,
+            QC: C,
+            S1,
+            S2,
+            S3,
+            group_order: self.group_order,
+        }
     }
 
     pub fn make_gate_polynomials(
         &self,
     ) -> (
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
+        UnivariateEval<F>,
+        UnivariateEval<F>,
+        UnivariateEval<F>,
+        UnivariateEval<F>,
+        UnivariateEval<F>,
     ) {
+        let mut L = vec![F::ZERO; self.group_order as usize];
+        let mut R = vec![F::ZERO; self.group_order as usize];
+        let mut M = vec![F::ZERO; self.group_order as usize];
+        let mut O = vec![F::ZERO; self.group_order as usize];
+        let mut C = vec![F::ZERO; self.group_order as usize];
+
+        for (i, constraint) in self.constraints.iter().enumerate() {
+            let gate = constraint.gate();
+            L[i] = gate.L;
+            R[i] = gate.R;
+            M[i] = gate.M;
+            O[i] = gate.O;
+            C[i] = gate.C;
+        }
+
+        // represent polynomial in evaluation form so that we can use FFT
         todo!()
     }
 
-    pub fn make_s_polynomials(
-        &self,
-    ) -> (
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
-        UnivariantPolynomial<F>,
-    ) {
+    pub fn make_s_polynomials(&self) -> (UnivariateEval<F>, UnivariateEval<F>, UnivariateEval<F>) {
         let mut variable_uses = HashMap::new();
         //The purpose of the loop is to put all the cells where the variable is located in variable_uses
         for (row, constraint) in self.constraints.iter().enumerate() {
@@ -115,13 +139,13 @@ impl<F: PrimeField> Program<F> {
         let mut s1 = None;
         let mut s2 = None;
         let mut s3 = None;
-        // for (key, vec) in s.into_iter() {
-        //     match key {
-        //         Column::LEFT => s1 = Some(Polynomial::new(vec, Basis::Lagrange)),
-        //         Column::RIGHT => s2 = Some(Polynomial::new(vec, Basis::Lagrange)),
-        //         Column::OUTPUT => s3 = Some(Polynomial::new(vec, Basis::Lagrange)),
-        //     }
-        // }
+        for (key, vec) in s.into_iter() {
+            match key {
+                Column::LEFT => s1 = Some(UnivariateEval::new(vec)),
+                Column::RIGHT => s2 = Some(UnivariateEval::new(vec)),
+                Column::OUTPUT => s3 = Some(UnivariateEval::new(vec)),
+            }
+        }
         (s1.unwrap(), s2.unwrap(), s3.unwrap())
     }
 
@@ -150,6 +174,75 @@ impl<F: PrimeField> Program<F> {
     }
 
     pub fn get_public_assignment(&self) -> Vec<Option<String>> {
-        todo!()
+        let mut no_more_allowed = false;
+        let mut o = Vec::new();
+
+        for coeff in self.coeffs() {
+            if coeff.get(&Some("$public".to_string())).is_some() {
+                if no_more_allowed {
+                    panic!("Public var declarations must be at the top")
+                }
+                let mut var_name = Vec::new();
+                for (key, _) in coeff.iter() {
+                    if key.clone().unwrap().chars().next().unwrap() != '$' {
+                        var_name.push(key.clone().unwrap());
+                    }
+                }
+                o.push(Some(var_name.join("")));
+            } else {
+                no_more_allowed = true;
+            }
+        }
+
+        o
+    }
+
+    /// Attempts to "run" the program to fill in any intermediate variable
+    /// assignments, starting from the given assignments. Eg. if
+    /// `starting_assignments` contains {'a': 3, 'b': 5}, and the first line
+    /// says `c <== a * b`, then it fills in `c: 15`.
+    pub fn fill_variable_assignments(
+        &self,
+        starting_assignments: HashMap<Option<String>, F>,
+    ) -> HashMap<Option<String>, F> {
+        let mut out: HashMap<Option<String>, F> = starting_assignments.clone();
+        out.insert(None, F::ZERO);
+
+        for constraint in self.constraints.iter() {
+            let wires = constraint.wires.clone();
+            let coeffs = constraint.coeffs.clone();
+
+            let in_L = wires.L;
+            let in_R = wires.R;
+            let output = wires.O;
+            let default_f_one = F::from(1u32);
+            let out_coeff = coeffs
+                .get(&Some("$output_coeff".to_string()))
+                .unwrap_or(&default_f_one);
+            let product_key = get_product_key(in_L.clone(), in_R.clone());
+
+            if output.is_some() && (*out_coeff == F::ONE.neg() || *out_coeff == F::ONE) {
+                let new_value = F::from(
+                    *coeffs.get(&Some("".to_string())).unwrap_or(&F::ZERO)
+                        + *out.get(&in_L).unwrap() * *coeffs.get(&in_L).unwrap_or(&F::ZERO)
+                        + *out.get(&in_R).unwrap()
+                            * *coeffs.get(&in_R).unwrap_or(&F::ZERO)
+                            * if in_R != in_L { F::ONE } else { F::ZERO }
+                        + *out.get(&in_L).unwrap()
+                            * *out.get(&in_R).unwrap()
+                            * coeffs.get(&product_key).unwrap_or(&F::ZERO),
+                ) * out_coeff;
+
+                if out.get(&output).is_some() {
+                    if out.get(&output).unwrap() != &new_value {
+                        panic!("Inconsistent assignment for variable {:?}", output);
+                    }
+                } else {
+                    out.insert(output.clone(), new_value);
+                }
+            }
+        }
+
+        out
     }
 }

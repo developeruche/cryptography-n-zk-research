@@ -1,5 +1,7 @@
+#![allow(non_snake_case)]
+
 use ark_ff::PrimeField;
-use std::{clone, collections::HashMap};
+use std::collections::HashMap;
 
 use crate::utils::{get_product_key, is_valid_variable_name, merge_maps, multiply_maps};
 
