@@ -9,6 +9,37 @@ A Cryptography and Zero Knowledge Proof Research Repo Implementing Research pape
 
 
 
+```
+research-implementation/
+│
+├── primitives/
+│   ├── polynomial/
+│   ├── arithmetic circuit/
+│   └── SHA256 hash function/
+|
+├── protocol implementation/
+│   ├── GKR
+│   ├── Groth16
+│   ├── KZG polynomial commitment scheme
+│             ├── univariate poly/
+|             ├── univariate batch/
+│             └── multilinear poly/
+│   ├── Succinct GRK (using KZG as the PCS)
+│   ├── Sum Check Protocol
+│   ├── Schnorr Digital Signature
+│   ├── NON-Interactive Chaum Pederson zero-knowledge proof
+│   ├── Fiat Shamir
+│   ├── Interactive Chaum Pederson zero-knowledge proof
+│   └── ECDSA
+|
+├── projects/
+│   ├── KZG airdrop over bn254 Elliptic curve
+│   ├── Light tornado cash (powered by Groth16)
+│   ├── Verifiable Random Function (VRF)
+│   ├── BLS Multi Sign Threshold Wallet (Powered by Shimir secret sharing protocol)
+│   └── Circom Groth16
+
+```
 
 
 
