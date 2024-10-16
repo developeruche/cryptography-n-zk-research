@@ -2,7 +2,7 @@
 
 use ark_ff::PrimeField;
 use plonk_core::primitives::CommonPreprocessedInput;
-use polynomial::evaluation::univariate::UnivariateEval;
+use polynomial::evaluation::{univariate::UnivariateEval, Domain};
 use std::collections::HashMap;
 
 use crate::{
@@ -140,10 +140,11 @@ impl<F: PrimeField> Program<F> {
         let mut s2 = None;
         let mut s3 = None;
         for (key, vec) in s.into_iter() {
+            let domain = Domain::<F>::new(self.group_order as usize);
             match key {
-                Column::LEFT => s1 = Some(UnivariateEval::new(vec)),
-                Column::RIGHT => s2 = Some(UnivariateEval::new(vec)),
-                Column::OUTPUT => s3 = Some(UnivariateEval::new(vec)),
+                Column::LEFT => s1 = Some(UnivariateEval::new(vec, domain)),
+                Column::RIGHT => s2 = Some(UnivariateEval::new(vec, domain)),
+                Column::OUTPUT => s3 = Some(UnivariateEval::new(vec, domain)),
             }
         }
         (s1.unwrap(), s2.unwrap(), s3.unwrap())

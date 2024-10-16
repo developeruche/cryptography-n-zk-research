@@ -1,4 +1,3 @@
-use super::Domain;
 use ark_ff::PrimeField;
 
 pub fn split_odd_even<F: PrimeField>(arr: &Vec<F>) -> (Vec<F>, Vec<F>) {

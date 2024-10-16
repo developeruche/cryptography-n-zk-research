@@ -36,12 +36,34 @@ impl<F: PrimeField> Domain<F> {
 
     /// This function is used to obtain the coset of the domain
     pub fn get_coset(&self, offest: usize) -> Self {
-        todo!()
+        let generator = self.generator * F::from(offest as u64);
+        let group_gen_inverse = generator.inverse().unwrap();
+
+        Domain {
+            size: self.size,
+            generator,
+            group_gen_inverse,
+        }
     }
 
     /// This function returns the roots of unity
     pub fn get_roots_of_unity(&self) -> Vec<F> {
-        todo!()
+        // Initialize a vector to store the roots of unity
+        let mut roots = Vec::with_capacity(self.size as usize);
+
+        // Start with the first root of unity (which is always 1)
+        let mut current = F::one();
+
+        // Get the generator (root of unity) omega
+        let omega = self.generator;
+
+        // Iterate through to calculate the powers of omega
+        for _ in 0..self.size {
+            roots.push(current);
+            current *= omega; // Move to the next power of omega
+        }
+
+        roots
     }
 
     /// This function is used to get the root of unity
@@ -57,7 +79,7 @@ impl<F: PrimeField> Domain<F> {
         coeffs.resize(self.size as usize, F::ZERO);
         self.fft_in_place_internal(coeffs, false);
     }
-    
+
     pub fn ifft_in_place(&self, evals: &mut Vec<F>) {
         if evals.len() == 1 {
             return;
