@@ -1,8 +1,6 @@
 [package]
-name = "fiat_shamir"
+name = "merlin"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sha3 = "0.10.8"
-ark-ff = "0.4.2"

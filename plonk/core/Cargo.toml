@@ -1,22 +1,12 @@
 [package]
-name = "sum_check"
+name = "plonk_core"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 ark-ff.workspace = true
+ark-ec.workspace = true
 ark-test-curves.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
-
-
-
-
-[dev-dependencies]
-criterion = "0.5.1"
-
-
-[[bench]]
-name = "sum_check_benchmark"
-harness = false
-
+kzg-rust.workspace = true

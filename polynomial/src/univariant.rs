@@ -3,6 +3,7 @@ use crate::{
     utils::get_langrange_basis,
 };
 use ark_ff::{BigInteger, PrimeField};
+use ark_std::rand::Rng;
 pub use ark_test_curves;
 use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
@@ -171,7 +172,8 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
         let mut coeffs = vec![];
 
         for _ in 0..size {
-            coeffs.push(F::rand(&mut rng));
+            let coeff = rng.gen_range(0..15);
+            coeffs.push(F::from(coeff as u64));
         }
 
         UnivariantPolynomial::from_coefficients_vec(coeffs)
