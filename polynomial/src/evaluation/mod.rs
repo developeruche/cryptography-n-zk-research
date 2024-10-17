@@ -65,31 +65,53 @@ impl<F: PrimeField> Domain<F> {
 
         roots
     }
+    
+    /// This function gets inverse roots of unity
+    pub fn get_inv_roots_of_unity(&self) -> Vec<F> {
+        // Initialize a vector to store the roots of unity
+        let mut roots = Vec::with_capacity(self.size as usize);
+
+        // Start with the first root of unity (which is always 1)
+        let mut current = F::one();
+
+        // Get the generator (root of unity) omega
+        let omega = self.group_gen_inverse;
+
+        // Iterate through to calculate the powers of omega
+        for _ in 0..self.size {
+            roots.push(current);
+            current *= omega; // Move to the next power of omega
+        }
+
+        roots
+    }
 
     /// This function is used to get the root of unity
     pub fn get_root_of_unity(&self) -> F {
         self.generator
     }
 
-    pub fn fft_in_place(&self, coeffs: &mut Vec<F>) {
+    pub fn fft(&self, coeffs: &Vec<F>) -> Vec<F> {
+        let mut coeffs = coeffs.clone();
         if coeffs.len() == 1 {
-            return;
+            return coeffs.clone();
         }
 
         coeffs.resize(self.size as usize, F::ZERO);
-        self.fft_in_place_internal(coeffs, false);
+        self.fft_internal(&coeffs, false)
     }
 
-    pub fn ifft_in_place(&self, evals: &mut Vec<F>) {
+    pub fn ifft(&self, evals: &Vec<F>) -> Vec<F> {
+        let mut evals = evals.clone();
         if evals.len() == 1 {
-            return;
+            return evals.clone();
         }
 
         evals.resize(self.size as usize, F::ZERO);
-        self.fft_in_place_internal(evals, true);
+        self.fft_internal(&evals, true)
     }
 
-    pub fn fft_in_place_internal(&self, coeffs: &mut Vec<F>, is_inverse: bool) -> Vec<F> {
+    pub fn fft_internal(&self, coeffs: &Vec<F>, is_inverse: bool) -> Vec<F> {
         let len_of_coeffs = coeffs.len();
         if len_of_coeffs == 1 {
             return coeffs.clone();
@@ -98,8 +120,8 @@ impl<F: PrimeField> Domain<F> {
         let (mut even, mut odd) = utils::split_odd_even::<F>(&coeffs);
 
         let (y_even, y_odd) = (
-            self.fft_in_place_internal(&mut even, is_inverse),
-            self.fft_in_place_internal(&mut odd, is_inverse),
+            self.fft_internal(&mut even, is_inverse),
+            self.fft_internal(&mut odd, is_inverse),
         );
 
         let mut y = vec![F::ZERO; len_of_coeffs];
@@ -112,6 +134,11 @@ impl<F: PrimeField> Domain<F> {
         for j in 0..len_of_coeffs / 2 {
             y[j] = y_even[j] + (y_odd[j] * w.pow(&[j as u64]));
             y[j + len_of_coeffs / 2] = y_even[j] - (y_odd[j] * w.pow(&[j as u64]));
+
+            if is_inverse {
+                y[j] /= F::from(2 as u64);
+                y[j + len_of_coeffs / 2] /= F::from(2 as u64);
+            }
         }
 
         y
