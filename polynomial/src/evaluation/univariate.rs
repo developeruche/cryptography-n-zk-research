@@ -9,6 +9,7 @@ use ark_ff::PrimeField;
 
 use super::Domain;
 
+
 #[derive(Debug, Clone)]
 pub struct UnivariateEval<F: PrimeField> {
     /// this is a list of the evaluation of the polynomial
@@ -68,8 +69,6 @@ impl<F: PrimeField> UnivariateEval<F> {
         let poly_1_eval = domain.fft(&poly1_coeffs);
         let poly_2_eval = domain.fft(&poly2_coeffs);
 
-        println!("poly_1_eval: {:?}", poly_1_eval);
-        println!("poly_2_eval: {:?}", poly_2_eval);
 
         let mut result = vec![F::ZERO; length_of_poly];
         for i in 0..length_of_poly {
@@ -195,19 +194,3 @@ mod tests {
         assert_eq!(result.coefficients, expected.coefficients);
     }
 }
-
-// let poly1 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(1), Fr::from(2)]);
-// let poly2 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(4), Fr::from(5)]);
-
-// let mut poly1_coeffs = poly1.coefficients.clone();
-// let mut poly2_coeffs = poly2.coefficients.clone();
-
-// let length_of_poly = poly1_coeffs.len() + poly2_coeffs.len() - 1;
-// let domain = Domain::<Fr>::new(length_of_poly);
-// poly1_coeffs.resize(length_of_poly, Fr::ZERO);
-// poly2_coeffs.resize(length_of_poly, Fr::ZERO);
-
-// let poly_1_eval = domain.fft(&poly1_coeffs);
-// let poly_2_eval = domain.fft(&poly2_coeffs);
-
-// pr
