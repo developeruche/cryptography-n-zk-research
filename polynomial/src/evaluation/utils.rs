@@ -7,7 +7,7 @@ pub fn split_odd_even<F: PrimeField>(arr: &Vec<F>) -> (Vec<F>, Vec<F>) {
     (even, odd)
 }
 
-/// this algorithm was for from dusk-plonk implemenation
+/// this algorithm was gotten from dusk-plonk implemenation
 pub fn serial_fft<F: PrimeField>(list: &mut Vec<F>, w: F, size_log: u32) {
     let n = list.len() as u32;
     // this is also a check ensure that the size of the list is a power of 2
