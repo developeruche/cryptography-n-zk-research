@@ -65,7 +65,7 @@ impl<F: PrimeField> Domain<F> {
 
         roots
     }
-    
+
     /// This function gets inverse roots of unity
     pub fn get_inv_roots_of_unity(&self) -> Vec<F> {
         // Initialize a vector to store the roots of unity
@@ -141,6 +141,16 @@ impl<F: PrimeField> Domain<F> {
             }
         }
 
+        // for (j, (even, odd)) in y_even.iter().zip(y_odd.iter()).enumerate() {
+        //     y[j] = *even + (*odd * w.pow(&[j as u64]));
+        //     y[j + len_of_coeffs / 2] = *even - (*odd * w.pow(&[j as u64]));
+        // }
+
         y
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
 }

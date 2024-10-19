@@ -76,15 +76,6 @@ mod tests {
     use super::*;
     use crate::interface::PolynomialInterface;
     use ark_test_curves::bls12_381::Fr;
-    
-    use ark_ff::MontConfig;
-    use ark_ff::{Fp64, MontBackend};
-    
-    #[derive(MontConfig)]
-    #[modulus = "17"]
-    #[generator = "3"]
-    pub struct FqConfig;
-    pub type Fq = Fp64<MontBackend<FqConfig, 1>>;
 
     #[test]
     fn test_univariate_eval_0() {
@@ -123,21 +114,20 @@ mod tests {
 
     #[test]
     fn test_univariate_eval_2() {
-        let poly = UnivariantPolynomial::<Fq>::new(vec![
-            Fq::from(1),
-            Fq::from(2),
-            Fq::from(3),
-            Fq::from(4),
-            Fq::from(5),
-            Fq::from(6),
-            Fq::from(7),
-            Fq::from(8),
+        let poly = UnivariantPolynomial::<Fr>::new(vec![
+            Fr::from(1),
+            Fr::from(2),
+            Fr::from(3),
+            Fr::from(4),
+            Fr::from(5),
+            Fr::from(6),
+            Fr::from(7),
+            Fr::from(8),
         ]);
-
 
         let eval = UnivariateEval::from_coefficients(poly.coefficients.clone());
         let roots = eval.domain.get_roots_of_unity();
-        
+
         println!("Roots: {:?}", roots);
 
         for i in 0..poly.coefficients.len() {
