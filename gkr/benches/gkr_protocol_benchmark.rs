@@ -100,10 +100,10 @@ fn gkr_protocol_benchmark_without_only_verify(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    // gkr_protocol_benchmark,
-    // gkr_protocol_benchmark_without_eval,
-    // gkr_protocol_benchmark_without_only_prove,
-    // gkr_protocol_benchmark_without_only_verify,
+    gkr_protocol_benchmark,
+    gkr_protocol_benchmark_without_eval,
+    gkr_protocol_benchmark_without_only_prove,
+    gkr_protocol_benchmark_without_only_verify,
     gkr_protocol_benchmark_with_field_ops_tracker
 );
 

@@ -11,7 +11,7 @@ pub struct PlonkSRS<P: Pairing> {
     pub g2_power_of_tau: Vec<P::G2>,
 }
 
-pub struct CommonPreprocessedInput<F: PrimeField> {
+pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
     // q_M(X) multiplication selector polynomial
     pub QM: UnivariateEval<F>,
     // q_L(X) left selector polynomial
