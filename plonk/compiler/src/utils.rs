@@ -113,7 +113,6 @@ pub fn multiply_maps<F: PrimeField>(
     result
 }
 
-
 pub fn extract_number_and_variable<F: PrimeField>(input: &str) -> Option<(F, Vec<String>)> {
     let re = Regex::new(r"^(\d+)?((\*[a-zA-Z]+)*|([a-zA-Z]+(\*[a-zA-Z]+)*))$").unwrap();
     if let Some(caps) = re.captures(input) {

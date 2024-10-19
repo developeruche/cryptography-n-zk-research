@@ -159,7 +159,7 @@ pub fn evaluate_expression<F: PrimeField>(
 /// a <== b * * c                // Two times signs in a row
 /// e <== a + b * c * d          // Multiplicative degree > 2
 ///
-pub fn eq_to_assembly<F: PrimeField>(eq: &str) -> AssembleEquation<F> {
+pub fn eq_to_assembly<F: PrimeField>(eq: String) -> AssembleEquation<F> {
     let tokens: Vec<&str> = eq.trim().split(" ").collect();
     if tokens[1] == "<==" || tokens[1] == "===" {
         // First token is the output variable

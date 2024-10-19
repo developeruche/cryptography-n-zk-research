@@ -9,7 +9,6 @@ use ark_ff::PrimeField;
 
 use super::Domain;
 
-
 #[derive(Debug, Clone)]
 pub struct UnivariateEval<F: PrimeField> {
     /// this is a list of the evaluation of the polynomial
@@ -68,7 +67,6 @@ impl<F: PrimeField> UnivariateEval<F> {
 
         let poly_1_eval = domain.fft(&poly1_coeffs);
         let poly_2_eval = domain.fft(&poly2_coeffs);
-
 
         let mut result = vec![F::ZERO; length_of_poly];
         for i in 0..length_of_poly {

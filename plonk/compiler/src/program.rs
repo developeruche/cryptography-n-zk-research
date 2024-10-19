@@ -26,7 +26,7 @@ impl<F: PrimeField> Program<F> {
     pub fn new_with_string(constraints: Vec<String>, group_order: u64) -> Self {
         let mut parsed_constraints = vec![];
         for constraint in constraints {
-            let parsed_constraint = eq_to_assembly(&constraint);
+            let parsed_constraint = eq_to_assembly(constraint);
             parsed_constraints.push(parsed_constraint);
         }
         Program {
@@ -159,7 +159,7 @@ impl<F: PrimeField> Program<F> {
     pub fn from_str(constraints: &str, group_order: u64) -> Self {
         let constraints = constraints
             .lines()
-            .map(|line| eq_to_assembly(line))
+            .map(|line| eq_to_assembly(line.to_string()))
             .collect();
         Program::new(constraints, group_order)
     }
@@ -271,7 +271,7 @@ mod tests {
         let original_constriants = ["c <== a * b", "b <== a * e"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
-            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
@@ -300,7 +300,7 @@ mod tests {
         let original_constriants = ["e public", "c <== a * b", "e <== c * d"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
-            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
