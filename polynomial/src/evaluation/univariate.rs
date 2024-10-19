@@ -9,7 +9,7 @@ use ark_ff::PrimeField;
 
 use super::Domain;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, PartialEq, Eq, Default, Debug)]
 pub struct UnivariateEval<F: PrimeField> {
     /// this is a list of the evaluation of the polynomial
     pub values: Vec<F>,

@@ -258,6 +258,7 @@ impl<F: PrimeField> Program<F> {
 mod tests {
     use super::*;
     use ark_test_curves::bls12_381::Fr;
+    use circuits::{adapters::plonkish::plonkish_transpile, primitives::{Circuit, CircuitLayer, Gate, GateType}};
 
     #[test]
     fn test_make_s_polynomials() {
@@ -310,5 +311,48 @@ mod tests {
         println!("m:{:?}", m);
         println!("o:{:?}", o);
         println!("c:{:?}", c);
+    }
+    
+    #[test]
+    fn test_transpiler_compatibilty() {
+        let original_constriants = ["v00 <== v10 * v11", "v10 <== v20 + v21", "v11 <== v22 * v23"];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+        
+        
+        let program = Program::new(assembly_eqns, 8);
+        let (l, r, m, o, c) = program.make_gate_polynomials();
+        let (s1, s2, s3) = program.make_s_polynomials();
+        
+        
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+        let circuit = Circuit::new(vec![layer_0, layer_1]);
+        
+        let original_constriants = plonkish_transpile(&circuit);
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+        
+        let program = Program::new(assembly_eqns, 8);
+        let (l_, r_, m_, o_, c_) = program.make_gate_polynomials();
+        let (s1_, s2_, s3_) = program.make_s_polynomials();
+        
+        assert_eq!(l, l_);
+        assert_eq!(r, r_);
+        assert_eq!(m, m_);
+        assert_eq!(o, o_);
+        assert_eq!(c, c_);
+        assert_eq!(s1, s1_);
+        assert_eq!(s2, s2_);
+        assert_eq!(s3, s3_);
     }
 }
