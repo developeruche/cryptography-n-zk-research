@@ -1,4 +1,4 @@
-use ark_ff::{FftField, PrimeField};
+use ark_ff::PrimeField;
 use regex::Regex;
 use std::collections::HashMap;
 
@@ -113,47 +113,6 @@ pub fn multiply_maps<F: PrimeField>(
     result
 }
 
-/// Coefficient to point value NTT
-pub fn ntt_f<F: PrimeField>(elements: &Vec<F>) -> Vec<F> {
-    let n = elements.len() as u64;
-    assert!(is_power_of_two(n));
-    let mut matrix: Vec<Vec<u64>> = vec![vec![0; n as usize]; n as usize];
-    (0..n).for_each(|x| (0..n).for_each(|y| matrix[x as usize][y as usize] = x * y));
-    // println!("{:#?}", matrix);
-    matrix
-        .iter()
-        .map(|row| {
-            elements
-                .iter()
-                .zip(row)
-                .map(|(elem, ij)| *elem * F::get_root_of_unity(*ij).unwrap())
-                .sum::<F>()
-        })
-        .collect::<Vec<F>>()
-}
-
-fn is_power_of_two(n: u64) -> bool {
-    n != 0 && (n & (n - 1)) == 0
-}
-
-/// Point Value to Coefficient NTT
-pub fn i_ntt_f<F: PrimeField>(elements: &Vec<F>) -> Vec<F> {
-    let n = elements.len() as u64;
-    assert!(is_power_of_two(n));
-    let mut matrix: Vec<Vec<u64>> = vec![vec![0; n as usize]; n as usize];
-    (0..n).for_each(|x| (0..n).for_each(|y| matrix[x as usize][y as usize] = x * y));
-    matrix
-        .iter()
-        .map(|row| {
-            elements
-                .iter()
-                .zip(row)
-                .map(|(elem, ij)| *elem * F::get_root_of_unity(*ij).unwrap())
-                .sum::<F>()
-                * F::from(n).inverse().unwrap()
-        })
-        .collect::<Vec<F>>()
-}
 
 pub fn extract_number_and_variable<F: PrimeField>(input: &str) -> Option<(F, Vec<String>)> {
     let re = Regex::new(r"^(\d+)?((\*[a-zA-Z]+)*|([a-zA-Z]+(\*[a-zA-Z]+)*))$").unwrap();

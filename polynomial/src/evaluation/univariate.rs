@@ -9,6 +9,8 @@ use ark_ff::PrimeField;
 
 use super::Domain;
 
+
+#[derive(Debug, Clone)]
 pub struct UnivariateEval<F: PrimeField> {
     /// this is a list of the evaluation of the polynomial
     pub values: Vec<F>,
@@ -51,15 +53,22 @@ impl<F: PrimeField> UnivariateEval<F> {
         poly1: &UnivariantPolynomial<F>,
         poly2: &UnivariantPolynomial<F>,
     ) -> UnivariantPolynomial<F> {
-        let poly1_coeffs = poly1.coefficients.clone();
-        let poly2_coeffs = poly2.coefficients.clone();
+        let mut poly1_coeffs = poly1.coefficients.clone();
+        let mut poly2_coeffs = poly2.coefficients.clone();
 
-        let length_of_poly = poly1_coeffs.len() + poly2_coeffs.len() - 1;
-
+        let length_of_poly_unscaled = poly1_coeffs.len() + poly2_coeffs.len() - 1;
+        let length_of_poly = if length_of_poly_unscaled.is_power_of_two() {
+            length_of_poly_unscaled
+        } else {
+            length_of_poly_unscaled.checked_next_power_of_two().unwrap()
+        };
         let domain = Domain::<F>::new(length_of_poly);
+        poly1_coeffs.resize(length_of_poly, F::ZERO);
+        poly2_coeffs.resize(length_of_poly, F::ZERO);
 
         let poly_1_eval = domain.fft(&poly1_coeffs);
         let poly_2_eval = domain.fft(&poly2_coeffs);
+
 
         let mut result = vec![F::ZERO; length_of_poly];
         for i in 0..length_of_poly {
@@ -67,7 +76,7 @@ impl<F: PrimeField> UnivariateEval<F> {
         }
 
         let coeff = domain.ifft(&result);
-        UnivariantPolynomial::new(coeff[..length_of_poly].to_vec())
+        UnivariantPolynomial::new(coeff[..length_of_poly_unscaled].to_vec())
     }
 }
 
@@ -76,15 +85,6 @@ mod tests {
     use super::*;
     use crate::interface::PolynomialInterface;
     use ark_test_curves::bls12_381::Fr;
-    
-    use ark_ff::MontConfig;
-    use ark_ff::{Fp64, MontBackend};
-    
-    #[derive(MontConfig)]
-    #[modulus = "17"]
-    #[generator = "3"]
-    pub struct FqConfig;
-    pub type Fq = Fp64<MontBackend<FqConfig, 1>>;
 
     #[test]
     fn test_univariate_eval_0() {
@@ -123,34 +123,74 @@ mod tests {
 
     #[test]
     fn test_univariate_eval_2() {
-        let poly = UnivariantPolynomial::<Fq>::new(vec![
-            Fq::from(1),
-            Fq::from(2),
-            Fq::from(3),
-            Fq::from(4),
-            Fq::from(5),
-            Fq::from(6),
-            Fq::from(7),
-            Fq::from(8),
+        let poly = UnivariantPolynomial::<Fr>::new(vec![
+            Fr::from(1),
+            Fr::from(2),
+            Fr::from(3),
+            Fr::from(4),
+            Fr::from(5),
+            Fr::from(6),
+            Fr::from(7),
+            Fr::from(8),
         ]);
-
 
         let eval = UnivariateEval::from_coefficients(poly.coefficients.clone());
         let roots = eval.domain.get_roots_of_unity();
-        
-        println!("Roots: {:?}", roots);
 
         for i in 0..poly.coefficients.len() {
             assert!(poly.evaluate(&roots[i]) == eval.values[i]);
         }
     }
 
-    // #[test]
-    // fn test_univariate_eval_multiply() {
-    //     let poly1 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
-    //     let poly2 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(4), Fr::from(5), Fr::from(6)]);
-    //     let result = UnivariateEval::multiply(&poly1, &poly2);
-    //     let expected = vec![Fr::from(4), Fr::from(13), Fr::from(28), Fr::from(27), Fr::from(18)];
-    //     assert_eq!(result.coefficients, expected);
-    // }
+    #[test]
+    fn test_univariate_eval_ran_500() {
+        let poly = UnivariantPolynomial::<Fr>::random(500);
+
+        let eval = UnivariateEval::from_coefficients(poly.coefficients.clone());
+        let roots = eval.domain.get_roots_of_unity();
+
+        for i in 0..poly.coefficients.len() {
+            // poly(omega_i) = evals[i]
+            assert!(poly.evaluate(&roots[i]) == eval.values[i]);
+        }
+    }
+
+    #[test]
+    fn test_univariate_eval_ran_500_n_vice() {
+        let poly = UnivariantPolynomial::<Fr>::random(500);
+
+        let eval = UnivariateEval::from_coefficients(poly.coefficients.clone());
+        let roots = eval.domain.get_roots_of_unity();
+
+        for i in 0..poly.coefficients.len() {
+            assert!(poly.evaluate(&roots[i]) == eval.values[i]);
+        }
+
+        let coeffs = eval.to_coefficients();
+        let fractor_poly = UnivariantPolynomial::<Fr>::new(coeffs.clone());
+
+        for i in 0..poly.coefficients.len() {
+            assert!(fractor_poly.evaluate(&roots[i]) == eval.values[i]);
+        }
+    }
+
+    #[test]
+    fn test_univariate_eval_multiply() {
+        let poly1 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(1), Fr::from(2)]);
+        let poly2 = UnivariantPolynomial::<Fr>::new(vec![Fr::from(4), Fr::from(5)]);
+        let result = UnivariateEval::multiply(&poly1, &poly2);
+        let expected = poly1.clone() * poly2.clone();
+
+        assert_eq!(result.coefficients, expected.coefficients);
+    }
+
+    #[test]
+    fn test_univariate_eval_multiply_random_500() {
+        let poly1 = UnivariantPolynomial::<Fr>::random(500);
+        let poly2 = UnivariantPolynomial::<Fr>::random(500);
+        let result = UnivariateEval::multiply(&poly1, &poly2);
+        let expected = poly1.clone() * poly2.clone();
+
+        assert_eq!(result.coefficients, expected.coefficients);
+    }
 }

@@ -2,16 +2,31 @@
 //! Evaluation form.
 //! This domain implemenation took a lot of inspiration from arkworks!
 use ark_ff::{FftField, PrimeField};
+use utils::serial_fft;
 pub mod univariate;
 pub mod utils;
 
+#[derive(Clone, PartialEq, Eq, Default, Debug)]
 pub struct Domain<F: FftField> {
     /// This is a const size of the domain
-    pub size: u64,
+    pub(crate) size: u64,
     /// This is the generator of the domain, ofter regarded as the root of unity (omega)
-    pub generator: F,
+    pub(crate) generator: F,
     /// This is the inverse of the group generator
-    pub group_gen_inverse: F,
+    pub(crate) group_gen_inverse: F,
+    /// This is the inverse of the group size
+    pub(crate) group_size_inverse: F,
+}
+
+// implemenat the display trait for the domain
+impl<F: PrimeField> std::fmt::Display for Domain<F> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "Domain: size = {}, generator = {}, group_gen_inverse = {}",
+            self.size, self.generator, self.group_gen_inverse
+        )
+    }
 }
 
 impl<F: PrimeField> Domain<F> {
@@ -26,11 +41,13 @@ impl<F: PrimeField> Domain<F> {
 
         let generator = F::get_root_of_unity(size).unwrap();
         let group_gen_inverse = generator.inverse().unwrap();
-
+        let group_size_inverse = F::from(size).inverse().unwrap();
+      
         Domain {
             size,
             generator,
             group_gen_inverse,
+            group_size_inverse,
         }
     }
 
@@ -43,6 +60,7 @@ impl<F: PrimeField> Domain<F> {
             size: self.size,
             generator,
             group_gen_inverse,
+            group_size_inverse: self.group_size_inverse,
         }
     }
 
@@ -65,7 +83,7 @@ impl<F: PrimeField> Domain<F> {
 
         roots
     }
-    
+
     /// This function gets inverse roots of unity
     pub fn get_inv_roots_of_unity(&self) -> Vec<F> {
         // Initialize a vector to store the roots of unity
@@ -93,54 +111,64 @@ impl<F: PrimeField> Domain<F> {
 
     pub fn fft(&self, coeffs: &Vec<F>) -> Vec<F> {
         let mut coeffs = coeffs.clone();
-        if coeffs.len() == 1 {
-            return coeffs.clone();
-        }
-
-        coeffs.resize(self.size as usize, F::ZERO);
-        self.fft_internal(&coeffs, false)
+        self.fft_internal(&mut coeffs);
+        coeffs
     }
 
     pub fn ifft(&self, evals: &Vec<F>) -> Vec<F> {
         let mut evals = evals.clone();
-        if evals.len() == 1 {
-            return evals.clone();
-        }
-
-        evals.resize(self.size as usize, F::ZERO);
-        self.fft_internal(&evals, true)
+        self.ifft_internal(&mut evals);
+        evals
     }
 
-    pub fn fft_internal(&self, coeffs: &Vec<F>, is_inverse: bool) -> Vec<F> {
-        let len_of_coeffs = coeffs.len();
-        if len_of_coeffs == 1 {
-            return coeffs.clone();
-        }
+    pub fn fft_internal(&self, coeffs: &mut Vec<F>) {
+        coeffs.resize(self.size as usize, F::zero());
+        serial_fft(coeffs, self.generator, self.size.trailing_zeros());
+    }
 
-        let (mut even, mut odd) = utils::split_odd_even::<F>(&coeffs);
+    pub fn ifft_internal(&self, evals: &mut Vec<F>) {
+        evals.resize(self.size as usize, F::zero());
+        serial_fft(evals, self.group_gen_inverse, self.size.trailing_zeros());
 
-        let (y_even, y_odd) = (
-            self.fft_internal(&mut even, is_inverse),
-            self.fft_internal(&mut odd, is_inverse),
+        // scaling down the resulting coefficients
+        evals
+            .iter_mut()
+            .for_each(|eval| *eval *= self.group_size_inverse); //TODO: This can be parallelized!
+    }
+
+    pub fn size(&self) -> u64 {
+        self.size
+    }
+
+    pub fn generator(&self) -> F {
+        self.generator
+    }
+
+    pub fn group_gen_inverse(&self) -> F {
+        self.group_gen_inverse
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+
+    #[test]
+    fn test_domain_new() {
+        let domain = Domain::<Fr>::new(10);
+        assert_eq!(domain.size, 16);
+        assert_eq!(
+            domain.generator.to_string(),
+            String::from(
+                "14788168760825820622209131888203028446852016562542525606630160374691593895118"
+            )
         );
-
-        let mut y = vec![F::ZERO; len_of_coeffs];
-        let w = if is_inverse {
-            self.group_gen_inverse
-        } else {
-            self.generator
-        };
-
-        for j in 0..len_of_coeffs / 2 {
-            y[j] = y_even[j] + (y_odd[j] * w.pow(&[j as u64]));
-            y[j + len_of_coeffs / 2] = y_even[j] - (y_odd[j] * w.pow(&[j as u64]));
-
-            if is_inverse {
-                y[j] /= F::from(2 as u64);
-                y[j + len_of_coeffs / 2] /= F::from(2 as u64);
-            }
-        }
-
-        y
+        assert_eq!(
+            domain.group_gen_inverse.to_string(),
+            String::from(
+                "26753076894533791554649012143113393549300550745003194222677083919072199473480"
+            )
+        );
     }
 }

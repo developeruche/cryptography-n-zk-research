@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use ark_ff::PrimeField;
-use plonk_core::primitives::CommonPreprocessedInput;
+use plonk_core::primitives::PlonkishIntermediateRepresentation;
 use polynomial::evaluation::{univariate::UnivariateEval, Domain};
 use std::collections::HashMap;
 
@@ -35,11 +35,11 @@ impl<F: PrimeField> Program<F> {
         }
     }
 
-    pub fn common_preproccessed_input(&self) -> CommonPreprocessedInput<F> {
+    pub fn common_preproccessed_input(&self) -> PlonkishIntermediateRepresentation<F> {
         let (L, R, M, O, C) = self.make_gate_polynomials();
         let (S1, S2, S3) = self.make_s_polynomials();
 
-        CommonPreprocessedInput {
+        PlonkishIntermediateRepresentation {
             QM: M,
             QL: L,
             QR: R,
@@ -76,8 +76,14 @@ impl<F: PrimeField> Program<F> {
             C[i] = gate.C;
         }
 
-        // represent polynomial in evaluation form so that we can use FFT
-        todo!()
+        let domain = Domain::<F>::new(self.group_order as usize);
+        (
+            UnivariateEval::new(L, domain.clone()),
+            UnivariateEval::new(R, domain.clone()),
+            UnivariateEval::new(M, domain.clone()),
+            UnivariateEval::new(O, domain.clone()),
+            UnivariateEval::new(C, domain.clone()),
+        )
     }
 
     pub fn make_s_polynomials(&self) -> (UnivariateEval<F>, UnivariateEval<F>, UnivariateEval<F>) {
@@ -245,5 +251,64 @@ impl<F: PrimeField> Program<F> {
         }
 
         out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+
+    #[test]
+    fn test_make_s_polynomials() {
+        //passed
+        //L R  O
+        //w 2w 3w
+        //w^2 2w^2 3w^2
+
+        //a b c
+        //a e b
+        let original_constriants = ["c <== a * b", "b <== a * e"];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            assembly_eqns.push(assembly_eqn);
+        }
+        let program = Program::new(assembly_eqns, 8);
+        let (s1, s2, s3) = program.make_s_polynomials();
+
+        let unmoved_s1: Vec<_> = roots_of_unity(8);
+        let unmoved_s2: Vec<_> = roots_of_unity(8)
+            .into_iter()
+            .map(|ele: Fr| ele * Fr::from(2))
+            .collect();
+        let unmoved_s3: Vec<_> = roots_of_unity(8)
+            .into_iter()
+            .map(|ele: Fr| ele * Fr::from(3))
+            .collect();
+        assert_eq!(s1.values[0], unmoved_s1[1]);
+
+        assert_eq!(s2.values[0], unmoved_s3[1]);
+
+        println!("s1:{:?}", s1);
+        println!("s2:{:?}", s2);
+        println!("s3:{:?}", s3);
+    }
+
+    #[test]
+    fn test_make_gate_polynomials() {
+        let original_constriants = ["e public", "c <== a * b", "e <== c * d"];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            assembly_eqns.push(assembly_eqn);
+        }
+        let program = Program::new(assembly_eqns, 8);
+        let (l, r, m, o, c) = program.make_gate_polynomials();
+        println!("l:{:?}", l);
+        println!("r:{:?}", r);
+        println!("m:{:?}", m);
+        println!("o:{:?}", o);
+        println!("c:{:?}", c);
     }
 }
