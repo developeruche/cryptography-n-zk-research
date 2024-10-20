@@ -11,6 +11,8 @@ pub struct PlonkSRS<P: Pairing> {
     pub g2_power_of_tau: Vec<P::G2>,
 }
 
+/// This is an intermediate representation of the plonk protocol circuit
+/// showing how the circuit is represented in the plonk protocol
 pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
     // q_M(X) multiplication selector polynomial
     pub QM: UnivariateEval<F>,
@@ -30,6 +32,20 @@ pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
     pub S3: UnivariateEval<F>,
     // order of group
     pub group_order: u64,
+}
+
+/// This struct is used to represent the witness of the polynomial
+pub struct Witness<F: PrimeField> {
+    pub a: Vec<F>,
+    pub b: Vec<F>,
+    pub c: Vec<F>,
+}
+
+/// This is a struct representing the interface of the plonk proof
+pub struct PlonkProof<F: PrimeField> {
+    pub a: Vec<F>,
+    pub b: Vec<F>,
+    pub c: Vec<F>,
 }
 
 impl<P: Pairing> PlonkSRS<P> {
