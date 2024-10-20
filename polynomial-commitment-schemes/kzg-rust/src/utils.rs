@@ -2,12 +2,13 @@ use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
 
-pub fn linear_combination_homomorphic_poly_eval_g1<P>(
-    poly: &UnivariantPolynomial<P::ScalarField>,
+pub fn linear_combination_homomorphic_poly_eval_g1<P, F>(
+    poly: &UnivariantPolynomial<F>,
     powers_of_secret_gx: &[P::G1],
 ) -> P::G1
 where
     P: Pairing,
+    F: PrimeField,
 {
     poly.coefficients
         .iter()

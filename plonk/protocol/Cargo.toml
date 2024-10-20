@@ -11,3 +11,4 @@ ark-test-curves.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
 kzg-rust.workspace = true
+rand.workspace = true

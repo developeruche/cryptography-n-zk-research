@@ -178,6 +178,13 @@ impl<F: PrimeField> UnivariantPolynomial<F> {
 
         UnivariantPolynomial::from_coefficients_vec(coeffs)
     }
+
+    pub fn create_monomial(degree: usize, coeff: F, constant: F) -> Self {
+        let mut coeffs = vec![F::zero(); degree + 1];
+        coeffs[degree] = coeff;
+        coeffs[0] = constant;
+        UnivariantPolynomial::from_coefficients_vec(coeffs)
+    }
 }
 
 impl<F: PrimeField> Deref for UnivariantPolynomial<F> {

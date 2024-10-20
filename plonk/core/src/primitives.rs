@@ -3,7 +3,7 @@
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
-use polynomial::evaluation::univariate::UnivariateEval;
+use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
 pub struct PlonkSRS<P: Pairing> {
     pub g1_power_of_taus: Vec<P::G1>,
@@ -36,9 +36,16 @@ pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
 
 /// This struct is used to represent the witness of the polynomial
 pub struct Witness<F: PrimeField> {
-    pub a: Vec<F>,
-    pub b: Vec<F>,
-    pub c: Vec<F>,
+    pub a: UnivariantPolynomial<F>,
+    pub b: UnivariantPolynomial<F>,
+    pub c: UnivariantPolynomial<F>,
+}
+
+/// This is the RoundOne Output
+pub struct RoundOneOutput<P: Pairing> {
+    pub a_commitment: P::G1,
+    pub b_commitment: P::G1,
+    pub c_commitment: P::G1,
 }
 
 /// This is a struct representing the interface of the plonk proof

@@ -655,6 +655,7 @@ dependencies = [
  "kzg-rust",
  "plonk_core",
  "polynomial",
+ "rand",
 ]
 
 [[package]]
