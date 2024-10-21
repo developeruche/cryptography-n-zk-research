@@ -3,7 +3,7 @@
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use kzg_rust::primitives::SRS;
-use plonk_core::primitives::{PlonkProof, RoundOneOutput, Witness};
+use plonk_core::primitives::{PlonkProof, RoundOneOutput, Witness, WitnessRaw};
 use polynomial::univariant::UnivariantPolynomial;
 
 /// This is a generic interface for the transcript.
@@ -18,7 +18,9 @@ pub trait PlonkTranscriptInterface<F: PrimeField> {
 /// This is a generaic interface for the plonk prover
 pub trait PlonkProverInterface<F: PrimeField, P: Pairing> {
     /// This function performs all the plonk protocol's 5 round and returns a proof.
-    fn prove(&self, witness: Witness<F>) -> PlonkProof<F>;
+    fn prove(&mut self, witness: Witness<F>) -> PlonkProof<F>;
     /// Plonk protocol round 1
-    fn round_one(&self, witness: Witness<F>) -> RoundOneOutput<P>;
+    fn round_one(&mut self, witness: Witness<F>) -> RoundOneOutput<P>;
+    /// Plonk protocol round 2
+    fn round_two(&mut self, raw_witness: WitnessRaw<F>) -> P::G1;
 }

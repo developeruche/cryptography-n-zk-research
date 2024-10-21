@@ -653,6 +653,7 @@ dependencies = [
  "ark-test-curves",
  "fiat_shamir",
  "kzg-rust",
+ "plonk_compiler",
  "plonk_core",
  "polynomial",
  "rand",

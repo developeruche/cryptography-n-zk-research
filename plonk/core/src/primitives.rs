@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use ark_ec::pairing::Pairing;
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
 use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
@@ -39,6 +39,14 @@ pub struct Witness<F: PrimeField> {
     pub a: UnivariantPolynomial<F>,
     pub b: UnivariantPolynomial<F>,
     pub c: UnivariantPolynomial<F>,
+    pub raw: WitnessRaw<F>,
+}
+
+/// This is the representation of the witness in it raw form
+pub struct WitnessRaw<F: PrimeField> {
+    pub a: Vec<F>,
+    pub b: Vec<F>,
+    pub c: Vec<F>,
 }
 
 /// This is the RoundOne Output
@@ -69,5 +77,23 @@ impl<P: Pairing> PlonkSRS<P> {
             g1_power_of_taus: kzg_srs.g1_power_of_taus,
             g2_power_of_tau: kzg_srs.g2_power_of_tau,
         }
+    }
+}
+
+impl<P: Pairing> RoundOneOutput<P> {
+    pub fn new(a_commitment: P::G1, b_commitment: P::G1, c_commitment: P::G1) -> Self {
+        Self {
+            a_commitment,
+            b_commitment,
+            c_commitment,
+        }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.a_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.b_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.c_commitment.to_string().as_bytes());
+        bytes
     }
 }

@@ -23,6 +23,20 @@ impl<F: PrimeField> UnivariateEval<F> {
         UnivariateEval { values, domain }
     }
 
+    /// This function is used to create a new polynomial from the evaluation form but also does checks
+    pub fn new_checked(values: Vec<F>, domain: Domain<F>) -> Result<Self, &'static str> {
+        if values.len() != domain.size() as usize {
+            return Err("The size of the values does not match the size of the domain");
+        }
+        Ok(UnivariateEval { values, domain })
+    }
+
+    /// This function performs interpolation on the vaules provided and returns a polynomial
+    pub fn interpolate(values: Vec<F>, domain: Domain<F>) -> UnivariantPolynomial<F> {
+        let coeffs = domain.ifft(&values);
+        UnivariantPolynomial::new(coeffs)
+    }
+
     /// This function is used to convert the coefficient form of the polynomial to the evaluation form
     pub fn from_coefficients(coefficients: Vec<F>) -> Self {
         let mut coeffs = coefficients.clone();
