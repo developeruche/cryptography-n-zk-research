@@ -8,11 +8,11 @@ use plonk_core::primitives::{
 /// This is a generaic interface for the plonk prover
 pub trait PlonkProverInterface<F: PrimeField, P: Pairing> {
     /// This function performs all the plonk protocol's 5 round and returns a proof.
-    fn prove(&mut self, witness: Witness<F>) -> PlonkProof<F>;
+    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<F>;
     /// Plonk protocol round 1
-    fn round_one(&mut self, witness: Witness<F>) -> RoundOneOutput<P, F>;
+    fn round_one(&mut self, witness: &Witness<F>) -> RoundOneOutput<P, F>;
     /// Plonk protocol round 2
-    fn round_two(&mut self, raw_witness: Witness<F>) -> RoundTwoOutput<P, F>;
+    fn round_two(&mut self, raw_witness: &Witness<F>) -> RoundTwoOutput<P, F>;
     /// Plonk protocol round 3
     fn round_three(
         &mut self,

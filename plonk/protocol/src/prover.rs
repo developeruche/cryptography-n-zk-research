@@ -40,7 +40,7 @@ impl<F: PrimeField, P: Pairing> PlonkProver<F, P> {
 }
 
 impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P> {
-    fn prove(&mut self, witness: Witness<F>) -> PlonkProof<F> {
+    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<F> {
         // round one
         let round_one_output = self.round_one(witness);
 
@@ -49,11 +49,12 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             .append_with_label("round_one_output", round_one_output.to_bytes());
 
         // round 2
+        let round_two_output = self.round_two(witness);
 
         todo!()
     }
 
-    fn round_one(&mut self, witness: Witness<F>) -> RoundOneOutput<P, F> {
+    fn round_one(&mut self, witness: &Witness<F>) -> RoundOneOutput<P, F> {
         // generate 6 random element, these element provides some hiding properties for our polynomial
         let mut rng = rand::thread_rng();
         let rands = (0..6).map(|_| F::rand(&mut rng)).collect::<Vec<F>>();
@@ -114,7 +115,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         }
     }
 
-    fn round_two(&mut self, witness: Witness<F>) -> RoundTwoOutput<P, F> {
+    fn round_two(&mut self, witness: &Witness<F>) -> RoundTwoOutput<P, F> {
         let circuit_group_order = self.circuit_ir.group_order as usize;
         let mut accumulator = vec![F::ONE; circuit_group_order];
         let roots: Vec<F> = roots_of_unity(circuit_group_order as u64);
@@ -145,6 +146,20 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
                             + gamma)));
 
             accumulator[i] = acc;
+        }
+
+        #[cfg(test)]
+        for i in 0..circuit_group_order {
+            assert_eq!(
+                ((witness.a.values[i] + (beta * roots[i]) + gamma)
+                    * (witness.b.values[i] + (beta * F::from(2u8) * roots[i]) + gamma)
+                    * (witness.c.values[i] + (beta * F::from(3u8) * roots[i]) + gamma))
+                    * accumulator[i],
+                ((witness.a.values[i] + (beta * self.circuit_ir.S1.values[i]) + gamma)
+                    * (witness.b.values[i] + (beta * self.circuit_ir.S2.values[i]) + gamma)
+                    * (witness.c.values[i] + (beta * self.circuit_ir.S3.values[i]) + gamma))
+                    * accumulator[(i + 1) % circuit_group_order as usize]
+            );
         }
 
         let domain = Domain::new(circuit_group_order);
@@ -198,7 +213,7 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn test_plonk_prove_round_1() {
+    fn test_plonk_complete_prove() {
         let original_constriants = ["e public"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
@@ -218,12 +233,11 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
 
-        let round_one_output = prover.round_one(witness);
+        let round_one_output = prover.prove(&witness);
     }
 
     #[test]
-    #[ignore]
-    fn test_plonk_prove_round_2() {
+    fn test_plonk_prove_round_1() {
         let original_constriants = ["e public"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
@@ -247,6 +261,6 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
 
-        let round_one_output = prover.round_one(witness);
+        let round_one_output = prover.round_one(&witness);
     }
 }
