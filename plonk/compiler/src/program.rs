@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use ark_ff::PrimeField;
-use plonk_core::primitives::PlonkishIntermediateRepresentation;
+use plonk_core::primitives::{PlonkishIntermediateRepresentation, Witness};
 use polynomial::evaluation::{univariate::UnivariateEval, Domain};
 use std::collections::HashMap;
 
@@ -252,6 +252,54 @@ impl<F: PrimeField> Program<F> {
 
         out
     }
+
+    pub fn compute_witness_and_public_parameter(
+        &self,
+        starting_assignments: HashMap<Option<String>, F>,
+    ) -> Witness<F> {
+        let out = self.compute_witness(starting_assignments);
+        let mut public_params_values: Vec<F> = self
+            .get_public_assignment()
+            .iter()
+            .map(|x| out.get(x).unwrap().clone().neg())
+            .collect();
+        public_params_values.resize(self.group_order as usize, F::ZERO);
+        let public_params_poly = UnivariateEval::new(
+            public_params_values,
+            Domain::<F>::new(self.group_order as usize),
+        );
+
+        let mut witness_a = vec![F::ZERO; self.group_order as usize];
+        let mut witness_b = vec![F::ZERO; self.group_order as usize];
+        let mut witness_c = vec![F::ZERO; self.group_order as usize];
+
+        for (i, constraint) in self.constraints.iter().enumerate() {
+            let l = constraint.wires.L.clone();
+            witness_a[i] = match l {
+                Some(l) => *out.get(&Some(l)).unwrap(),
+                None => F::ZERO,
+            };
+
+            let r = constraint.wires.R.clone();
+            witness_b[i] = match r {
+                Some(r) => *out.get(&Some(r)).unwrap(),
+                None => F::ZERO,
+            };
+
+            let o = constraint.wires.O.clone();
+            witness_c[i] = match o {
+                Some(o) => *out.get(&Some(o)).unwrap(),
+                None => F::ZERO,
+            };
+        }
+
+        Witness {
+            a: UnivariateEval::new(witness_a, Domain::<F>::new(self.group_order as usize)),
+            b: UnivariateEval::new(witness_b, Domain::<F>::new(self.group_order as usize)),
+            c: UnivariateEval::new(witness_c, Domain::<F>::new(self.group_order as usize)),
+            pi: public_params_poly,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -381,7 +429,12 @@ mod tests {
         variable_assignment.insert(Some("e".to_string()), Fr::from(8));
 
         let out = program.compute_witness(variable_assignment);
+        let pub_variable = program.get_public_assignment();
 
-        println!("This is the output: {:?}", out);
+        for i in pub_variable.iter() {
+            let tl = out.get(i);
+            println!("Vaule of the witness: {:?} - {:?}", i, tl);
+        }
+        println!("This is the output: {:?} - {:?}", out, pub_variable);
     }
 }

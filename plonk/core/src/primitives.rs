@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use ark_ec::pairing::Pairing;
-use ark_ff::{BigInteger, PrimeField};
+use ark_ff::PrimeField;
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
 use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
@@ -36,24 +36,34 @@ pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
 
 /// This struct is used to represent the witness of the polynomial
 pub struct Witness<F: PrimeField> {
-    pub a: UnivariantPolynomial<F>,
-    pub b: UnivariantPolynomial<F>,
-    pub c: UnivariantPolynomial<F>,
-    pub raw: WitnessRaw<F>,
-}
-
-/// This is the representation of the witness in it raw form
-pub struct WitnessRaw<F: PrimeField> {
-    pub a: Vec<F>,
-    pub b: Vec<F>,
-    pub c: Vec<F>,
+    pub a: UnivariateEval<F>,
+    pub b: UnivariateEval<F>,
+    pub c: UnivariateEval<F>,
+    pub pi: UnivariateEval<F>,
 }
 
 /// This is the RoundOne Output
-pub struct RoundOneOutput<P: Pairing> {
+pub struct RoundOneOutput<P: Pairing, F: PrimeField> {
     pub a_commitment: P::G1,
     pub b_commitment: P::G1,
     pub c_commitment: P::G1,
+    pub a_x: UnivariantPolynomial<F>,
+    pub b_x: UnivariantPolynomial<F>,
+    pub c_x: UnivariantPolynomial<F>,
+}
+
+/// This is the output for round two
+pub struct RoundTwoOutput<P: Pairing, F: PrimeField> {
+    pub accumulator_commitment: P::G1,
+    pub beta: F,
+    pub gamma: F,
+}
+
+/// This is the output of the round 3 round
+pub struct RoundThreeOutput<P: Pairing> {
+    pub t_lo: P::G1,
+    pub t_mid: P::G1,
+    pub t_hi: P::G1,
 }
 
 /// This is a struct representing the interface of the plonk proof
@@ -80,12 +90,22 @@ impl<P: Pairing> PlonkSRS<P> {
     }
 }
 
-impl<P: Pairing> RoundOneOutput<P> {
-    pub fn new(a_commitment: P::G1, b_commitment: P::G1, c_commitment: P::G1) -> Self {
+impl<P: Pairing, F: PrimeField> RoundOneOutput<P, F> {
+    pub fn new(
+        a_commitment: P::G1,
+        b_commitment: P::G1,
+        c_commitment: P::G1,
+        a_x: UnivariantPolynomial<F>,
+        b_x: UnivariantPolynomial<F>,
+        c_x: UnivariantPolynomial<F>,
+    ) -> Self {
         Self {
             a_commitment,
             b_commitment,
             c_commitment,
+            a_x,
+            b_x,
+            c_x,
         }
     }
 
@@ -95,5 +115,16 @@ impl<P: Pairing> RoundOneOutput<P> {
         bytes.extend_from_slice(&self.b_commitment.to_string().as_bytes());
         bytes.extend_from_slice(&self.c_commitment.to_string().as_bytes());
         bytes
+    }
+}
+
+impl<F: PrimeField> Witness<F> {
+    pub fn new(
+        a: UnivariateEval<F>,
+        b: UnivariateEval<F>,
+        c: UnivariateEval<F>,
+        pi: UnivariateEval<F>,
+    ) -> Self {
+        Self { a, b, c, pi }
     }
 }
