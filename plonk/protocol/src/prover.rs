@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use crate::{
     interface::PlonkProverInterface,
     utils::{apply_w_to_polynomial, split_poly_in_3},
@@ -59,11 +61,27 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             .append_with_label("round_two_output", round_two_output.to_bytes());
 
         // round 3
-        let round_three_output = self.round_three(witness, round_one_output, round_two_output);
+        let round_three_output = self.round_three(witness, &round_one_output, &round_two_output);
 
         // commit round three output to the transcript
         self.transcript
             .append_with_label("round_three_output", round_three_output.to_bytes());
+
+        // round 4
+        let round_four_output = self.round_four(&round_one_output, &round_three_output);
+
+        // commit round four output to the transcript
+        self.transcript
+            .append_with_label("round_four_output", round_four_output.to_bytes());
+
+        // round 5
+        let round_five_output = self.round_five(
+            &witness,
+            &round_one_output,
+            &round_two_output,
+            &round_three_output,
+            &round_four_output,
+        );
 
         todo!()
     }
@@ -210,8 +228,8 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
     fn round_three(
         &mut self,
         witness: &Witness<F>,
-        round_one_output: RoundOneOutput<P, F>,
-        round_two_output: RoundTwoOutput<P, F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_two_output: &RoundTwoOutput<P, F>,
     ) -> RoundThreeOutput<P, F> {
         let alpha = self.transcript.sample_as_field_element::<F>();
         let vanishing_polynomial = UnivariantPolynomial::create_monomial(
@@ -314,13 +332,14 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             t_lo_poly: t_lo_blinded,
             t_mid_poly: t_mid_blinded,
             t_hi_poly: t_hi_blinding,
+            alpha,
         }
     }
 
     fn round_four(
         &mut self,
-        round_one_output: RoundOneOutput<P, F>,
-        round_three_output: RoundThreeOutput<P, F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_three_output: &RoundThreeOutput<P, F>,
     ) -> RoundFourOutput<F> {
         let zeta = self.transcript.sample_as_field_element::<F>();
 
@@ -345,17 +364,100 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             w_accumulator_poly_zeta,
             s1_poly_zeta,
             s2_poly_zeta,
+            zeta,
         }
     }
 
     fn round_five(
         &mut self,
-        round_one_output: RoundOneOutput<P, F>,
-        round_two_output: RoundTwoOutput<P, F>,
-        round_three_output: RoundThreeOutput<P, F>,
-        round_four_output: RoundFourOutput<F>,
+        witness: &Witness<F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_two_output: &RoundTwoOutput<P, F>,
+        round_three_output: &RoundThreeOutput<P, F>,
+        round_four_output: &RoundFourOutput<F>,
     ) -> RoundFiveOutput<P, F> {
-        todo!()
+        let vinculum = self.transcript.sample_as_field_element::<F>();
+
+        let a_x_ploy_zeta = round_four_output.a_x_ploy_zeta;
+        let b_x_ploy_zeta = round_four_output.b_x_ploy_zeta;
+        let c_x_ploy_zeta = round_four_output.c_x_ploy_zeta;
+        let w_accumulator_poly_zeta = round_four_output.w_accumulator_poly_zeta;
+        let s1_poly_zeta = round_four_output.s1_poly_zeta;
+        let s2_poly_zeta = round_four_output.s2_poly_zeta;
+
+        let alpha = round_three_output.alpha;
+        let beta = round_two_output.beta;
+        let gamma = round_two_output.gamma;
+        let zeta = round_four_output.zeta;
+
+        let a_x_poly = round_one_output.a_x.clone();
+        let b_x_poly = round_one_output.b_x.clone();
+        let c_x_poly = round_one_output.c_x.clone();
+        let accumulator_poly = round_two_output.accumulator_poly.clone();
+        let s1_poly = self.circuit_ir.S1.to_coefficient_poly();
+        let s2_poly = self.circuit_ir.S2.to_coefficient_poly();
+
+        let mut l1_values = vec![F::ZERO; self.circuit_ir.group_order as usize];
+        l1_values[0] = F::ONE;
+        let domain = Domain::new(self.circuit_ir.group_order as usize);
+        let l1_poly_eval = UnivariateEval::new(l1_values, domain);
+
+        let vanishing_polynomial = UnivariantPolynomial::create_monomial(
+            self.circuit_ir.group_order as usize,
+            F::ONE,
+            -F::ONE,
+        );
+        let root: F = root_of_unity::<F>(self.circuit_ir.group_order);
+
+        let r_poly = ((self.circuit_ir.QM.to_coefficient_poly() * a_x_ploy_zeta * b_x_ploy_zeta)
+            + (self.circuit_ir.QL.to_coefficient_poly() * a_x_ploy_zeta)
+            + (self.circuit_ir.QR.to_coefficient_poly() * b_x_ploy_zeta)
+            + (self.circuit_ir.QO.to_coefficient_poly() * c_x_ploy_zeta)
+            + witness.pi.to_coefficient_poly().evaluate(&zeta)
+            + self.circuit_ir.QC.to_coefficient_poly())
+            + (((accumulator_poly.clone()
+                * (a_x_ploy_zeta + (beta * zeta) + gamma)
+                * (b_x_ploy_zeta + (beta * F::from(2u8) * zeta) + gamma)
+                * (c_x_ploy_zeta + (beta * F::from(3u8) * zeta) + gamma))
+                - (((self.circuit_ir.S3.to_coefficient_poly() * beta) + c_x_ploy_zeta + gamma)
+                    * (a_x_ploy_zeta + (beta * s1_poly_zeta) + gamma)
+                    * (b_x_ploy_zeta + (beta * s2_poly_zeta) + gamma)
+                    * w_accumulator_poly_zeta))
+                * alpha)
+            + (((accumulator_poly.clone() - F::ONE)
+                * (l1_poly_eval.to_coefficient_poly().evaluate(&zeta)))
+                * alpha.pow(&[2 as u64]))
+            - ((round_three_output.t_lo_poly.clone()
+                + (round_three_output.t_mid_poly.clone()
+                    * zeta.pow(&[self.circuit_ir.group_order]))
+                + (round_three_output.t_hi_poly.clone()
+                    * zeta.pow(&[2 * self.circuit_ir.group_order])))
+                * vanishing_polynomial.evaluate(&zeta));
+
+        let x_minus_zeta = UnivariantPolynomial::new(vec![-zeta, F::ONE]);
+        let W_zeta_poly = (r_poly
+            + ((a_x_poly.clone() - a_x_ploy_zeta) * vinculum)
+            + ((b_x_poly.clone() - b_x_ploy_zeta) * vinculum.pow(&[2 as u64]))
+            + ((c_x_poly.clone() - c_x_ploy_zeta) * vinculum.pow(&[3 as u64]))
+            + ((s1_poly.clone() - s1_poly_zeta) * vinculum.pow(&[4 as u64]))
+            + ((s2_poly.clone() - s2_poly_zeta) * vinculum.pow(&[5 as u64])))
+            / x_minus_zeta;
+
+        let x_minus_w_zeta = UnivariantPolynomial::new(vec![-(root * zeta), F::ONE]);
+        let W_zeta_w_poly = (accumulator_poly - w_accumulator_poly_zeta) / x_minus_w_zeta;
+
+        let W_zeta_poly_commitment =
+            <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &W_zeta_poly);
+        let W_zeta_w_poly_commitment =
+            <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &W_zeta_w_poly);
+
+        let mu = self.transcript.sample_as_field_element::<F>();
+
+        RoundFiveOutput {
+            W_zeta_poly_commitment,
+            W_zeta_w_poly_commitment,
+            mu,
+        }
     }
 }
 
@@ -416,6 +518,6 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
 
-        let round_one_output = prover.round_one(&witness);
+        let _ = prover.round_one(&witness);
     }
 }

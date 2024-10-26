@@ -5,6 +5,7 @@ use ark_ff::PrimeField;
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
 use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlonkSRS<P: Pairing> {
     pub g1_power_of_taus: Vec<P::G1>,
     // making this a vec also so batch kzg polynomial commitment can be used also
@@ -13,6 +14,7 @@ pub struct PlonkSRS<P: Pairing> {
 
 /// This is an intermediate representation of the plonk protocol circuit
 /// showing how the circuit is represented in the plonk protocol
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
     // q_M(X) multiplication selector polynomial
     pub QM: UnivariateEval<F>,
@@ -35,6 +37,7 @@ pub struct PlonkishIntermediateRepresentation<F: PrimeField> {
 }
 
 /// This struct is used to represent the witness of the polynomial
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Witness<F: PrimeField> {
     pub a: UnivariateEval<F>,
     pub b: UnivariateEval<F>,
@@ -43,6 +46,7 @@ pub struct Witness<F: PrimeField> {
 }
 
 /// This is the RoundOne Output
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RoundOneOutput<P: Pairing, F: PrimeField> {
     pub a_commitment: P::G1,
     pub b_commitment: P::G1,
@@ -53,6 +57,7 @@ pub struct RoundOneOutput<P: Pairing, F: PrimeField> {
 }
 
 /// This is the output for round two
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RoundTwoOutput<P: Pairing, F: PrimeField> {
     pub accumulator_commitment: P::G1,
     pub accumulator_poly: UnivariantPolynomial<F>,
@@ -61,6 +66,7 @@ pub struct RoundTwoOutput<P: Pairing, F: PrimeField> {
 }
 
 /// This is the output of the round 3 round
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RoundThreeOutput<P: Pairing, F: PrimeField> {
     pub t_lo_commitment: P::G1,
     pub t_mid_commitment: P::G1,
@@ -69,9 +75,11 @@ pub struct RoundThreeOutput<P: Pairing, F: PrimeField> {
     pub t_lo_poly: UnivariantPolynomial<F>,
     pub t_mid_poly: UnivariantPolynomial<F>,
     pub t_hi_poly: UnivariantPolynomial<F>,
+    pub alpha: F,
 }
 
 /// This is the output of the round 4 round
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RoundFourOutput<F: PrimeField> {
     pub a_x_ploy_zeta: F,
     pub b_x_ploy_zeta: F,
@@ -79,16 +87,19 @@ pub struct RoundFourOutput<F: PrimeField> {
     pub w_accumulator_poly_zeta: F,
     pub s1_poly_zeta: F,
     pub s2_poly_zeta: F,
-}
-
-/// This is the output of the round 5 round
-pub struct RoundFiveOutput<P: Pairing, F: PrimeField> {
-    pub w_zeta_commitment: P::G1,
-    pub w_w_zeta_commitment: P::G1,
     pub zeta: F,
 }
 
+/// This is the output of the round 5 round
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RoundFiveOutput<P: Pairing, F: PrimeField> {
+    pub W_zeta_poly_commitment: P::G1,
+    pub W_zeta_w_poly_commitment: P::G1,
+    pub mu: F,
+}
+
 /// This is a struct representing the interface of the plonk proof
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PlonkProof<F: PrimeField> {
     pub a: Vec<F>,
     pub b: Vec<F>,
@@ -178,6 +189,15 @@ impl<F: PrimeField> RoundFourOutput<F> {
         bytes.extend_from_slice(&self.a_x_ploy_zeta.to_string().as_bytes());
         bytes.extend_from_slice(&self.b_x_ploy_zeta.to_string().as_bytes());
         bytes.extend_from_slice(&self.c_x_ploy_zeta.to_string().as_bytes());
+        bytes
+    }
+}
+
+impl<P: Pairing, F: PrimeField> RoundFiveOutput<P, F> {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.W_zeta_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.W_zeta_w_poly_commitment.to_string().as_bytes());
         bytes
     }
 }

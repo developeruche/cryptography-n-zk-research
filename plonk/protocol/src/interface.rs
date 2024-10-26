@@ -18,21 +18,22 @@ pub trait PlonkProverInterface<F: PrimeField, P: Pairing> {
     fn round_three(
         &mut self,
         raw_witness: &Witness<F>,
-        round_one_output: RoundOneOutput<P, F>,
-        round_two_output: RoundTwoOutput<P, F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_two_output: &RoundTwoOutput<P, F>,
     ) -> RoundThreeOutput<P, F>;
     /// Plonk protocol round 4
     fn round_four(
         &mut self,
-        round_one_output: RoundOneOutput<P, F>,
-        round_three_output: RoundThreeOutput<P, F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_three_output: &RoundThreeOutput<P, F>,
     ) -> RoundFourOutput<F>;
     /// Plonk protocol round 5
     fn round_five(
         &mut self,
-        round_one_output: RoundOneOutput<P, F>,
-        round_two_output: RoundTwoOutput<P, F>,
-        round_three_output: RoundThreeOutput<P, F>,
-        round_four_output: RoundFourOutput<F>,
+        witness: &Witness<F>,
+        round_one_output: &RoundOneOutput<P, F>,
+        round_two_output: &RoundTwoOutput<P, F>,
+        round_three_output: &RoundThreeOutput<P, F>,
+        round_four_output: &RoundFourOutput<F>,
     ) -> RoundFiveOutput<P, F>;
 }
