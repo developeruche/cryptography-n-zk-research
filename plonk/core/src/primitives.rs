@@ -178,7 +178,7 @@ impl<P: Pairing, F: PrimeField> RoundFourOutput<P, F> {
         bytes.extend_from_slice(&self.c_poly_commitment.to_string().as_bytes());
         bytes.extend_from_slice(&self.s1_poly_commitment.to_string().as_bytes());
         bytes.extend_from_slice(&self.s2_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.accumulator_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.accumulator_w_poly_commitment.to_string().as_bytes());
         bytes
     }
 }

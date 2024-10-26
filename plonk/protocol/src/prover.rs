@@ -64,6 +64,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         // commit round three output to the transcript
         self.transcript
             .append_with_label("round_three_output", round_three_output.to_bytes());
+
         todo!()
     }
 
@@ -280,8 +281,16 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         let mut x_n_coeffs = vec![F::ZERO; self.circuit_ir.group_order as usize + 1];
         x_n_coeffs[self.circuit_ir.group_order as usize] = F::ONE;
 
-        let mut x_2n = vec![F::ZERO; self.circuit_ir.group_order as usize * 2 + 1];
-        x_2n[self.circuit_ir.group_order as usize * 2] = F::ONE;
+        let mut x_2n_coeffs = vec![F::ZERO; self.circuit_ir.group_order as usize * 2 + 1];
+        x_2n_coeffs[self.circuit_ir.group_order as usize * 2] = F::ONE;
+
+        #[cfg(test)]
+        assert_eq!(
+            t_x.clone(),
+            t_lo.clone()
+                + (UnivariantPolynomial::new(x_n_coeffs.clone()) * t_mid.clone())
+                + (UnivariantPolynomial::new(x_2n_coeffs) * t_hi.clone()),
+        );
 
         let t_lo_blinded = t_lo.clone() + (UnivariantPolynomial::new(x_n_coeffs.clone()) * b_10);
         let t_mid_blinded =
