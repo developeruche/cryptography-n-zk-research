@@ -9,7 +9,7 @@ use plonk_core::primitives::{
 /// This is a generaic interface for the plonk prover
 pub trait PlonkProverInterface<F: PrimeField, P: Pairing> {
     /// This function performs all the plonk protocol's 5 round and returns a proof.
-    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<F>;
+    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<P, F>;
     /// Plonk protocol round 1
     fn round_one(&mut self, witness: &Witness<F>) -> RoundOneOutput<P, F>;
     /// Plonk protocol round 2

@@ -100,10 +100,22 @@ pub struct RoundFiveOutput<P: Pairing, F: PrimeField> {
 
 /// This is a struct representing the interface of the plonk proof
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PlonkProof<F: PrimeField> {
-    pub a: Vec<F>,
-    pub b: Vec<F>,
-    pub c: Vec<F>,
+pub struct PlonkProof<P: Pairing, F: PrimeField> {
+    pub a_poly_commitment: P::G1,
+    pub b_poly_commitment: P::G1,
+    pub c_poly_commitment: P::G1,
+    pub accumulator_poly_commitment: P::G1,
+    pub t_lo_poly_commitment: P::G1,
+    pub t_mid_poly_commitment: P::G1,
+    pub t_hi_poly_commitment: P::G1,
+    pub W_zeta_poly_commitment: P::G1,
+    pub W_zeta_w_poly_commitment: P::G1,
+    pub a_x_zeta: F,
+    pub b_x_zeta: F,
+    pub c_x_zeta: F,
+    pub w_accumulator_poly_zeta: F,
+    pub s1_poly_zeta: F,
+    pub s2_poly_zeta: F,
 }
 
 impl<P: Pairing> PlonkSRS<P> {

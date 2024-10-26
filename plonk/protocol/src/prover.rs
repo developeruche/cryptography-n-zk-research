@@ -45,7 +45,7 @@ impl<F: PrimeField, P: Pairing> PlonkProver<F, P> {
 }
 
 impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P> {
-    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<F> {
+    fn prove(&mut self, witness: &Witness<F>) -> PlonkProof<P, F> {
         // round one
         let round_one_output = self.round_one(witness);
 
@@ -83,7 +83,24 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             &round_four_output,
         );
 
-        todo!()
+        // return the proof
+        PlonkProof {
+            a_poly_commitment: round_one_output.a_commitment,
+            b_poly_commitment: round_one_output.b_commitment,
+            c_poly_commitment: round_one_output.c_commitment,
+            accumulator_poly_commitment: round_two_output.accumulator_commitment,
+            t_lo_poly_commitment: round_three_output.t_lo_commitment,
+            t_mid_poly_commitment: round_three_output.t_mid_commitment,
+            t_hi_poly_commitment: round_three_output.t_hi_commitment,
+            W_zeta_poly_commitment: round_five_output.W_zeta_poly_commitment,
+            W_zeta_w_poly_commitment: round_five_output.W_zeta_w_poly_commitment,
+            a_x_zeta: round_four_output.a_x_ploy_zeta,
+            b_x_zeta: round_four_output.b_x_ploy_zeta,
+            c_x_zeta: round_four_output.c_x_ploy_zeta,
+            w_accumulator_poly_zeta: round_four_output.w_accumulator_poly_zeta,
+            s1_poly_zeta: round_four_output.s1_poly_zeta,
+            s2_poly_zeta: round_four_output.s2_poly_zeta,
+        }
     }
 
     fn round_one(&mut self, witness: &Witness<F>) -> RoundOneOutput<P, F> {
@@ -490,7 +507,7 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
 
-        let proof = prover.prove(&witness);
+        let _ = prover.prove(&witness);
     }
 
     #[test]
