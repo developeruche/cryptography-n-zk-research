@@ -1,12 +1,15 @@
-use crate::interface::PlonkProverInterface;
+use crate::{
+    interface::PlonkProverInterface,
+    utils::{apply_w_to_polynomial, split_poly_in_3},
+};
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
 use plonk_compiler::utils::{root_of_unity, roots_of_unity};
 use plonk_core::primitives::{
-    PlonkProof, PlonkishIntermediateRepresentation, RoundOneOutput, RoundThreeOutput,
-    RoundTwoOutput, Witness,
+    PlonkProof, PlonkishIntermediateRepresentation, RoundFiveOutput, RoundFourOutput,
+    RoundOneOutput, RoundThreeOutput, RoundTwoOutput, Witness,
 };
 use polynomial::{
     evaluation::{univariate::UnivariateEval, Domain},
@@ -51,6 +54,16 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         // round 2
         let round_two_output = self.round_two(witness);
 
+        // commit round two output to the transcript
+        self.transcript
+            .append_with_label("round_two_output", round_two_output.to_bytes());
+
+        // round 3
+        let round_three_output = self.round_three(witness, round_one_output, round_two_output);
+
+        // commit round three output to the transcript
+        self.transcript
+            .append_with_label("round_three_output", round_three_output.to_bytes());
         todo!()
     }
 
@@ -187,6 +200,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
 
         RoundTwoOutput {
             accumulator_commitment,
+            accumulator_poly: blinded_accumulator_poly,
             beta,
             gamma,
         }
@@ -194,12 +208,117 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
 
     fn round_three(
         &mut self,
-        raw_witness: Witness<F>,
+        witness: &Witness<F>,
         round_one_output: RoundOneOutput<P, F>,
         round_two_output: RoundTwoOutput<P, F>,
-    ) -> RoundThreeOutput<P> {
-        // sampling alpha
+    ) -> RoundThreeOutput<P, F> {
         let alpha = self.transcript.sample_as_field_element::<F>();
+        let vanishing_polynomial = UnivariantPolynomial::create_monomial(
+            self.circuit_ir.group_order as usize,
+            F::ONE,
+            -F::ONE,
+        );
+        let root: F = root_of_unity::<F>(self.circuit_ir.group_order);
+        let mut l1_values = vec![F::ZERO; self.circuit_ir.group_order as usize];
+        l1_values[0] = F::ONE;
+        let domain = Domain::new(self.circuit_ir.group_order as usize);
+        let l1_poly_eval = UnivariateEval::new(l1_values, domain);
+        let t_x = (((round_one_output.a_x.clone()
+            * round_one_output.b_x.clone()
+            * self.circuit_ir.QM.to_coefficient_poly())
+            + (round_one_output.a_x.clone() * self.circuit_ir.QL.to_coefficient_poly())
+            + (round_one_output.b_x.clone() * self.circuit_ir.QR.to_coefficient_poly())
+            + (round_one_output.c_x.clone() * self.circuit_ir.QO.to_coefficient_poly())
+            + witness.pi.to_coefficient_poly()
+            + self.circuit_ir.QC.to_coefficient_poly())
+            / vanishing_polynomial.clone())
+            + ((((round_one_output.a_x.clone()
+                + UnivariantPolynomial::create_monomial(
+                    1,
+                    round_two_output.beta,
+                    round_two_output.gamma,
+                ))
+                * (round_one_output.b_x.clone()
+                    + UnivariantPolynomial::create_monomial(
+                        1,
+                        round_two_output.beta * F::from(2u32),
+                        round_two_output.gamma,
+                    ))
+                * (round_one_output.c_x.clone()
+                    + UnivariantPolynomial::create_monomial(
+                        1,
+                        round_two_output.beta * F::from(3u32),
+                        round_two_output.gamma,
+                    ))
+                * round_two_output.accumulator_poly.clone())
+                * alpha)
+                / vanishing_polynomial.clone())
+            - ((((round_one_output.a_x.clone()
+                + (self.circuit_ir.S1.to_coefficient_poly() * round_two_output.beta)
+                + round_two_output.gamma)
+                * (round_one_output.b_x.clone()
+                    + (self.circuit_ir.S2.to_coefficient_poly() * round_two_output.beta)
+                    + round_two_output.gamma)
+                * (round_one_output.c_x.clone()
+                    + (self.circuit_ir.S3.to_coefficient_poly() * round_two_output.beta)
+                    + round_two_output.gamma)
+                * apply_w_to_polynomial(&round_two_output.accumulator_poly.clone(), &root))
+                * alpha)
+                / vanishing_polynomial.clone())
+            + ((((round_two_output.accumulator_poly.clone() - F::ONE)
+                * (l1_poly_eval.to_coefficient_poly()))
+                * alpha.pow(&[2 as u64]))
+                / vanishing_polynomial);
+
+        let (t_lo, t_mid, t_hi) = split_poly_in_3(&t_x, self.circuit_ir.group_order as usize);
+
+        let mut rng = rand::thread_rng();
+        let rands = (0..2).map(|_| F::rand(&mut rng)).collect::<Vec<F>>();
+        let b_10 = rands[0];
+        let b_11 = rands[1];
+
+        let mut x_n_coeffs = vec![F::ZERO; self.circuit_ir.group_order as usize + 1];
+        x_n_coeffs[self.circuit_ir.group_order as usize] = F::ONE;
+
+        let mut x_2n = vec![F::ZERO; self.circuit_ir.group_order as usize * 2 + 1];
+        x_2n[self.circuit_ir.group_order as usize * 2] = F::ONE;
+
+        let t_lo_blinded = t_lo.clone() + (UnivariantPolynomial::new(x_n_coeffs.clone()) * b_10);
+        let t_mid_blinded =
+            t_mid.clone() + (UnivariantPolynomial::new(x_n_coeffs.clone()) * b_11 - b_10);
+        let t_hi_blinding = t_hi.clone() + b_11.neg();
+
+        let t_lo_commitment =
+            <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &t_lo_blinded);
+        let t_mid_commitment =
+            <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &t_mid_blinded);
+        let t_hi_commitment =
+            <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &t_hi_blinding);
+
+        RoundThreeOutput {
+            t_lo: t_lo_commitment,
+            t_mid: t_mid_commitment,
+            t_hi: t_hi_commitment,
+            zeta: F::ONE,
+        }
+    }
+
+    fn round_four(
+        &mut self,
+        round_one_output: RoundOneOutput<P, F>,
+        round_two_output: RoundTwoOutput<P, F>,
+        round_three_output: RoundThreeOutput<P, F>,
+    ) -> RoundFourOutput<P, F> {
+        todo!()
+    }
+
+    fn round_five(
+        &mut self,
+        round_one_output: RoundOneOutput<P, F>,
+        round_two_output: RoundTwoOutput<P, F>,
+        round_three_output: RoundThreeOutput<P, F>,
+        round_four_output: RoundFourOutput<P, F>,
+    ) -> RoundFiveOutput<P, F> {
         todo!()
     }
 }
@@ -233,7 +352,7 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
 
-        let round_one_output = prover.prove(&witness);
+        let proof = prover.prove(&witness);
     }
 
     #[test]

@@ -2,7 +2,8 @@
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use plonk_core::primitives::{
-    PlonkProof, RoundOneOutput, RoundThreeOutput, RoundTwoOutput, Witness,
+    PlonkProof, RoundFiveOutput, RoundFourOutput, RoundOneOutput, RoundThreeOutput, RoundTwoOutput,
+    Witness,
 };
 
 /// This is a generaic interface for the plonk prover
@@ -16,8 +17,23 @@ pub trait PlonkProverInterface<F: PrimeField, P: Pairing> {
     /// Plonk protocol round 3
     fn round_three(
         &mut self,
-        raw_witness: Witness<F>,
+        raw_witness: &Witness<F>,
         round_one_output: RoundOneOutput<P, F>,
         round_two_output: RoundTwoOutput<P, F>,
-    ) -> RoundThreeOutput<P>;
+    ) -> RoundThreeOutput<P, F>;
+    /// Plonk protocol round 4
+    fn round_four(
+        &mut self,
+        round_one_output: RoundOneOutput<P, F>,
+        round_two_output: RoundTwoOutput<P, F>,
+        round_three_output: RoundThreeOutput<P, F>,
+    ) -> RoundFourOutput<P, F>;
+    /// Plonk protocol round 5
+    fn round_five(
+        &mut self,
+        round_one_output: RoundOneOutput<P, F>,
+        round_two_output: RoundTwoOutput<P, F>,
+        round_three_output: RoundThreeOutput<P, F>,
+        round_four_output: RoundFourOutput<P, F>,
+    ) -> RoundFiveOutput<P, F>;
 }

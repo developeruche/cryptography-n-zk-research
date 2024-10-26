@@ -55,15 +55,35 @@ pub struct RoundOneOutput<P: Pairing, F: PrimeField> {
 /// This is the output for round two
 pub struct RoundTwoOutput<P: Pairing, F: PrimeField> {
     pub accumulator_commitment: P::G1,
+    pub accumulator_poly: UnivariantPolynomial<F>,
     pub beta: F,
     pub gamma: F,
 }
 
 /// This is the output of the round 3 round
-pub struct RoundThreeOutput<P: Pairing> {
+pub struct RoundThreeOutput<P: Pairing, F: PrimeField> {
     pub t_lo: P::G1,
     pub t_mid: P::G1,
     pub t_hi: P::G1,
+    pub zeta: F,
+}
+
+/// This is the output of the round 4 round
+pub struct RoundFourOutput<P: Pairing, F: PrimeField> {
+    pub a_poly_commitment: P::G1,
+    pub b_poly_commitment: P::G1,
+    pub c_poly_commitment: P::G1,
+    pub s1_poly_commitment: P::G1,
+    pub s2_poly_commitment: P::G1,
+    pub accumulator_w_poly_commitment: P::G1,
+    pub zeta: F,
+}
+
+/// This is the output of the round 5 round
+pub struct RoundFiveOutput<P: Pairing, F: PrimeField> {
+    pub w_zeta_commitment: P::G1,
+    pub w_w_zeta_commitment: P::G1,
+    pub zeta: F,
 }
 
 /// This is a struct representing the interface of the plonk proof
@@ -114,6 +134,51 @@ impl<P: Pairing, F: PrimeField> RoundOneOutput<P, F> {
         bytes.extend_from_slice(&self.a_commitment.to_string().as_bytes());
         bytes.extend_from_slice(&self.b_commitment.to_string().as_bytes());
         bytes.extend_from_slice(&self.c_commitment.to_string().as_bytes());
+        bytes
+    }
+}
+
+impl<P: Pairing, F: PrimeField> RoundTwoOutput<P, F> {
+    pub fn new(
+        accumulator_commitment: P::G1,
+        beta: F,
+        gamma: F,
+        accumulator_poly: UnivariantPolynomial<F>,
+    ) -> Self {
+        Self {
+            accumulator_commitment,
+            accumulator_poly,
+            beta,
+            gamma,
+        }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.accumulator_commitment.to_string().as_bytes());
+        bytes
+    }
+}
+
+impl<P: Pairing, F: PrimeField> RoundThreeOutput<P, F> {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.t_lo.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_mid.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_hi.to_string().as_bytes());
+        bytes
+    }
+}
+
+impl<P: Pairing, F: PrimeField> RoundFourOutput<P, F> {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.a_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.b_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.c_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.s1_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.s2_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.accumulator_poly_commitment.to_string().as_bytes());
         bytes
     }
 }
