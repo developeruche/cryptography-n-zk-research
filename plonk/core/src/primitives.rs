@@ -62,21 +62,23 @@ pub struct RoundTwoOutput<P: Pairing, F: PrimeField> {
 
 /// This is the output of the round 3 round
 pub struct RoundThreeOutput<P: Pairing, F: PrimeField> {
-    pub t_lo: P::G1,
-    pub t_mid: P::G1,
-    pub t_hi: P::G1,
-    pub zeta: F,
+    pub t_lo_commitment: P::G1,
+    pub t_mid_commitment: P::G1,
+    pub t_hi_commitment: P::G1,
+    pub w_accumulator_poly: UnivariantPolynomial<F>,
+    pub t_lo_poly: UnivariantPolynomial<F>,
+    pub t_mid_poly: UnivariantPolynomial<F>,
+    pub t_hi_poly: UnivariantPolynomial<F>,
 }
 
 /// This is the output of the round 4 round
-pub struct RoundFourOutput<P: Pairing, F: PrimeField> {
-    pub a_poly_commitment: P::G1,
-    pub b_poly_commitment: P::G1,
-    pub c_poly_commitment: P::G1,
-    pub s1_poly_commitment: P::G1,
-    pub s2_poly_commitment: P::G1,
-    pub accumulator_w_poly_commitment: P::G1,
-    pub zeta: F,
+pub struct RoundFourOutput<F: PrimeField> {
+    pub a_x_ploy_zeta: F,
+    pub b_x_ploy_zeta: F,
+    pub c_x_ploy_zeta: F,
+    pub w_accumulator_poly_zeta: F,
+    pub s1_poly_zeta: F,
+    pub s2_poly_zeta: F,
 }
 
 /// This is the output of the round 5 round
@@ -163,22 +165,19 @@ impl<P: Pairing, F: PrimeField> RoundTwoOutput<P, F> {
 impl<P: Pairing, F: PrimeField> RoundThreeOutput<P, F> {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        bytes.extend_from_slice(&self.t_lo.to_string().as_bytes());
-        bytes.extend_from_slice(&self.t_mid.to_string().as_bytes());
-        bytes.extend_from_slice(&self.t_hi.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_lo_poly.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_mid_poly.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_hi_poly.to_string().as_bytes());
         bytes
     }
 }
 
-impl<P: Pairing, F: PrimeField> RoundFourOutput<P, F> {
+impl<F: PrimeField> RoundFourOutput<F> {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        bytes.extend_from_slice(&self.a_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.b_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.c_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.s1_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.s2_poly_commitment.to_string().as_bytes());
-        bytes.extend_from_slice(&self.accumulator_w_poly_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.a_x_ploy_zeta.to_string().as_bytes());
+        bytes.extend_from_slice(&self.b_x_ploy_zeta.to_string().as_bytes());
+        bytes.extend_from_slice(&self.c_x_ploy_zeta.to_string().as_bytes());
         bytes
     }
 }

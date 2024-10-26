@@ -224,6 +224,8 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         l1_values[0] = F::ONE;
         let domain = Domain::new(self.circuit_ir.group_order as usize);
         let l1_poly_eval = UnivariateEval::new(l1_values, domain);
+        let w_accumulator_poly =
+            apply_w_to_polynomial(&round_two_output.accumulator_poly.clone(), &root);
         let t_x = (((round_one_output.a_x.clone()
             * round_one_output.b_x.clone()
             * self.circuit_ir.QM.to_coefficient_poly())
@@ -263,7 +265,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
                 * (round_one_output.c_x.clone()
                     + (self.circuit_ir.S3.to_coefficient_poly() * round_two_output.beta)
                     + round_two_output.gamma)
-                * apply_w_to_polynomial(&round_two_output.accumulator_poly.clone(), &root))
+                * w_accumulator_poly.clone())
                 * alpha)
                 / vanishing_polynomial.clone())
             + ((((round_two_output.accumulator_poly.clone() - F::ONE)
@@ -305,20 +307,45 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             <UnivariateKZG as KZGUnivariateInterface<P>>::commit(&self.srs, &t_hi_blinding);
 
         RoundThreeOutput {
-            t_lo: t_lo_commitment,
-            t_mid: t_mid_commitment,
-            t_hi: t_hi_commitment,
-            zeta: F::ONE,
+            t_lo_commitment,
+            t_mid_commitment,
+            t_hi_commitment,
+            w_accumulator_poly,
+            t_lo_poly: t_lo_blinded,
+            t_mid_poly: t_mid_blinded,
+            t_hi_poly: t_hi_blinding,
         }
     }
 
     fn round_four(
         &mut self,
         round_one_output: RoundOneOutput<P, F>,
-        round_two_output: RoundTwoOutput<P, F>,
         round_three_output: RoundThreeOutput<P, F>,
-    ) -> RoundFourOutput<P, F> {
-        todo!()
+    ) -> RoundFourOutput<F> {
+        let zeta = self.transcript.sample_as_field_element::<F>();
+
+        let a_x_poly = round_one_output.a_x.clone();
+        let b_x_poly = round_one_output.b_x.clone();
+        let c_x_poly = round_one_output.c_x.clone();
+        let w_accumulator_poly = round_three_output.w_accumulator_poly.clone();
+        let s1_poly = self.circuit_ir.S1.to_coefficient_poly();
+        let s2_poly = self.circuit_ir.S2.to_coefficient_poly();
+
+        let a_x_ploy_zeta = a_x_poly.evaluate(&zeta);
+        let b_x_ploy_zeta = b_x_poly.evaluate(&zeta);
+        let c_x_ploy_zeta = c_x_poly.evaluate(&zeta);
+        let w_accumulator_poly_zeta = w_accumulator_poly.evaluate(&zeta);
+        let s1_poly_zeta = s1_poly.evaluate(&zeta);
+        let s2_poly_zeta = s2_poly.evaluate(&zeta);
+
+        RoundFourOutput {
+            a_x_ploy_zeta,
+            b_x_ploy_zeta,
+            c_x_ploy_zeta,
+            w_accumulator_poly_zeta,
+            s1_poly_zeta,
+            s2_poly_zeta,
+        }
     }
 
     fn round_five(
@@ -326,7 +353,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
         round_one_output: RoundOneOutput<P, F>,
         round_two_output: RoundTwoOutput<P, F>,
         round_three_output: RoundThreeOutput<P, F>,
-        round_four_output: RoundFourOutput<P, F>,
+        round_four_output: RoundFourOutput<F>,
     ) -> RoundFiveOutput<P, F> {
         todo!()
     }
