@@ -502,7 +502,7 @@ mod tests {
         let witness = program.compute_witness_and_public_parameter(variable_assignment);
         let circuit_ir = program.common_preproccessed_input();
 
-        let transcript = FiatShamirTranscript::new("test_plonk_prove_round_1".as_bytes().to_vec());
+        let transcript = FiatShamirTranscript::new("plonk-protocol".as_bytes().to_vec());
         let srs: SRS<Bls12_381> =
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);
@@ -530,7 +530,7 @@ mod tests {
         let witness = program.compute_witness_and_public_parameter(variable_assignment);
         let circuit_ir = program.common_preproccessed_input();
 
-        let transcript = FiatShamirTranscript::new("test_plonk_prove_round_1".as_bytes().to_vec());
+        let transcript = FiatShamirTranscript::new("plonk-protocol".as_bytes().to_vec());
         let srs: SRS<Bls12_381> =
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir, srs);

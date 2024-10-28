@@ -2,6 +2,7 @@
 
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
+use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
 use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
 use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
@@ -118,6 +119,20 @@ pub struct PlonkProof<P: Pairing, F: PrimeField> {
     pub s2_poly_zeta: F,
 }
 
+/// This is the verier preprocessed input
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifierPreprocessedInput<P: Pairing> {
+    pub qm_1_commitment: P::G1,
+    pub ql_1_commitment: P::G1,
+    pub qr_1_commitment: P::G1,
+    pub qo_1_commitment: P::G1,
+    pub qc_1_commitment: P::G1,
+    pub s1_1_commitment: P::G1,
+    pub s2_1_commitment: P::G1,
+    pub s3_1_commitment: P::G1,
+    pub x_2: P::G2,
+}
+
 impl<P: Pairing> PlonkSRS<P> {
     pub fn new(g1_power_of_taus: Vec<P::G1>, g2_power_of_tau: Vec<P::G2>) -> Self {
         Self {
@@ -222,5 +237,108 @@ impl<F: PrimeField> Witness<F> {
         pi: UnivariateEval<F>,
     ) -> Self {
         Self { a, b, c, pi }
+    }
+}
+
+impl<F: PrimeField> PlonkishIntermediateRepresentation<F> {
+    pub fn to_vpi<P: Pairing>(&self, srs: &SRS<P>) -> VerifierPreprocessedInput<P> {
+        VerifierPreprocessedInput {
+            qm_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.QM.to_coefficient_poly(),
+            ),
+            ql_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.QL.to_coefficient_poly(),
+            ),
+            qr_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.QR.to_coefficient_poly(),
+            ),
+            qo_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.QO.to_coefficient_poly(),
+            ),
+            qc_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.QC.to_coefficient_poly(),
+            ),
+            s1_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.S1.to_coefficient_poly(),
+            ),
+            s2_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.S2.to_coefficient_poly(),
+            ),
+            s3_1_commitment: <UnivariateKZG as KZGUnivariateInterface<P>>::commit(
+                srs,
+                &self.S3.to_coefficient_poly(),
+            ),
+            x_2: srs.g2_power_of_tau[1],
+        }
+    }
+}
+
+impl<F: PrimeField, P: Pairing> PlonkProof<P, F> {
+    /// This function output beta, gamma, alpha, zeta, vinculum, mu ---- (beta, gamma, alpha, zeta, vinculum, mu)
+    pub fn output_transcript_challenges(&self) -> (F, F, F, F, F, F) {
+        let mut transcript = FiatShamirTranscript::new("plonk-protocol".as_bytes().to_vec());
+
+        let round_one_output: RoundOneOutput<P, F> = RoundOneOutput {
+            a_commitment: self.a_poly_commitment,
+            b_commitment: self.b_poly_commitment,
+            c_commitment: self.c_poly_commitment,
+            a_x: UnivariantPolynomial::<F>::zero(),
+            b_x: UnivariantPolynomial::<F>::zero(),
+            c_x: UnivariantPolynomial::<F>::zero(),
+        };
+        transcript.append_with_label("round_one_output", round_one_output.to_bytes());
+        let rand_round_2 = transcript.sample_n_as_field_elements(2);
+        let beta = rand_round_2[0];
+        let gamma = rand_round_2[1];
+
+        let round_two_output: RoundTwoOutput<P, F> = RoundTwoOutput {
+            accumulator_commitment: self.accumulator_poly_commitment,
+            beta: F::ZERO,
+            gamma: F::ZERO,
+            accumulator_poly: UnivariantPolynomial::<F>::zero(),
+        };
+
+        transcript.append_with_label("round_two_output", round_two_output.to_bytes());
+
+        let alpha = transcript.sample_as_field_element::<F>();
+
+        let round_three_output: RoundThreeOutput<P, F> = RoundThreeOutput {
+            t_lo_commitment: self.t_lo_poly_commitment,
+            t_mid_commitment: self.t_mid_poly_commitment,
+            t_hi_commitment: self.t_hi_poly_commitment,
+            w_accumulator_poly: UnivariantPolynomial::<F>::zero(),
+            t_lo_poly: UnivariantPolynomial::<F>::zero(),
+            t_mid_poly: UnivariantPolynomial::<F>::zero(),
+            t_hi_poly: UnivariantPolynomial::<F>::zero(),
+            alpha: F::ZERO,
+        };
+
+        transcript.append_with_label("round_three_output", round_three_output.to_bytes());
+
+        let zeta = transcript.sample_as_field_element::<F>();
+
+        let round_four_output = RoundFourOutput {
+            a_x_ploy_zeta: self.a_x_zeta,
+            b_x_ploy_zeta: self.b_x_zeta,
+            c_x_ploy_zeta: self.c_x_zeta,
+            w_accumulator_poly_zeta: F::ZERO,
+            s1_poly_zeta: F::ZERO,
+            s2_poly_zeta: F::ZERO,
+            zeta: F::ZERO,
+        };
+
+        transcript.append_with_label("round_four_output", round_four_output.to_bytes());
+
+        let vinculum = transcript.sample_as_field_element::<F>();
+        let mu = transcript.sample_as_field_element::<F>();
+
+        (beta, gamma, alpha, zeta, vinculum, mu)
     }
 }

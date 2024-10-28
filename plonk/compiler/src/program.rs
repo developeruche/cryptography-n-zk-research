@@ -253,6 +253,11 @@ impl<F: PrimeField> Program<F> {
         out
     }
 
+    /// Attempts to "run" the program to fill in any intermediate variable
+    /// assignments, starting from the given assignments. Eg. if
+    /// `starting_assignments` contains {'a': 3, 'b': 5}, and the first line
+    /// says `c <== a * b`, then it fills in `c: 15`.
+    /// also returns the public parameters
     pub fn compute_witness_and_public_parameter(
         &self,
         starting_assignments: HashMap<Option<String>, F>,
