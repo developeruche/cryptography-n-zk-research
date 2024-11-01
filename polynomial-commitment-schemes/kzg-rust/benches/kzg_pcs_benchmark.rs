@@ -36,7 +36,7 @@ fn kzg_univariant_protocol_benchmark(c: &mut Criterion) {
 fn kzg_univariant_protocol_benchmark_only_commit(c: &mut Criterion) {
     let tau = Fr::from(10u64);
     let poly_degree = SIZE;
-    let poly = black_box(UnivariantPolynomial::random(SIZE));
+    let poly: UnivariantPolynomial<Fr> = black_box(UnivariantPolynomial::random(SIZE));
     let srs: SRS<Bls12_381> = black_box(UnivariateKZG::generate_srs(&tau, poly_degree));
 
     c.bench_function("KZG protocol ONLY commitment", |b| {

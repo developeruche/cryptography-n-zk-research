@@ -133,7 +133,7 @@ mod tests {
 
         let vanishing_poly = generate_vanishing_polynomial(&opening);
 
-        let (q, r) = poly.divide_with_q_and_r(&vanishing_poly).unwrap();
+        let (_, r) = poly.divide_with_q_and_r(&vanishing_poly).unwrap();
 
         let t_eval_0 = r.evaluate(&opening[0]);
         let t_eval_1 = r.evaluate(&opening[1]);

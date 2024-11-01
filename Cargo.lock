@@ -651,6 +651,7 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-test-curves",
+ "circuits",
  "fiat_shamir",
  "kzg-rust",
  "plonk_compiler",

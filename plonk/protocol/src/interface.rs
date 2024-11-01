@@ -1,7 +1,6 @@
 //! This module contains the generic interfaces for the polynomial commitment scheme and the transcript.
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
-use kzg_rust::primitives::SRS;
 use plonk_core::primitives::{
     PlonkProof, RoundFiveOutput, RoundFourOutput, RoundOneOutput, RoundThreeOutput, RoundTwoOutput,
     Witness,

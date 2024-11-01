@@ -1,9 +1,10 @@
 //! The goal of this module is to provide a way to transpile a circuit into a Plonkish representation.
 use crate::primitives::{Circuit, GateType};
 
-pub fn plonkish_transpile(circuit: &Circuit) -> Vec<String> {
+pub fn plonkish_transpile(circuit: &Circuit) -> (Vec<String>, Vec<String>) {
     let var_prefix = "v";
     let mut asq = Vec::new();
+    let mut input_vars = Vec::new();
 
     for (i, layer) in circuit.layers.iter().enumerate() {
         for (i_g, gate) in layer.layer.iter().enumerate() {
@@ -17,6 +18,10 @@ pub fn plonkish_transpile(circuit: &Circuit) -> Vec<String> {
                         format!("{}{}{}", var_prefix, i + 1, (i_g * 2) + 1)
                     );
                     asq.push(as_);
+                    if i == circuit.layers.len() - 1 {
+                        input_vars.push(format!("{}{}{}", var_prefix, i + 1, i_g * 2));
+                        input_vars.push(format!("{}{}{}", var_prefix, i + 1, (i_g * 2) + 1));
+                    }
                 }
                 GateType::Mul => {
                     let as_ = format!(
@@ -25,17 +30,22 @@ pub fn plonkish_transpile(circuit: &Circuit) -> Vec<String> {
                         format!("{}{}{}", var_prefix, i + 1, i_g * 2),
                         format!("{}{}{}", var_prefix, i + 1, (i_g * 2) + 1)
                     );
-                    asq.push(as_);
+                    asq.push(as_.clone());
+                    if i == circuit.layers.len() - 1 {
+                        input_vars.push(format!("{}{}{}", var_prefix, i + 1, i_g * 2));
+                        input_vars.push(format!("{}{}{}", var_prefix, i + 1, (i_g * 2) + 1));
+                    }
                 }
             }
         }
     }
 
-    asq
+    (asq, input_vars)
 }
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
     use crate::primitives::{CircuitLayer, Gate};
 
@@ -49,8 +59,10 @@ mod tests {
         let circuit = Circuit::new(vec![layer_0, layer_1]);
 
         let asq = plonkish_transpile(&circuit);
+        println!("Input vars: {:?}", asq.1);
+
         assert_eq!(
-            asq,
+            asq.0,
             vec![
                 "v00 <== v10 * v11".to_string(),
                 "v10 <== v20 + v21".to_string(),

@@ -332,10 +332,10 @@ mod tests {
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
-        let (s1, s2, s3) = program.make_s_polynomials();
+        let (s1, s2, _) = program.make_s_polynomials();
 
         let unmoved_s1: Vec<_> = roots_of_unity(8);
-        let unmoved_s2: Vec<_> = roots_of_unity(8)
+        let _: Vec<_> = roots_of_unity(8)
             .into_iter()
             .map(|ele: Fr| ele * Fr::from(2))
             .collect();
@@ -346,10 +346,6 @@ mod tests {
         assert_eq!(s1.values[0], unmoved_s1[1]);
 
         assert_eq!(s2.values[0], unmoved_s3[1]);
-
-        println!("s1:{:?}", s1);
-        println!("s2:{:?}", s2);
-        println!("s3:{:?}", s3);
     }
 
     #[test]
@@ -393,7 +389,7 @@ mod tests {
         ]);
         let circuit = Circuit::new(vec![layer_0, layer_1]);
 
-        let original_constriants = plonkish_transpile(&circuit);
+        let original_constriants = plonkish_transpile(&circuit).0;
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
             let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
@@ -423,8 +419,8 @@ mod tests {
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
-        let (l, r, m, o, c) = program.make_gate_polynomials();
-        let (s1, s2, s3) = program.make_s_polynomials();
+        let _ = program.make_gate_polynomials();
+        let _ = program.make_s_polynomials();
 
         let mut variable_assignment = HashMap::new();
         variable_assignment.insert(Some("a".to_string()), Fr::from(1));

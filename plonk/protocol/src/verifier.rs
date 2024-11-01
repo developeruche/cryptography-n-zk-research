@@ -1,6 +1,8 @@
+#![allow(non_snake_case)]
+
 use crate::interface::PlonkVerifierInterface;
-use ark_ec::{pairing::Pairing, AffineRepr, Group};
-use ark_ff::{BigInteger, PrimeField};
+use ark_ec::{pairing::Pairing, Group};
+use ark_ff::PrimeField;
 use kzg_rust::primitives::SRS;
 use plonk_compiler::utils::root_of_unity;
 use plonk_core::primitives::{
@@ -51,7 +53,7 @@ impl<F: PrimeField, P: Pairing> PlonkVerifierInterface<F, P> for PlonkVerifier<P
 
         let root: F = root_of_unity::<F>(self.group_order);
 
-        let l1_eval_zeta = (root * Z_h_zeta) / (F::from(self.group_order) * (zeta - root)); // Remove after testing
+        // let l1_eval_zeta = (root * Z_h_zeta) / (F::from(self.group_order) * (zeta - root)); // Remove after testing
         let public_params_poly_at_zeta = public_input.to_coefficient_poly().evaluate(&zeta);
 
         let a_x_zeta = proof.a_x_zeta;
@@ -147,7 +149,7 @@ impl<F: PrimeField, P: Pairing> PlonkVerifierInterface<F, P> for PlonkVerifier<P
                 - e_1,
             P::G2::generator(),
         );
-        
+
         left == right
     }
 }
@@ -183,7 +185,44 @@ mod tests {
             UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
         let mut prover = PlonkProver::new(transcript, circuit_ir.clone(), srs.clone());
         let proof = prover.prove(&witness);
-        let mut verifer = PlonkVerifier::new(program.group_order, circuit_ir.clone(), srs);
+        let verifer = PlonkVerifier::new(program.group_order, circuit_ir.clone(), srs);
+        let is_valid = verifer.verify(&proof, witness.pi);
+        assert_eq!(is_valid, true);
+    }
+
+    #[test]
+    fn test_plonk_complete_prove_n_verify_1() {
+        let original_constriants = [
+            "x public",
+            "c <== a * b",
+            "f <== d * e",
+            "g <== c + f",
+            "x <== g * y",
+        ];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+        let program = Program::new(assembly_eqns, 8);
+
+        let mut variable_assignment = HashMap::new();
+        variable_assignment.insert(Some("x".to_string()), Fr::from(258));
+        variable_assignment.insert(Some("a".to_string()), Fr::from(2));
+        variable_assignment.insert(Some("b".to_string()), Fr::from(4));
+        variable_assignment.insert(Some("d".to_string()), Fr::from(5));
+        variable_assignment.insert(Some("e".to_string()), Fr::from(7));
+        variable_assignment.insert(Some("y".to_string()), Fr::from(6));
+
+        let witness = program.compute_witness_and_public_parameter(variable_assignment);
+        let circuit_ir = program.common_preproccessed_input();
+
+        let transcript = FiatShamirTranscript::new("plonk-protocol".as_bytes().to_vec());
+        let srs: SRS<Bls12_381> =
+            UnivariateKZG::generate_srs(&Fr::from(6), program.group_order as usize * 4);
+        let mut prover = PlonkProver::new(transcript, circuit_ir.clone(), srs.clone());
+        let proof = prover.prove(&witness);
+        let verifer = PlonkVerifier::new(program.group_order, circuit_ir.clone(), srs);
         let is_valid = verifer.verify(&proof, witness.pi);
         assert_eq!(is_valid, true);
     }

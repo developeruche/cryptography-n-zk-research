@@ -203,9 +203,9 @@ impl<P: Pairing, F: PrimeField> RoundTwoOutput<P, F> {
 impl<P: Pairing, F: PrimeField> RoundThreeOutput<P, F> {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        bytes.extend_from_slice(&self.t_lo_poly.to_string().as_bytes());
-        bytes.extend_from_slice(&self.t_mid_poly.to_string().as_bytes());
-        bytes.extend_from_slice(&self.t_hi_poly.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_lo_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_mid_commitment.to_string().as_bytes());
+        bytes.extend_from_slice(&self.t_hi_commitment.to_string().as_bytes());
         bytes
     }
 }

@@ -13,3 +13,4 @@ fiat_shamir.workspace = true
 kzg-rust.workspace = true
 rand.workspace = true
 plonk_compiler.workspace = true
+circuits.workspace = true
