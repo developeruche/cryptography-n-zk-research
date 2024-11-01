@@ -28,8 +28,8 @@ impl<P: Pairing> KZGUnivariateInterface<P> for UnivariateKZG {
         }
     }
 
-    fn commit(srs: &SRS<P>, poly: &UnivariantPolynomial<P::ScalarField>) -> P::G1 {
-        linear_combination_homomorphic_poly_eval_g1::<P>(poly, &srs.g1_power_of_taus)
+    fn commit<F: PrimeField>(srs: &SRS<P>, poly: &UnivariantPolynomial<F>) -> P::G1 {
+        linear_combination_homomorphic_poly_eval_g1::<P, F>(poly, &srs.g1_power_of_taus)
     }
 
     fn open<F: PrimeField>(srs: &SRS<P>, poly: &UnivariantPolynomial<F>, point: &F) -> (F, P::G1) {
@@ -133,7 +133,7 @@ mod tests {
 
         let vanishing_poly = generate_vanishing_polynomial(&opening);
 
-        let (q, r) = poly.divide_with_q_and_r(&vanishing_poly).unwrap();
+        let (_, r) = poly.divide_with_q_and_r(&vanishing_poly).unwrap();
 
         let t_eval_0 = r.evaluate(&opening[0]);
         let t_eval_1 = r.evaluate(&opening[1]);

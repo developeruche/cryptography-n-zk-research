@@ -10,4 +10,5 @@ ark-test-curves.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
 plonk_core.workspace =  true
+circuits.workspace = true
 regex = "1.11.0"

@@ -625,6 +625,7 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-test-curves",
+ "circuits",
  "fiat_shamir",
  "plonk_core",
  "polynomial",
@@ -650,10 +651,13 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-test-curves",
+ "circuits",
  "fiat_shamir",
  "kzg-rust",
+ "plonk_compiler",
  "plonk_core",
  "polynomial",
+ "rand",
 ]
 
 [[package]]

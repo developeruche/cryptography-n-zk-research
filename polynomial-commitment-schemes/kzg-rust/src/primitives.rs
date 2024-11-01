@@ -3,6 +3,7 @@ use ark_ec::pairing::Pairing;
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SRS<P: Pairing> {
     pub g1_power_of_taus: Vec<P::G1>,
+    // this is a vector not just an element so it would support batch kzg
     pub g2_power_of_tau: Vec<P::G2>,
 }
 

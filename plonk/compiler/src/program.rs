@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use ark_ff::PrimeField;
-use plonk_core::primitives::PlonkishIntermediateRepresentation;
+use plonk_core::primitives::{PlonkishIntermediateRepresentation, Witness};
 use polynomial::evaluation::{univariate::UnivariateEval, Domain};
 use std::collections::HashMap;
 
@@ -26,7 +26,7 @@ impl<F: PrimeField> Program<F> {
     pub fn new_with_string(constraints: Vec<String>, group_order: u64) -> Self {
         let mut parsed_constraints = vec![];
         for constraint in constraints {
-            let parsed_constraint = eq_to_assembly(&constraint);
+            let parsed_constraint = eq_to_assembly(constraint);
             parsed_constraints.push(parsed_constraint);
         }
         Program {
@@ -159,7 +159,7 @@ impl<F: PrimeField> Program<F> {
     pub fn from_str(constraints: &str, group_order: u64) -> Self {
         let constraints = constraints
             .lines()
-            .map(|line| eq_to_assembly(line))
+            .map(|line| eq_to_assembly(line.to_string()))
             .collect();
         Program::new(constraints, group_order)
     }
@@ -208,7 +208,7 @@ impl<F: PrimeField> Program<F> {
     /// assignments, starting from the given assignments. Eg. if
     /// `starting_assignments` contains {'a': 3, 'b': 5}, and the first line
     /// says `c <== a * b`, then it fills in `c: 15`.
-    pub fn fill_variable_assignments(
+    pub fn compute_witness(
         &self,
         starting_assignments: HashMap<Option<String>, F>,
     ) -> HashMap<Option<String>, F> {
@@ -252,12 +252,69 @@ impl<F: PrimeField> Program<F> {
 
         out
     }
+
+    /// Attempts to "run" the program to fill in any intermediate variable
+    /// assignments, starting from the given assignments. Eg. if
+    /// `starting_assignments` contains {'a': 3, 'b': 5}, and the first line
+    /// says `c <== a * b`, then it fills in `c: 15`.
+    /// also returns the public parameters
+    pub fn compute_witness_and_public_parameter(
+        &self,
+        starting_assignments: HashMap<Option<String>, F>,
+    ) -> Witness<F> {
+        let out = self.compute_witness(starting_assignments);
+        let mut public_params_values: Vec<F> = self
+            .get_public_assignment()
+            .iter()
+            .map(|x| out.get(x).unwrap().clone().neg())
+            .collect();
+        public_params_values.resize(self.group_order as usize, F::ZERO);
+        let public_params_poly = UnivariateEval::new(
+            public_params_values,
+            Domain::<F>::new(self.group_order as usize),
+        );
+
+        let mut witness_a = vec![F::ZERO; self.group_order as usize];
+        let mut witness_b = vec![F::ZERO; self.group_order as usize];
+        let mut witness_c = vec![F::ZERO; self.group_order as usize];
+
+        for (i, constraint) in self.constraints.iter().enumerate() {
+            let l = constraint.wires.L.clone();
+            witness_a[i] = match l {
+                Some(l) => *out.get(&Some(l)).unwrap(),
+                None => F::ZERO,
+            };
+
+            let r = constraint.wires.R.clone();
+            witness_b[i] = match r {
+                Some(r) => *out.get(&Some(r)).unwrap(),
+                None => F::ZERO,
+            };
+
+            let o = constraint.wires.O.clone();
+            witness_c[i] = match o {
+                Some(o) => *out.get(&Some(o)).unwrap(),
+                None => F::ZERO,
+            };
+        }
+
+        Witness {
+            a: UnivariateEval::new(witness_a, Domain::<F>::new(self.group_order as usize)),
+            b: UnivariateEval::new(witness_b, Domain::<F>::new(self.group_order as usize)),
+            c: UnivariateEval::new(witness_c, Domain::<F>::new(self.group_order as usize)),
+            pi: public_params_poly,
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use ark_test_curves::bls12_381::Fr;
+    use circuits::{
+        adapters::plonkish::plonkish_transpile,
+        primitives::{Circuit, CircuitLayer, Gate, GateType},
+    };
 
     #[test]
     fn test_make_s_polynomials() {
@@ -271,14 +328,14 @@ mod tests {
         let original_constriants = ["c <== a * b", "b <== a * e"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
-            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
-        let (s1, s2, s3) = program.make_s_polynomials();
+        let (s1, s2, _) = program.make_s_polynomials();
 
         let unmoved_s1: Vec<_> = roots_of_unity(8);
-        let unmoved_s2: Vec<_> = roots_of_unity(8)
+        let _: Vec<_> = roots_of_unity(8)
             .into_iter()
             .map(|ele: Fr| ele * Fr::from(2))
             .collect();
@@ -289,10 +346,6 @@ mod tests {
         assert_eq!(s1.values[0], unmoved_s1[1]);
 
         assert_eq!(s2.values[0], unmoved_s3[1]);
-
-        println!("s1:{:?}", s1);
-        println!("s2:{:?}", s2);
-        println!("s3:{:?}", s3);
     }
 
     #[test]
@@ -300,7 +353,7 @@ mod tests {
         let original_constriants = ["e public", "c <== a * b", "e <== c * d"];
         let mut assembly_eqns = Vec::new();
         for eq in original_constriants.iter() {
-            let assembly_eqn = eq_to_assembly::<Fr>(eq);
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
             assembly_eqns.push(assembly_eqn);
         }
         let program = Program::new(assembly_eqns, 8);
@@ -310,5 +363,79 @@ mod tests {
         println!("m:{:?}", m);
         println!("o:{:?}", o);
         println!("c:{:?}", c);
+    }
+
+    #[test]
+    fn test_transpiler_compatibilty() {
+        let original_constriants = [
+            "v00 <== v10 * v11",
+            "v10 <== v20 + v21",
+            "v11 <== v22 * v23",
+        ];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+
+        let program = Program::new(assembly_eqns, 8);
+        let (l, r, m, o, c) = program.make_gate_polynomials();
+        let (s1, s2, s3) = program.make_s_polynomials();
+
+        let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Mul, [0, 1])]);
+        let layer_1 = CircuitLayer::new(vec![
+            Gate::new(GateType::Add, [0, 1]),
+            Gate::new(GateType::Mul, [2, 3]),
+        ]);
+        let circuit = Circuit::new(vec![layer_0, layer_1]);
+
+        let original_constriants = plonkish_transpile(&circuit).0;
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+
+        let program = Program::new(assembly_eqns, 8);
+        let (l_, r_, m_, o_, c_) = program.make_gate_polynomials();
+        let (s1_, s2_, s3_) = program.make_s_polynomials();
+
+        assert_eq!(l, l_);
+        assert_eq!(r, r_);
+        assert_eq!(m, m_);
+        assert_eq!(o, o_);
+        assert_eq!(c, c_);
+        assert_eq!(s1, s1_);
+        assert_eq!(s2, s2_);
+        assert_eq!(s3, s3_);
+    }
+
+    #[test]
+    fn test_compute_witness() {
+        let original_constriants = ["e public", "c <== a * b", "e <== c * d"];
+        let mut assembly_eqns = Vec::new();
+        for eq in original_constriants.iter() {
+            let assembly_eqn = eq_to_assembly::<Fr>(eq.to_string());
+            assembly_eqns.push(assembly_eqn);
+        }
+        let program = Program::new(assembly_eqns, 8);
+        let _ = program.make_gate_polynomials();
+        let _ = program.make_s_polynomials();
+
+        let mut variable_assignment = HashMap::new();
+        variable_assignment.insert(Some("a".to_string()), Fr::from(1));
+        variable_assignment.insert(Some("b".to_string()), Fr::from(2));
+        variable_assignment.insert(Some("c".to_string()), Fr::from(2));
+        variable_assignment.insert(Some("d".to_string()), Fr::from(4));
+        variable_assignment.insert(Some("e".to_string()), Fr::from(8));
+
+        let out = program.compute_witness(variable_assignment);
+        let pub_variable = program.get_public_assignment();
+
+        for i in pub_variable.iter() {
+            let tl = out.get(i);
+            println!("Vaule of the witness: {:?} - {:?}", i, tl);
+        }
+        println!("This is the output: {:?} - {:?}", out, pub_variable);
     }
 }

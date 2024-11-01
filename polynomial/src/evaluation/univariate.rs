@@ -9,8 +9,7 @@ use ark_ff::PrimeField;
 
 use super::Domain;
 
-
-#[derive(Debug, Clone)]
+#[derive(Clone, PartialEq, Eq, Default, Debug)]
 pub struct UnivariateEval<F: PrimeField> {
     /// this is a list of the evaluation of the polynomial
     pub values: Vec<F>,
@@ -22,6 +21,20 @@ impl<F: PrimeField> UnivariateEval<F> {
     /// This function is used to create a new polynomial from the evaluation form
     pub fn new(values: Vec<F>, domain: Domain<F>) -> Self {
         UnivariateEval { values, domain }
+    }
+
+    /// This function is used to create a new polynomial from the evaluation form but also does checks
+    pub fn new_checked(values: Vec<F>, domain: Domain<F>) -> Result<Self, &'static str> {
+        if values.len() != domain.size() as usize {
+            return Err("The size of the values does not match the size of the domain");
+        }
+        Ok(UnivariateEval { values, domain })
+    }
+
+    /// This function performs interpolation on the vaules provided and returns a polynomial
+    pub fn interpolate(values: Vec<F>, domain: Domain<F>) -> UnivariantPolynomial<F> {
+        let coeffs = domain.ifft(&values);
+        UnivariantPolynomial::new(coeffs)
     }
 
     /// This function is used to convert the coefficient form of the polynomial to the evaluation form
@@ -68,7 +81,6 @@ impl<F: PrimeField> UnivariateEval<F> {
 
         let poly_1_eval = domain.fft(&poly1_coeffs);
         let poly_2_eval = domain.fft(&poly2_coeffs);
-
 
         let mut result = vec![F::ZERO; length_of_poly];
         for i in 0..length_of_poly {

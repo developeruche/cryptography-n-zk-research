@@ -73,9 +73,8 @@ impl<P: Pairing> BatchKZGUnivariateInterface<P> for UnivariateKZG {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{interface::KZGUnivariateInterface, utils::generate_vanishing_polynomial};
+    use crate::interface::KZGUnivariateInterface;
     use ark_test_curves::bls12_381::{Bls12_381, Fr};
-    use polynomial::interface::UnivariantPolynomialInterface;
 
     #[test]
     fn test_batch_univariate_kzg() {

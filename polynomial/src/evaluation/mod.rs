@@ -42,7 +42,7 @@ impl<F: PrimeField> Domain<F> {
         let generator = F::get_root_of_unity(size).unwrap();
         let group_gen_inverse = generator.inverse().unwrap();
         let group_size_inverse = F::from(size).inverse().unwrap();
-      
+
         Domain {
             size,
             generator,
