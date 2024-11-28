@@ -115,6 +115,7 @@ impl<F: PrimeField, P: Pairing> PlonkProverInterface<F, P> for PlonkProver<F, P>
             -F::ONE,
         );
 
+        // translating witness polynomial from evaluation form to co-eff form
         let witness_a_poly = witness.a.to_coefficient_poly();
         let witness_b_poly = witness.b.to_coefficient_poly();
         let witness_c_poly = witness.c.to_coefficient_poly();

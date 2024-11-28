@@ -110,7 +110,7 @@ pub fn bh_to_g1_srs<F: PrimeField, P: Pairing>(bh: &[Vec<F>], object: &[F]) -> V
     let generator = P::G1::generator();
 
     for i in bh.iter() {
-        let result = perform_zero_and_one_check(i, object);
+        let result = perform_zero_and_one_check(i, object); // langrange interpolation and evaluating the variable x immidiately
         srs.push(generator.mul_bigint(result.into_bigint()));
     }
 

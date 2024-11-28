@@ -39,7 +39,7 @@ impl<P: Pairing> KZGMultiLinearInterface<P> for MultilinearKZG {
         poly: &Multilinear<F>,
         point: &[F],
     ) -> (F, Vec<<P as Pairing>::G1>) {
-        let points_evaluations = poly.evaluate(&point.to_vec());
+        let points_evaluation = poly.evaluate(&point.to_vec());
         let mut quotient_proofs = Vec::new();
         let mut last_reminder = poly.clone();
 
@@ -53,7 +53,7 @@ impl<P: Pairing> KZGMultiLinearInterface<P> for MultilinearKZG {
             quotient_proofs.push(quotient_commitment);
         }
 
-        (points_evaluations.unwrap(), quotient_proofs)
+        (points_evaluation.unwrap(), quotient_proofs)
     }
 
     fn verify<F: PrimeField>(
