@@ -17,13 +17,10 @@ research-implementation/
 │   ├── arithmetic circuit/
 │   └── SHA256 hash function/
 |
-├── protocol implementation/
+├── protocol implementation (piop)/
 │   ├── GKR
 │   ├── Groth16
-│   ├── KZG polynomial commitment scheme
-│             ├── univariate poly/
-|             ├── univariate batch/
-│             └── multilinear poly/
+│   ├── Plonk
 │   ├── Succinct GRK (using KZG as the PCS)
 │   ├── Sum Check Protocol
 │   ├── Schnorr Digital Signature
@@ -31,6 +28,14 @@ research-implementation/
 │   ├── Fiat Shamir
 │   ├── Interactive Chaum Pederson zero-knowledge proof
 │   └── ECDSA
+|
+├── polynomial commitment scheme (pcs)/
+│   ├── KZG polynomial commitment scheme
+│             ├── univariate poly/
+|             ├── univariate batch/
+│             └── multilinear poly/
+│   ├── FRI
+│   └── ~
 |
 ├── projects/
 │   ├── KZG airdrop over bn254 Elliptic curve
@@ -143,6 +148,22 @@ The Groth16 protocol is a highly efficient zero-knowledge succinct non-interacti
 - [x] Trusted Setup
 - [x] Prover
 - [x] Verifer
+
+
+[codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
+<br>
+<br>
+
+### Plonk 
+PLONK (Permutation Argument for Generalized Proofs of Knowledge) is a zero-knowledge proof (ZKP) protocol that allows one to prove the correctness of a computation without revealing its internal data. Developed as a universal and efficient ZKP system, PLONK offers several key features that make it popular in cryptographic applications like blockchain.
+
+**Features**
+- [x] Circuit Pre-processing
+- [x] GRK circuit to PLONKISH transpiler
+- [x] Trusted Setup (KZG) 
+- [x] Prover
+- [x] Verifer
+- [ ] Solidty Verifer Example
 
 
 [codebase](https://github.com/developeruche/cryptography-n-zk-research/tree/main/gkr)
