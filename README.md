@@ -15,19 +15,11 @@ research-implementation/
 ├── primitives/
 │   ├── polynomial/
 │   ├── arithmetic circuit/
-│   └── SHA256 hash function/
+│   └── transcript/
 |
 ├── protocol implementation (piop)/
 │   ├── GKR
-│   ├── Groth16
-│   ├── Plonk
-│   ├── Succinct GRK (using KZG as the PCS)
-│   ├── Sum Check Protocol
-│   ├── Schnorr Digital Signature
-│   ├── NON-Interactive Chaum Pederson zero-knowledge proof
-│   ├── Fiat Shamir
-│   ├── Interactive Chaum Pederson zero-knowledge proof
-│   └── ECDSA
+│   └── Sum Check Protocol
 |
 ├── polynomial commitment scheme (pcs)/
 │   ├── KZG polynomial commitment scheme
@@ -40,15 +32,26 @@ research-implementation/
 ├── projects/
 │   ├── KZG airdrop over bn254 Elliptic curve
 │   ├── Light tornado cash (powered by Groth16)
+│   ├── non interactive chaum pedersen lib
 │   ├── Verifiable Random Function (VRF)
 │   ├── BLS Multi Sign Threshold Wallet (Powered by Shimir secret sharing protocol)
 │   └── Circom Groth16
-
-```
-
-
-
-
+|
+├── hash functions/
+│   ├── sha256
+│   └── keccak256
+|
+├── digital signatures/
+│   ├── ecdsa
+│   └── schnorr
+|
+├── arguments of knowledge (arks)/
+├── SNARKS/
+│   ├── groth16/
+│   ├── plonk/
+│   ├── succinct grk protocol/
+├── STARKS/
+│   ├── ~/
 
 
 
