@@ -3,9 +3,6 @@ use ark_ff::PrimeField;
 use polynomial::multilinear::Multilinear;
 use sum_check::composed::ComposedSumCheckProof;
 
-
-
-
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct SuccinctGKRMultilinearKZGOPenningProof<P: Pairing, F: PrimeField> {
     pub opening: F,

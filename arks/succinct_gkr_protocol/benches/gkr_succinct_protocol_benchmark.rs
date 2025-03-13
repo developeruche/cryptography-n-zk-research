@@ -1,7 +1,7 @@
 //! This file contains the benchmarking code for the gkr protocol.
 use ark_test_curves::bls12_381::{Bls12_381, Fr};
 use circuits::{interfaces::CircuitInterface, primitives::Circuit};
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use gkr::utils::gen_random_taus;
 use kzg_rust::{
     interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,

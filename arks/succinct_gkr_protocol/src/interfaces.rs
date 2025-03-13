@@ -1,13 +1,8 @@
+use crate::primitives::SuccinctGKRProof;
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use circuits::primitives::{Circuit, CircuitEvaluation};
 use kzg_rust::primitives::MultiLinearSRS;
-use crate::primitives::SuccinctGKRProof;
-
-
-
-
-
 
 /// This is the interface for the GKR protocol
 pub trait SuccinctGKRProtocolInterface<F: PrimeField, P: Pairing> {

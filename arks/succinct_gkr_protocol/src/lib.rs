@@ -12,7 +12,7 @@ use circuits::{
     interfaces::GKRProtocolCircuitInterface,
     primitives::{Circuit, CircuitEvaluation},
 };
-use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
+use fiat_shamir::{FiatShamirTranscript, interface::TranscriptInterface};
 use gkr::utils::{gen_w_mle, perform_gkr_sumcheck_layer_one, verifiy_gkr_sumcheck_layer_one};
 use kzg_rust::{
     interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,
@@ -271,7 +271,9 @@ impl<F: PrimeField, P: Pairing> SuccinctGKRProtocolInterface<F, P> for SuccinctG
         );
 
         if !w_in_b_opening_verification || !w_in_c_opening_verification {
-            println!("Invalid sumcheck proof (w_in_b_opening_verification || w_in_c_opening_verification)");
+            println!(
+                "Invalid sumcheck proof (w_in_b_opening_verification || w_in_c_opening_verification)"
+            );
             return false;
         }
 

@@ -13,4 +13,3 @@ pub struct GKRProof<F: PrimeField> {
     /// This is a multilinear polynomial representing the output of the Circuit
     pub w_0_mle: Multilinear<F>,
 }
-

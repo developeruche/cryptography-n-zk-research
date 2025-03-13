@@ -5,10 +5,10 @@ members = [
     "transcripts/fiat_shamir", 
     "sum_check", 
     "sha256-hash-function",
-    "gkr", 
+    "iops/gkr", 
     "circuits", 
     "arks/groth16", 
-    "polynomial-commitment-schemes/kzg-rust", 
+    "pcs/kzg-rust", 
     "arks/plonk/compiler", 
     "arks/plonk/protocol", 
     "arks/plonk/core", 
@@ -33,10 +33,10 @@ ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls
 hex-literal = "0.4.1"
 fiat_shamir = {path = "transcripts/fiat_shamir"}
 sum_check = {path = "sum_check"}
-kzg-rust = {path = "polynomial-commitment-schemes/kzg-rust"}
+kzg-rust = {path = "pcs/kzg-rust"}
 ark-serialize = "0.4.2"
 digest = "0.10.7"
 plonk_protocol = { path = "arks/plonk/protocol" }
 plonk_core = { path = "arks/plonk/core" }
 plonk_compiler = { path = "arks/plonk/compiler" }
-gkr = {path = "gkr"}
+gkr = {path = "iops/gkr"}
