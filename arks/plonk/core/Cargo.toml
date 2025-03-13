@@ -1,0 +1,12 @@
+[package]
+name = "plonk_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ark-ff.workspace = true
+ark-ec.workspace = true
+ark-test-curves.workspace = true
+polynomial.workspace = true
+fiat_shamir.workspace = true
+kzg-rust.workspace = true

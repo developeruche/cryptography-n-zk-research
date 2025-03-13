@@ -1,0 +1,14 @@
+[package]
+name = "groth16"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ark-ff.workspace = true
+ark-ec.workspace = true
+ark-bls12-381 .workspace = true
+ark-test-curves.workspace = true
+polynomial.workspace = true
+circuits.workspace = true
+rand.workspace = true
+hex-literal.workspace = true
