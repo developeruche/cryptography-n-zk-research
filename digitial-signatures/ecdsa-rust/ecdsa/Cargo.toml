@@ -1,0 +1,17 @@
+[package]
+name = "rust_ecdsa"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["developeruche <developeruche@gmail.com>"]
+description = "This is a utils library for working with the ECDSA digtal signature"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ec_core = "0.1.0"
+rand = "0.8.5"
+num-bigint = { version="0.4.3", features=["rand"] }
+sha256 = "1.1.4"
+hex = "0.4.3"

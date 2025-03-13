@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "oracle",
+    "vrf_module",
+]
+
+default-member = ["oracle"]

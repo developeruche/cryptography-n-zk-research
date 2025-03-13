@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@types/node": "^20.9.1",
+    "@types/snarkjs": "^0.7.7",
+    "circomlibjs": "^0.1.7",
+    "ethers": "^5.7.2",
+    "snarkjs": "^0.7.2"
+  }
+}

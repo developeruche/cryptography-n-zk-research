@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "ec-core",
+    "ecdsa",
+]

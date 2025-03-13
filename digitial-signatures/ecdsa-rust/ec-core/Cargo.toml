@@ -1,0 +1,12 @@
+[package]
+name = "ec_core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["developeruche <developeruche@gmail.com>"]
+description = "This is a utils library for working with with ellipitic curves (in short words, implements the modular math used in elliptic curve operations)"
+
+
+[dependencies]
+num-bigint = { version = "0.4.4", features = [] }
+

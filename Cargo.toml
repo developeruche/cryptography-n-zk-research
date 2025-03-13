@@ -1,19 +1,20 @@
 [workspace]
 members = [
-    "polynomial",
-    "bls-multi-sign-threshold-wallet", 
-    "transcripts/fiat_shamir", 
-    "sum_check", 
-    "sha256-hash-function",
+    "primitives/polynomial",
+    "projects/bls-multi-sign-threshold-wallet", 
+    "primitives/transcripts/fiat_shamir", 
+    "iops/sum_check", 
+    "hash-functions/sha256-hash-function",
     "iops/gkr", 
-    "circuits", 
+    "primitives/circuits", 
     "arks/groth16", 
     "pcs/kzg-rust", 
     "arks/plonk/compiler", 
     "arks/plonk/protocol", 
     "arks/plonk/core", 
-    "transcripts/merlin", 
-    "arks/succinct_gkr_protocol",
+    "primitives/transcripts/merlin", 
+    "arks/succinct_gkr_protocol", 
+    "hash-functions/keccak256",
 ]
 exclude = [
     "circom-groth16",
@@ -21,8 +22,8 @@ exclude = [
 
 
 [workspace.dependencies]
-polynomial = { path = "polynomial" }
-circuits = { path = "circuits" }
+polynomial = { path = "primitives/polynomial" }
+circuits = { path = "primitives/circuits" }
 ark-std = "0.4.0"
 rand = "0.8.5"
 field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
@@ -31,8 +32,8 @@ ark-ec = "0.4.2"
 ark-bls12-381 = "0.4.0"
 ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381", "secp256k1"]}
 hex-literal = "0.4.1"
-fiat_shamir = {path = "transcripts/fiat_shamir"}
-sum_check = {path = "sum_check"}
+fiat_shamir = {path = "primitives/transcripts/fiat_shamir"}
+sum_check = {path = "iops/sum_check"}
 kzg-rust = {path = "pcs/kzg-rust"}
 ark-serialize = "0.4.2"
 digest = "0.10.7"

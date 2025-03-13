@@ -534,6 +534,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "keccak256"
+version = "0.1.0"
+
+[[package]]
 name = "kzg-rust"
 version = "0.1.0"
 dependencies = [
