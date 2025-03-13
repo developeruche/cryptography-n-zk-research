@@ -7,12 +7,13 @@ members = [
     "sha256-hash-function",
     "gkr", 
     "circuits", 
-    "groth16", 
+    "arks/groth16", 
     "polynomial-commitment-schemes/kzg-rust", 
-    "plonk/compiler", 
-    "plonk/protocol", 
-    "plonk/core", 
-    "transcripts/merlin",
+    "arks/plonk/compiler", 
+    "arks/plonk/protocol", 
+    "arks/plonk/core", 
+    "transcripts/merlin", 
+    "arks/succinct_gkr_protocol",
 ]
 exclude = [
     "circom-groth16",
@@ -35,6 +36,7 @@ sum_check = {path = "sum_check"}
 kzg-rust = {path = "polynomial-commitment-schemes/kzg-rust"}
 ark-serialize = "0.4.2"
 digest = "0.10.7"
-plonk_protocol = { path = "plonk/protocol" }
-plonk_core = { path = "plonk/core" }
-plonk_compiler = { path = "plonk/compiler" }
+plonk_protocol = { path = "arks/plonk/protocol" }
+plonk_core = { path = "arks/plonk/core" }
+plonk_compiler = { path = "arks/plonk/compiler" }
+gkr = {path = "gkr"}

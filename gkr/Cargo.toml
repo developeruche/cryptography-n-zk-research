@@ -22,7 +22,3 @@ criterion = "0.5.1"
 [[bench]]
 name = "gkr_protocol_benchmark"
 harness = false
-
-[[bench]]
-name = "gkr_succinct_protocol_benchmark"
-harness = false
