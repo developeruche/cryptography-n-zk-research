@@ -1,0 +1,25 @@
+[package]
+name = "succinct_protocol"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ark-ff.workspace = true
+ark-ec.workspace = true
+circuits.workspace = true
+fiat_shamir.workspace = true
+polynomial.workspace = true
+sum_check.workspace = true
+kzg-rust.workspace = true
+gkr.workspace = true
+ark-test-curves.workspace = true
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+
+
+[[bench]]
+name = "gkr_succinct_protocol_benchmark"
+harness = false
+
