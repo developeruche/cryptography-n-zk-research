@@ -3,7 +3,7 @@
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
-use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
+use pcs::{interface::KZGUnivariateInterface, kzg::univariate::UnivariateKZG, primitives::SRS};
 use polynomial::{evaluation::univariate::UnivariateEval, univariant::UnivariantPolynomial};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -3,7 +3,7 @@
 use crate::interface::PlonkVerifierInterface;
 use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
-use kzg_rust::primitives::SRS;
+use pcs::primitives::SRS;
 use plonk_compiler::utils::root_of_unity;
 use plonk_core::primitives::{
     PlonkProof, PlonkishIntermediateRepresentation, VerifierPreprocessedInput,
@@ -160,7 +160,7 @@ mod tests {
     use crate::{interface::PlonkProverInterface, prover::PlonkProver};
     use ark_test_curves::bls12_381::{Bls12_381, Fr};
     use fiat_shamir::FiatShamirTranscript;
-    use kzg_rust::{interface::KZGUnivariateInterface, univariate::UnivariateKZG};
+    use pcs::{interface::KZGUnivariateInterface, kzg::univariate::UnivariateKZG};
     use plonk_compiler::{assembly::eq_to_assembly, program::Program};
     use std::collections::HashMap;
 

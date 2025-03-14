@@ -407,10 +407,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fri"
-version = "0.1.0"
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -443,7 +439,7 @@ dependencies = [
  "criterion",
  "fiat_shamir",
  "field-tracker",
- "kzg-rust",
+ "pcs",
  "polynomial",
  "sum_check",
 ]
@@ -542,20 +538,6 @@ name = "keccak256"
 version = "0.1.0"
 
 [[package]]
-name = "kzg-rust"
-version = "0.1.0"
-dependencies = [
- "ark-bls12-381",
- "ark-ec",
- "ark-ff",
- "ark-test-curves",
- "circuits",
- "criterion",
- "polynomial",
- "rand",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -627,6 +609,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
+name = "pcs"
+version = "0.1.0"
+dependencies = [
+ "ark-bls12-381",
+ "ark-ec",
+ "ark-ff",
+ "ark-test-curves",
+ "circuits",
+ "criterion",
+ "polynomial",
+ "rand",
+]
+
+[[package]]
 name = "plonk_compiler"
 version = "0.1.0"
 dependencies = [
@@ -648,7 +644,7 @@ dependencies = [
  "ark-ff",
  "ark-test-curves",
  "fiat_shamir",
- "kzg-rust",
+ "pcs",
  "polynomial",
 ]
 
@@ -661,7 +657,7 @@ dependencies = [
  "ark-test-curves",
  "circuits",
  "fiat_shamir",
- "kzg-rust",
+ "pcs",
  "plonk_compiler",
  "plonk_core",
  "polynomial",
@@ -906,7 +902,7 @@ dependencies = [
  "criterion",
  "fiat_shamir",
  "gkr",
- "kzg-rust",
+ "pcs",
  "polynomial",
  "sum_check",
 ]

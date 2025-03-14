@@ -7,7 +7,7 @@ use crate::{
 use ark_ec::pairing::Pairing;
 use ark_ff::PrimeField;
 use fiat_shamir::{interface::TranscriptInterface, FiatShamirTranscript};
-use kzg_rust::{interface::KZGUnivariateInterface, primitives::SRS, univariate::UnivariateKZG};
+use pcs::{interface::KZGUnivariateInterface, kzg::univariate::UnivariateKZG, primitives::SRS};
 use plonk_compiler::utils::{root_of_unity, roots_of_unity};
 use plonk_core::primitives::{
     PlonkProof, PlonkishIntermediateRepresentation, RoundFiveOutput, RoundFourOutput,

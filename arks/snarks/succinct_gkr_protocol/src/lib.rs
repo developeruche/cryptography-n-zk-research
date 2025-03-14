@@ -14,8 +14,9 @@ use circuits::{
 };
 use fiat_shamir::{FiatShamirTranscript, interface::TranscriptInterface};
 use gkr::utils::{gen_w_mle, perform_gkr_sumcheck_layer_one, verifiy_gkr_sumcheck_layer_one};
-use kzg_rust::{
-    interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,
+use pcs::{
+    interface::KZGMultiLinearInterface, kzg::multilinear::MultilinearKZG,
+    primitives::MultiLinearSRS,
 };
 use polynomial::{
     composed::multilinear::ComposedMultilinear, interface::MultilinearPolynomialInterface,

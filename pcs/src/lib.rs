@@ -1,5 +1,5 @@
+pub mod fri;
 pub mod interface;
-pub mod multilinear;
+pub mod kzg;
 pub mod primitives;
-pub mod univariate;
 pub mod utils;

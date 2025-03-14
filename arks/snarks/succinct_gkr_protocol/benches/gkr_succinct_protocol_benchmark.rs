@@ -3,8 +3,9 @@ use ark_test_curves::bls12_381::{Bls12_381, Fr};
 use circuits::{interfaces::CircuitInterface, primitives::Circuit};
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use gkr::utils::gen_random_taus;
-use kzg_rust::{
-    interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,
+use pcs::{
+    interface::KZGMultiLinearInterface, kzg::multilinear::MultilinearKZG,
+    primitives::MultiLinearSRS,
 };
 use polynomial::{interface::MultilinearPolynomialInterface, multilinear::Multilinear};
 use succinct_protocol::{SuccinctGKRProtocol, interfaces::SuccinctGKRProtocolInterface};

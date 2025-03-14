@@ -2,6 +2,8 @@ use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 use polynomial::univariant::UnivariantPolynomial;
 
+/// This function provides a way to multiply coefficients of a polynomial and a group element vector elementwise\
+/// this mathematically  provides a way to `[poly(x)]_1`
 pub fn linear_combination_homomorphic_poly_eval_g1<P, F>(
     poly: &UnivariantPolynomial<F>,
     powers_of_secret_gx: &[P::G1],
@@ -21,6 +23,9 @@ where
 }
 
 /// This function generates the powers of tau for the circuit
+/// in the group G1
+///
+/// examples;
 /// tau = 5;
 /// powers_of_tau_g1 = [g.5^0 g.5^1, g.5^2, g.5^3, g.5^4, g.5^5, g.5^6, g.5^7]
 pub fn generate_powers_of_tau_g1<P: Pairing>(tau: &P::ScalarField, n: usize) -> Vec<P::G1> {
@@ -39,6 +44,8 @@ pub fn generate_powers_of_tau_g1<P: Pairing>(tau: &P::ScalarField, n: usize) -> 
     powers_of_tau_g1
 }
 
+/// This function generates the powers of tau for the circuit
+/// in the group G2
 pub fn generate_powers_of_tau_g2<P: Pairing>(tau: &P::ScalarField, n: usize) -> Vec<P::G2> {
     let n = n + 1;
     let mut powers_of_tau_g2 = Vec::with_capacity(n);
@@ -55,6 +62,8 @@ pub fn generate_powers_of_tau_g2<P: Pairing>(tau: &P::ScalarField, n: usize) -> 
     powers_of_tau_g2
 }
 
+/// This function provides a way to multiply coefficients of a polynomial and a group element vector elementwise
+/// this mathematically  provides a way to `[poly(x)]_1`
 pub fn linear_combination_homomorphic_poly_eval_g1_primefield<P, F>(
     poly: &UnivariantPolynomial<F>,
     powers_of_secret_gx: &[P::G1],
@@ -73,6 +82,8 @@ where
         })
 }
 
+/// This function provides a way to multiply coefficients of a polynomial and a group element vector elementwise
+/// this mathematically  provides a way to `[poly(x)]_2`
 pub fn linear_combination_homomorphic_poly_eval_g2_primefield<P, F>(
     poly: &UnivariantPolynomial<F>,
     powers_of_secret_gx: &[P::G2],
@@ -91,6 +102,8 @@ where
         })
 }
 
+/// This function is used tp perform zero and one check on the given pattern and object
+/// this is used for langrange interpolation for multilimear polynomial
 pub fn perform_zero_and_one_check<F: PrimeField>(pattern: &[F], object: &[F]) -> F {
     let mut result = F::one();
 
@@ -105,6 +118,7 @@ pub fn perform_zero_and_one_check<F: PrimeField>(pattern: &[F], object: &[F]) ->
     result
 }
 
+/// This function generates the G1 SRS for the given hypercube and object
 pub fn bh_to_g1_srs<F: PrimeField, P: Pairing>(bh: &[Vec<F>], object: &[F]) -> Vec<P::G1> {
     let mut srs = Vec::with_capacity(bh.len());
     let generator = P::G1::generator();
@@ -117,6 +131,7 @@ pub fn bh_to_g1_srs<F: PrimeField, P: Pairing>(bh: &[Vec<F>], object: &[F]) -> V
     srs
 }
 
+/// This function performs the group operation of G2 on a vec of elements
 pub fn g2_operation<F: PrimeField, P: Pairing>(oprands: &[F]) -> Vec<P::G2> {
     let mut result = Vec::with_capacity(oprands.len());
     let generator = P::G2::generator();
@@ -128,6 +143,7 @@ pub fn g2_operation<F: PrimeField, P: Pairing>(oprands: &[F]) -> Vec<P::G2> {
     result
 }
 
+/// This function is used to create a vanishing polynomial for the given data
 pub fn generate_vanishing_polynomial<F: PrimeField>(data: &Vec<F>) -> UnivariantPolynomial<F> {
     let mut v_poly = UnivariantPolynomial::one();
 

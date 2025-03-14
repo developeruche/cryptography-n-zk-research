@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 use crate::{
     interface::BatchKZGUnivariateInterface,
     primitives::SRS,
@@ -12,6 +10,7 @@ use ark_ec::{pairing::Pairing, Group};
 use ark_ff::PrimeField;
 use polynomial::interface::{PolynomialInterface, UnivariantPolynomialInterface};
 use polynomial::univariant::UnivariantPolynomial;
+use std::ops::Sub;
 
 use super::UnivariateKZG;
 

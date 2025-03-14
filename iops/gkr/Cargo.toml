@@ -11,7 +11,7 @@ polynomial.workspace = true
 fiat_shamir.workspace = true
 sum_check.workspace = true
 circuits.workspace = true
-kzg-rust.workspace = true
+pcs.workspace = true
 ark-std.workspace = true
 field-tracker.workspace = true
 

@@ -10,7 +10,7 @@ circuits.workspace = true
 fiat_shamir.workspace = true
 polynomial.workspace = true
 sum_check.workspace = true
-kzg-rust.workspace = true
+pcs.workspace = true
 gkr.workspace = true
 ark-test-curves.workspace = true
 

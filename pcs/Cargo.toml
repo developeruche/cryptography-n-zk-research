@@ -1,5 +1,5 @@
 [package]
-name = "kzg-rust"
+name = "pcs" # polynomial commitment scheme
 version = "0.1.0"
 edition = "2021"
 
