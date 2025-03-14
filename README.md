@@ -46,25 +46,13 @@ research-implementation/
 │   └── schnorr
 |
 ├── arguments of knowledge (arks)/
-├── SNARKS/
-│   ├── groth16/
-│   ├── plonk/
-│   ├── succinct grk protocol/
-├── STARKS/
-│   ├── ~/
-
-
-
-
-
-
-
-
-
-
-
-
-
+├─── SNARKS/
+│     ├── groth16/
+│     ├── plonk/
+│     ├── succinct grk protocol/
+├─── STARKS/
+│     ├── ~/
+└──
 
 ## Primitives and Toolkits
 -------------------------------
