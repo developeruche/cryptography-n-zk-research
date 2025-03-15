@@ -15,6 +15,7 @@ use std::ops::Sub;
 use super::UnivariateKZG;
 
 impl<P: Pairing> BatchKZGUnivariateInterface<P> for UnivariateKZG {
+    /// This function is batch opening one polynomials at different points, obtaining a single group element as a proof.
     fn open<F: PrimeField>(
         srs: &SRS<P>,
         poly: &UnivariantPolynomial<F>,
