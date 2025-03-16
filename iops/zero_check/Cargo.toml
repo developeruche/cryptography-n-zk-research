@@ -7,3 +7,7 @@ edition = "2024"
 sum_check.workspace = true
 fiat_shamir.workspace = true
 anyhow.workspace = true
+ark-ff.workspace = true
+ark-test-curves.workspace = true
+ark-serialize.workspace = true
+polynomial.workspace = true

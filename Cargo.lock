@@ -1157,7 +1157,11 @@ name = "zero_check"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "ark-ff",
+ "ark-serialize",
+ "ark-test-curves",
  "fiat_shamir",
+ "polynomial",
  "sum_check",
 ]
 
