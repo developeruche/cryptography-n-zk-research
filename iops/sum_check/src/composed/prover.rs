@@ -252,7 +252,7 @@ mod tests {
 
         assert!(ComposedVerifier::verify(&proof, &composed));
     }
-    
+
     #[test]
     fn test_sum_check_proof_3() {
         let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);

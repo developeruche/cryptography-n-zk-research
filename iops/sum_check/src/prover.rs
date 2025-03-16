@@ -46,7 +46,7 @@ impl<F: PrimeField> ProverInterface<F> for Prover {
             let number_of_round = poly.num_vars() - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
             let mut bh_partials = P::zero(1);
-            
+
             let verifier_random_reponse_f = F::from_be_bytes_mod_order(&transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
 
