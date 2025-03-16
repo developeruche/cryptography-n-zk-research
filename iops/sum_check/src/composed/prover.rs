@@ -81,7 +81,7 @@ impl<F: PrimeField> ComposedProverInterface<F> for ComposedProver {
                 round_poly: round_polys,
                 sum: *sum,
             },
-            all_random_reponse,
+            all_random_reponse, // this comes in handle in the GKR protocol
         )
     }
 }
@@ -245,6 +245,21 @@ mod tests {
         let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
 
         let composed = ComposedMultilinear::new(vec![poly1, poly2]);
+        let sum = ComposedProver::calculate_sum(&composed);
+
+        let mut transcript = FiatShamirTranscript::default();
+        let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+
+        assert!(ComposedVerifier::verify(&proof, &composed));
+    }
+    
+    #[test]
+    fn test_sum_check_proof_3() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(1)], 2);
+        let poly3 = Multilinear::new(vec![Fr::from(0), Fr::from(2), Fr::from(0), Fr::from(3)], 2);
+
+        let composed = ComposedMultilinear::new(vec![poly1.clone(), poly2, poly3, poly1]);
         let sum = ComposedProver::calculate_sum(&composed);
 
         let mut transcript = FiatShamirTranscript::default();

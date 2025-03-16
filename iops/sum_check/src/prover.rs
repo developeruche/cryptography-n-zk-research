@@ -45,8 +45,8 @@ impl<F: PrimeField> ProverInterface<F> for Prover {
         for i in 1..poly.num_vars() {
             let number_of_round = poly.num_vars() - i - 1;
             let bh = boolean_hypercube::<F>(number_of_round);
-
             let mut bh_partials = P::zero(1);
+            
             let verifier_random_reponse_f = F::from_be_bytes_mod_order(&transcript.sample());
             all_random_reponse.push(verifier_random_reponse_f);
 
@@ -59,7 +59,6 @@ impl<F: PrimeField> ProverInterface<F> for Prover {
                 eval_index.extend(suffix_eval_index);
 
                 let current_partial = poly.partial_evaluations(eval_vector, eval_index);
-
                 bh_partials.internal_add_assign(&current_partial);
             }
 

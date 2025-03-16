@@ -15,7 +15,7 @@ members = [
     "primitives/transcripts/merlin", 
     "arks/snarks/succinct_gkr_protocol", 
     "hash-functions/keccak256"
-]
+, "iops/zero_check"]
 exclude = [
     "circom-groth16",
 ]
