@@ -353,6 +353,27 @@ mod tests {
     }
 
     #[test]
+    fn test_evaluate_3_var() {
+        let evaluations = vec![
+            Fr::from(0),
+            Fr::from(0),
+            Fr::from(0),
+            Fr::from(0),
+            Fr::from(2),
+            Fr::from(-3),
+            Fr::from(-4),
+            Fr::from(6),
+        ];
+        let num_vars = 3;
+        let polynomial = Multilinear::new(evaluations, num_vars);
+
+        let point = vec![Fr::from(1), Fr::from(2), Fr::from(3)];
+        let eval_result = polynomial.evaluate(&point);
+
+        assert_eq!(eval_result, Some(Fr::from(136)));
+    }
+
+    #[test]
     fn test_partial_evaluation_2() {
         let evaluations = vec![
             Fr::from(3),

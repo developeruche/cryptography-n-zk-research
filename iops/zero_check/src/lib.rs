@@ -1,11 +1,22 @@
+//! This module contains the implementation of the zero check protocol.
+//! this protocol would be perfromed over the `ComposedMultilinear` polynomial variant
+//! this is done so the zero check piop can run on product of multilinear polynomials
 use ark_ff::PrimeField;
-use fiat_shamir::FiatShamirTranscript;
+use fiat_shamir::{FiatShamirTranscript, TranscriptInterface};
 use interface::ZeroCheckInterface;
-use polynomial::composed::multilinear::ComposedMultilinear;
+use polynomial::{
+    composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
+    interface::MultilinearPolynomialInterface,
+};
 use std::marker::PhantomData;
-use sum_check::composed::ComposedSumCheckProof;
+use sum_check::{
+    composed::{ComposedSumCheckProof, prover::ComposedProver},
+    interface::ComposedProverInterface,
+};
+use utils::generate_eq_poly;
 pub mod interface;
 pub mod primitives;
+pub mod utils;
 
 /// Struct used to create a instance of the zero check protocol.
 pub struct ZeroCheck<F: PrimeField> {
@@ -22,7 +33,15 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
         poly: &Self::Poly,
         transcript: &mut Self::Transcript,
     ) -> Result<Self::Proof, anyhow::Error> {
-        todo!()
+        let r_s = transcript.sample_n_as_field_elements(poly.num_vars());
+        let eq_poly = generate_eq_poly(&r_s);
+
+        // f(x) = poly(x) * eq_poly(x)
+        let f = poly.mul_by_mle(&eq_poly);
+
+        let (proof, _) = ComposedProver::sum_check_proof(&f, transcript, &F::ZERO);
+
+        Ok(proof)
     }
 
     fn verify(

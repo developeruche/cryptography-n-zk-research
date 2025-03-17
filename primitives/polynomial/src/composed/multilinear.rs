@@ -150,6 +150,12 @@ impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
     fn max_degree(&self) -> usize {
         self.polys.len()
     }
+
+    fn mul_by_mle(&self, mle: &Multilinear<F>) -> Self {
+        let mut res = self.clone();
+        res.polys.push(mle.clone());
+        res
+    }
 }
 
 #[cfg(test)]
