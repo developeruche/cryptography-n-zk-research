@@ -236,7 +236,12 @@ mod tests {
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        let mut transcript_ = FiatShamirTranscript::default();
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
 
     #[test]
@@ -249,8 +254,13 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+        let mut transcript_ = FiatShamirTranscript::default();
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
 
     #[test]
@@ -264,7 +274,12 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+        let mut transcript_ = FiatShamirTranscript::default();
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
 }

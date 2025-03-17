@@ -10,8 +10,8 @@ use polynomial::{
 };
 use std::marker::PhantomData;
 use sum_check::{
-    composed::{ComposedSumCheckProof, prover::ComposedProver},
-    interface::ComposedProverInterface,
+    composed::{ComposedSumCheckProof, prover::ComposedProver, verifier::ComposedVerifier},
+    interface::{ComposedProverInterface, ComposedVerifierInterface},
 };
 use utils::generate_eq_poly;
 pub mod interface;
@@ -36,6 +36,8 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
         let r_s = transcript.sample_n_as_field_elements(poly.num_vars());
         let eq_poly = generate_eq_poly(&r_s);
 
+        println!("eq_poly: {:?}", eq_poly);
+
         // f(x) = poly(x) * eq_poly(x)
         let f = poly.mul_by_mle(&eq_poly);
 
@@ -49,6 +51,46 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
         poly: &Self::Poly,
         transcript: &mut Self::Transcript,
     ) -> Result<bool, anyhow::Error> {
-        todo!()
+        if !ComposedVerifier::verify(proof, poly, transcript) {
+            return Err(anyhow::anyhow!("Verification failed"));
+        }
+
+        Ok(true)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ark_test_curves::bls12_381::Fr;
+    use polynomial::multilinear::Multilinear;
+
+    #[test]
+    fn test_zero_check() {
+        let zero_poly = ComposedMultilinear::new(vec![
+            Multilinear::new(vec![Fr::from(0), Fr::from(0)], 1),
+            Multilinear::new(vec![Fr::from(0), Fr::from(0)], 1),
+        ]);
+        let mut transcript = FiatShamirTranscript::default();
+
+        let proof = ZeroCheck::prove(&zero_poly, &mut transcript).unwrap();
+        let mut transcript_ = FiatShamirTranscript::default();
+        let result = ZeroCheck::verify(&proof, &zero_poly, &mut transcript_).unwrap();
+
+        assert!(result);
+    }
+
+    #[test]
+    fn test_zero_check_non_zero() {
+        let zero_poly = ComposedMultilinear::new(vec![
+            Multilinear::new(vec![Fr::from(1), Fr::from(0)], 1),
+            Multilinear::new(vec![Fr::from(1), Fr::from(0)], 1),
+        ]);
+        let mut transcript = FiatShamirTranscript::default();
+
+        let proof = ZeroCheck::prove(&zero_poly, &mut transcript).unwrap();
+        let mut transcript_ = FiatShamirTranscript::default();
+
+        assert!(ZeroCheck::verify(&proof, &zero_poly, &mut transcript_).is_err());
     }
 }

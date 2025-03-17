@@ -11,9 +11,11 @@ use polynomial::interface::PolynomialInterface;
 pub struct ComposedVerifier;
 
 impl<F: PrimeField> ComposedVerifierInterface<F> for ComposedVerifier {
-    fn verify(proof: &ComposedSumCheckProof<F>, poly: &ComposedMultilinear<F>) -> bool {
-        let mut transcript = FiatShamirTranscript::default();
-
+    fn verify(
+        proof: &ComposedSumCheckProof<F>,
+        poly: &ComposedMultilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> bool {
         transcript.append(poly.to_bytes());
         transcript.append(proof.sum.into_bigint().to_bytes_be());
 
