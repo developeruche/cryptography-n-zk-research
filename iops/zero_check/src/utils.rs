@@ -8,7 +8,7 @@ pub fn generate_eq_poly<F: PrimeField>(r_s: &[F]) -> Multilinear<F> {
     let mut eq_poly = eq_term.partial_evaluation(r_s[0], 1);
 
     for i in 1..r_s.len() {
-        eq_poly = eq_poly.mul_distinct(&eq_term.partial_evaluation(r_s[i], 2));
+        eq_poly = eq_poly.mul_distinct(&eq_term.partial_evaluation(r_s[i],1));
     }
 
     eq_poly
