@@ -1,5 +1,5 @@
 pub mod interface;
-use interface::TranscriptInterface;
+pub use interface::TranscriptInterface;
 use sha3::{Digest, Keccak256};
 
 #[derive(Clone, Default, Debug)]

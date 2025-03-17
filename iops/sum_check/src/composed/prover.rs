@@ -236,7 +236,12 @@ mod tests {
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        let mut transcript_ = FiatShamirTranscript::default();
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
 
     #[test]
@@ -249,10 +254,15 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+        let mut transcript_ = FiatShamirTranscript::default();
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
-    
+
     #[test]
     fn test_sum_check_proof_3() {
         let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(1), Fr::from(2), Fr::from(3)], 2);
@@ -264,7 +274,12 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
         let (proof, _) = ComposedProver::sum_check_proof(&composed, &mut transcript, &sum);
+        let mut transcript_ = FiatShamirTranscript::default();
 
-        assert!(ComposedVerifier::verify(&proof, &composed));
+        assert!(ComposedVerifier::verify(
+            &proof,
+            &composed,
+            &mut transcript_
+        ));
     }
 }

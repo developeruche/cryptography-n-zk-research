@@ -14,8 +14,8 @@ members = [
     "arks/snarks/plonk/core", 
     "primitives/transcripts/merlin", 
     "arks/snarks/succinct_gkr_protocol", 
-    "hash-functions/keccak256"
-, "iops/zero_check"]
+    "hash-functions/keccak256",
+    "iops/zero_check"]
 exclude = [
     "circom-groth16",
 ]
@@ -41,3 +41,4 @@ plonk_protocol = { path = "arks/snarks/plonk/protocol" }
 plonk_core = { path = "arks/snarks/plonk/core" }
 plonk_compiler = { path = "arks/snarks/plonk/compiler" }
 gkr = {path = "iops/gkr"}
+anyhow = "1.0.97"

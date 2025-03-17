@@ -52,7 +52,11 @@ pub trait ComposedProverInterface<F: PrimeField> {
 /// The verifier interface is used to verify the sum check proof
 pub trait ComposedVerifierInterface<F: PrimeField> {
     /// This function verifies the sum check proof
-    fn verify(proof: &ComposedSumCheckProof<F>, poly: &ComposedMultilinear<F>) -> bool;
+    fn verify(
+        proof: &ComposedSumCheckProof<F>,
+        poly: &ComposedMultilinear<F>,
+        transcript: &mut FiatShamirTranscript,
+    ) -> bool;
 }
 
 /// This trait is used to define the multi-composed prover interface
