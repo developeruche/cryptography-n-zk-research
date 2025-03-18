@@ -734,6 +734,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "product_check"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ark-ec",
+ "ark-ff",
+ "ark-serialize",
+ "ark-test-curves",
+ "fiat_shamir",
+ "pcs",
+ "polynomial",
+ "sum_check",
+ "zero_check",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
