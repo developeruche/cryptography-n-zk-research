@@ -1,6 +1,14 @@
 //! This file contains utility functions for the product check protocol.
+use std::f64::consts::FRAC_1_PI;
+
 use ark_ff::{PrimeField, batch_inversion};
-use polynomial::{composed::multilinear::ComposedMultilinear, multilinear::Multilinear};
+use fiat_shamir::{FiatShamirTranscript, TranscriptInterface};
+use polynomial::{
+    composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
+    multilinear::Multilinear,
+};
+use sum_check::composed::ComposedSumCheckProof;
+use zero_check::{ZeroCheck, interface::ZeroCheckInterface};
 
 pub fn generate_fractional_polynomial<F: PrimeField>(
     poly_1: &ComposedMultilinear<F>,
@@ -25,4 +33,97 @@ pub fn generate_fractional_polynomial<F: PrimeField>(
     }
 
     Multilinear::new(poly_1_evals, poly_1.polys[0].num_vars)
+}
+
+pub fn generate_product_poly<F: PrimeField>(fractional_poly: &Multilinear<F>) -> Multilinear<F> {
+    let num_vars = fractional_poly.num_vars;
+    let fractional_poly_evals = fractional_poly.evaluations.clone();
+    let mut product_poly_evals = vec![];
+
+    for i in 0..(1 << num_vars) - 1 {
+        let (x_zero_index, x_one_index, sign) = get_index(i, num_vars);
+        if !sign {
+            product_poly_evals
+                .push(fractional_poly_evals[x_zero_index] * fractional_poly_evals[x_one_index]);
+        } else {
+            product_poly_evals
+                .push(product_poly_evals[x_zero_index] * product_poly_evals[x_one_index]);
+        }
+    }
+
+    product_poly_evals.push(F::zero());
+
+    Multilinear::new(product_poly_evals, num_vars)
+}
+
+pub fn perform_zero_check_protocol<F: PrimeField>(
+    poly_1: &ComposedMultilinear<F>,
+    poly_2: &ComposedMultilinear<F>,
+    fractional_poly: &Multilinear<F>,
+    product_poly: &Multilinear<F>,
+    alpha: &F,
+    transcript: &mut FiatShamirTranscript,
+) -> Result<(ComposedSumCheckProof<F>, ComposedMultilinear<F>), anyhow::Error> {
+    let num_vars = fractional_poly.num_vars;
+
+    let mut p1_evals = vec![F::ZERO; 1 << num_vars];
+    let mut p2_evals = vec![F::ZERO; 1 << num_vars];
+
+    for x in 0..1 << num_vars {
+        let (x0, x1, sign) = get_index(x, num_vars);
+        if !sign {
+            p1_evals[x] = fractional_poly.evaluations[x0];
+            p2_evals[x] = fractional_poly.evaluations[x1];
+        } else {
+            p1_evals[x] = product_poly.evaluations[x0];
+            p2_evals[x] = product_poly.evaluations[x1];
+        }
+    }
+
+    let p1 = Multilinear::new(p1_evals, num_vars);
+    let p2 = Multilinear::new(p2_evals, num_vars);
+
+    let mut q_x = ComposedMultilinear::new(vec![product_poly.clone(), -p1, p2]);
+
+    let mut mle_list = poly_2.polys.clone();
+    mle_list.push(fractional_poly.clone() * *alpha);
+    q_x.extend_mle(&mle_list);
+
+    let mut poly_1_alpha = poly_1.clone();
+    poly_1_alpha.polys[0] = poly_1_alpha.polys[0].clone() * -*alpha;
+    q_x.extend_mle(&poly_1_alpha.polys);
+
+    let zero_check = ZeroCheck::prove(&q_x, transcript)?;
+
+    Ok((zero_check, q_x))
+}
+
+// Acknowledgement: the rest  of the code below was obtained from espressolabs hyperplonk implementation
+pub fn get_index(i: usize, num_vars: usize) -> (usize, usize, bool) {
+    let bit_sequence = bit_decompose(i as u64, num_vars);
+
+    // the last bit comes first here because of LE encoding
+    let x0 = project(&[[false].as_ref(), bit_sequence[..num_vars - 1].as_ref()].concat()) as usize;
+    let x1 = project(&[[true].as_ref(), bit_sequence[..num_vars - 1].as_ref()].concat()) as usize;
+
+    (x0, x1, bit_sequence[num_vars - 1])
+}
+
+pub(crate) fn project(input: &[bool]) -> u64 {
+    let mut res = 0;
+    for &e in input.iter().rev() {
+        res <<= 1;
+        res += e as u64;
+    }
+    res
+}
+
+pub fn bit_decompose(input: u64, num_var: usize) -> Vec<bool> {
+    let mut res = Vec::with_capacity(num_var);
+    let mut i = input;
+    for _ in 0..num_var {
+        res.push(i & 1 == 1);
+        i >>= 1;
+    }
+    res
 }

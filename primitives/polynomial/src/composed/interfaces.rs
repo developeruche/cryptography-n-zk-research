@@ -8,4 +8,6 @@ pub trait ComposedMultilinearInterface<F: PrimeField> {
     fn max_degree(&self) -> usize;
     /// Returns the product of the composed polynomial with another multilinear polynomial
     fn mul_by_mle(&self, mle: &Multilinear<F>) -> Self;
+    /// Extends the composed polynomial with a list of multilinear polynomials
+    fn extend_mle(&mut self, mles: &[Multilinear<F>]);
 }

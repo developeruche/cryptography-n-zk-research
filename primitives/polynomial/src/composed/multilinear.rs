@@ -156,6 +156,10 @@ impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
         res.polys.push(mle.clone());
         res
     }
+
+    fn extend_mle(&mut self, mles: &[Multilinear<F>]) {
+        self.polys.extend(mles.iter().cloned());
+    }
 }
 
 #[cfg(test)]

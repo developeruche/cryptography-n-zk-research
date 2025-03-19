@@ -44,7 +44,12 @@ fn composed_sum_check_benchmark(c: &mut Criterion) {
             let mut transcript = FiatShamirTranscript::default();
             let sum = ComposedProver::calculate_sum(&composed_poly);
             let (proof, _) = ComposedProver::sum_check_proof(&composed_poly, &mut transcript, &sum);
-            assert!(ComposedVerifier::verify(&proof, &composed_poly));
+            let mut transcript_ = FiatShamirTranscript::default();
+            assert!(ComposedVerifier::verify(
+                &proof,
+                &composed_poly,
+                &mut transcript_
+            ));
         })
     });
 }

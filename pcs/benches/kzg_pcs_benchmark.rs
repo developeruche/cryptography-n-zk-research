@@ -1,10 +1,10 @@
 //! This file contains the benchmarking code for the kzg protocol.
 use ark_bls12_381::{Bls12_381, Fr};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use kzg_rust::{
+use pcs::{
     interface::{self, KZGUnivariateInterface},
+    kzg::univariate::UnivariateKZG,
     primitives::SRS,
-    univariate::UnivariateKZG,
 };
 use polynomial::univariant::UnivariantPolynomial;
 
