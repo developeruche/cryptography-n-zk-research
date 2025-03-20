@@ -36,8 +36,6 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
         let r_s = transcript.sample_n_as_field_elements(poly.num_vars());
         let eq_poly = generate_eq_poly(&r_s);
 
-        println!("eq_poly: {:?}", eq_poly);
-
         // f(x) = poly(x) * eq_poly(x)
         let f = poly.mul_by_mle(&eq_poly);
 
@@ -52,7 +50,7 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
         transcript: &mut Self::Transcript,
     ) -> Result<bool, anyhow::Error> {
         if !ComposedVerifier::verify(proof, poly, transcript) {
-            return Err(anyhow::anyhow!("Verification failed"));
+            return Err(anyhow::anyhow!("Zero check Verification failed"));
         }
 
         Ok(true)

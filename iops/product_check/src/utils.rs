@@ -5,6 +5,7 @@ use ark_ff::{PrimeField, batch_inversion};
 use fiat_shamir::{FiatShamirTranscript, TranscriptInterface};
 use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
+    interface::MultilinearPolynomialInterface,
     multilinear::Multilinear,
 };
 use sum_check::composed::ComposedSumCheckProof;
@@ -83,7 +84,12 @@ pub fn perform_zero_check_protocol<F: PrimeField>(
     let p1 = Multilinear::new(p1_evals, num_vars);
     let p2 = Multilinear::new(p2_evals, num_vars);
 
-    let mut q_x = ComposedMultilinear::new(vec![product_poly.clone(), -p1, p2]);
+    let mut q_x = ComposedMultilinear::new(vec![product_poly.clone(), p1, p2 * -F::from(1u32)]); // Dubug Source: p(x) - (p1(x) * p2(x)), Composed Polynommial has no way to represent this structure, the solution to this would be to come up with one something similar to the Virual Polynomail by Espressolabs
+
+    println!(
+        "q_x: {:?}",
+        q_x.evaluate(&vec![F::from(10u32), F::from(20u32), F::from(30u32)])
+    );
 
     let mut mle_list = poly_2.polys.clone();
     mle_list.push(fractional_poly.clone() * *alpha);

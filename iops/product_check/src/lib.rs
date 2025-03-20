@@ -163,7 +163,82 @@ mod tests {
     // }
 
     #[test]
-    fn test_product_check() {}
+    fn test_product_check() {
+        // let num_vars = 4;
+        // let f1 = Multilinear::<Fr>::random(num_vars);
+        // let f2 = Multilinear::<Fr>::random(num_vars);
+
+        // let mut g1 = f1.clone();
+        // let mut g2 = f2.clone();
+
+        // g1.evaluations.reverse();
+        // g2.evaluations.reverse();
+
+        // let poly_1 = ComposedMultilinear::new(vec![f1, f2]);
+        // let poly_2 = ComposedMultilinear::new(vec![g1, g2]);
+        // let poly_3 = ComposedMultilinear::new(vec![Multilinear::<Fr>::random(num_vars), Multilinear::<Fr>::random(num_vars)]);
+
+        // let srs: MultiLinearSRS<Bls12_381> =
+        //     MultilinearKZG::generate_srs(&[Fr::from(5u32), Fr::from(7u32), Fr::from(11u32)]);
+
+        // test_product_check_helper::<Bls12_381>(
+        //     &poly_1, &poly_2, &poly_3, &srs
+        // );
+        let f1 = Multilinear::new(
+            vec![
+                Fr::from(2),
+                Fr::from(2),
+                Fr::from(5),
+                Fr::from(5),
+                Fr::from(6),
+                Fr::from(9),
+                Fr::from(9),
+                Fr::from(14),
+            ],
+            3,
+        );
+        let f2 = Multilinear::new(
+            vec![
+                Fr::from(12),
+                Fr::from(2),
+                Fr::from(5),
+                Fr::from(5),
+                Fr::from(16),
+                Fr::from(9),
+                Fr::from(19),
+                Fr::from(14),
+            ],
+            3,
+        );
+
+        let mut g1 = f1.clone();
+        let mut g2 = f2.clone();
+
+        g1.evaluations.reverse();
+        g2.evaluations.reverse();
+
+        let poly_1 = ComposedMultilinear::new(vec![f1, f2]);
+        let poly_2 = ComposedMultilinear::new(vec![g1, g2]);
+
+        let test_fractional_poly = generate_fractional_polynomial(&poly_1, &poly_2);
+        let product_poly = generate_product_poly(&test_fractional_poly);
+
+        let alpha = Fr::from(10);
+
+        let mut transcript = FiatShamirTranscript::default();
+
+        let (zero_check_proof, q_x) = perform_zero_check_protocol(
+            &poly_1,
+            &poly_2,
+            &test_fractional_poly,
+            &product_poly,
+            &alpha,
+            &mut transcript,
+        )
+        .unwrap();
+
+        // println!("q(x): {:?}", q_x);
+    }
 
     fn check_fractional_poly<P: Pairing>(
         fractional_poly: &Multilinear<P::ScalarField>,
@@ -202,6 +277,8 @@ mod tests {
         let (proof, product_poly, fractional_poly, q_x) =
             ProductCheck::prove(poly_1, poly_2, srs, &mut transcript).unwrap();
 
+        check_fractional_poly::<P>(&fractional_poly, poly_1, poly_2);
+
         let mut transcript_ = FiatShamirTranscript::default();
         let (final_query, final_eval, _alpha) =
             ProductCheck::verify(&proof, &q_x, &mut transcript_).unwrap();
@@ -211,8 +288,6 @@ mod tests {
             final_eval,
             "Wrong product detected"
         );
-
-        check_fractional_poly::<P>(&fractional_poly, poly_1, poly_2);
 
         // test bad poly case (poly_1 nd poly_3)
         let mut transcript = FiatShamirTranscript::default();
