@@ -9,3 +9,5 @@ ark-test-curves.workspace = true
 ark-serialize.workspace = true
 digest.workspace = true
 ark-std.workspace = true
+anyhow.workspace = true
+rand.workspace = true
