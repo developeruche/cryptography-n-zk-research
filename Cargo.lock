@@ -935,6 +935,7 @@ dependencies = [
 name = "sum_check"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "ark-ff",
  "ark-test-curves",
  "criterion",

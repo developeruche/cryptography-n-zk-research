@@ -203,4 +203,20 @@ impl<F: PrimeField> VirtualPolynomial<F> {
 
         Ok(res)
     }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = vec![];
+
+        for poly in &self.flattened_multilinear_poly {
+            bytes.extend_from_slice(&poly.to_bytes());
+        }
+
+        bytes.extend_from_slice(&self.num_var.to_le_bytes());
+        bytes.extend_from_slice(&self.max_degree.to_le_bytes());
+        bytes.extend_from_slice(&self.products.len().to_le_bytes());
+        bytes.extend_from_slice(&self.flattened_multilinear_poly.len().to_le_bytes());
+        bytes.extend_from_slice(&self.raw_pointers_lookup_table.len().to_le_bytes());
+
+        bytes
+    }
 }

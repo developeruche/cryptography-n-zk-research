@@ -8,7 +8,7 @@ ark-ff.workspace = true
 ark-test-curves.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
-
+anyhow.workspace = true
 
 
 
