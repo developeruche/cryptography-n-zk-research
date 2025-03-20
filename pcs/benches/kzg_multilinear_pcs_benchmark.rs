@@ -1,8 +1,9 @@
 //! This file contains the benchmarking code for the kzg protocol.
 use ark_bls12_381::{Bls12_381, Fr};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use kzg_rust::{
-    interface::KZGMultiLinearInterface, multilinear::MultilinearKZG, primitives::MultiLinearSRS,
+use pcs::{
+    interface::KZGMultiLinearInterface, kzg::multilinear::MultilinearKZG,
+    primitives::MultiLinearSRS,
 };
 use polynomial::multilinear::Multilinear;
 

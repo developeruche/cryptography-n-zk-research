@@ -6,7 +6,7 @@ use crate::{
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use std::ops::{Add, AddAssign, Mul, Sub};
+use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 
 /// A multilinear polynomial over a field.
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug, CanonicalSerialize, CanonicalDeserialize)]
@@ -321,6 +321,19 @@ impl<F: PrimeField> Sub for Multilinear<F> {
     }
 }
 
+impl<F: PrimeField> Neg for Multilinear<F> {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        let mut new_evaluations = Vec::new();
+        for i in 0..self.evaluations.len() {
+            new_evaluations.push(-self.evaluations[i]);
+        }
+
+        Self::new(new_evaluations, self.num_vars)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -434,6 +447,17 @@ mod tests {
             Fr::from(13),
             Fr::from(13),
         ];
+
+        // This is a snippet of code used for designing the product check protocol
+        // let r_v = poly.leftappend_with_new_variables(1);
+        // let mut v_vec = poly.evaluations.clone();
+        // v_vec.push(r_v.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(0)]).unwrap() * r_v.evaluate(&vec![Fr::from(0), Fr::from(0), Fr::from(1)]).unwrap());
+        // v_vec.push(r_v.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(0)]).unwrap() * r_v.evaluate(&vec![Fr::from(0), Fr::from(1), Fr::from(1)]).unwrap());
+        // v_vec.push(r_v.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(0)]).unwrap() * r_v.evaluate(&vec![Fr::from(1), Fr::from(0), Fr::from(1)]).unwrap());
+        // v_vec.push(r_v.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(0)]).unwrap() * r_v.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(1)]).unwrap());
+
+        // let v_mle = Multilinear::new(v_vec, 3);
+        // println!("v_mle eval: {:?}", v_mle.evaluate(&vec![Fr::from(1), Fr::from(1), Fr::from(0)]).unwrap());
 
         assert_eq!(new_poly.num_vars, 3);
         assert_eq!(new_poly.evaluations, resulting_evaluations);

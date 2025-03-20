@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use crate::composed::interfaces::ComposedMultilinearInterface;
 use crate::interface::MultilinearPolynomialInterface;
 use crate::multilinear::Multilinear;
@@ -155,6 +157,10 @@ impl<F: PrimeField> ComposedMultilinearInterface<F> for ComposedMultilinear<F> {
         let mut res = self.clone();
         res.polys.push(mle.clone());
         res
+    }
+
+    fn extend_mle(&mut self, mles: &[Multilinear<F>]) {
+        self.polys.extend(mles.iter().cloned());
     }
 }
 
