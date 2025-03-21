@@ -1,8 +1,11 @@
 //! Prover module for the sumcheck protocol of the virtual polynomial.
+use std::sync::Arc;
 
 use super::{SumCheckProver, SumCheckProverMessage};
 use ark_ff::{batch_inversion, PrimeField};
+use ark_std::cfg_into_iter;
 use polynomial::{multilinear::Multilinear, virtual_polynomial::VirtualPolynomial};
+use rayon::iter::{IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
 #[derive(Clone, Default, Debug)]
 pub struct VirtualProver<F: PrimeField> {
@@ -54,7 +57,7 @@ impl<F: PrimeField> SumCheckProver<F> for VirtualProver<F> {
             .poly
             .flattened_multilinear_poly
             .iter()
-            .map(|x| x.clone())
+            .map(|x| x.as_ref().clone())
             .collect();
 
         if let Some(chal) = challenge {
@@ -77,11 +80,14 @@ impl<F: PrimeField> SumCheckProver<F> for VirtualProver<F> {
         let mut products_sum = vec![F::zero(); self.poly.max_degree + 1];
 
         products_list.iter().for_each(|(coefficient, products)| {
-            let (_, mut sum) = (0..1 << (self.poly.num_var - self.round)).into_iter().fold(
-                (
-                    vec![(F::zero(), F::zero()); products.len()],
-                    vec![F::zero(); products.len() + 1],
-                ),
+            let mut sum = ParallelIterator::fold(
+                (0..1 << (self.poly.num_var - self.round)).into_par_iter(),
+                || {
+                    (
+                        vec![(F::zero(), F::zero()); products.len()],
+                        vec![F::zero(); products.len() + 1],
+                    )
+                },
                 |(mut buf, mut acc), b| {
                     buf.iter_mut()
                         .zip(products.iter())
@@ -90,38 +96,43 @@ impl<F: PrimeField> SumCheckProver<F> for VirtualProver<F> {
                             *eval = table.evaluations[b << 1];
                             *step = table.evaluations[(b << 1) + 1] - table.evaluations[b << 1];
                         });
-                    acc[0] += buf.iter().map(|(eval, _)| *eval).product::<F>();
+                    acc[0] += buf.iter().map(|(eval, _)| eval).product::<F>();
                     acc[1..].iter_mut().for_each(|acc| {
-                        buf.iter_mut().for_each(|(eval, step)| *eval += *step);
-                        *acc += buf.iter().map(|(eval, _)| *eval).product::<F>();
+                        buf.iter_mut().for_each(|(eval, step)| *eval += step as &_);
+                        *acc += buf.iter().map(|(eval, _)| eval).product::<F>();
                     });
                     (buf, acc)
                 },
+            )
+            .map(|(_, partial)| partial)
+            .reduce(
+                || vec![F::zero(); products.len() + 1],
+                |mut sum, partial| {
+                    sum.iter_mut()
+                        .zip(partial.iter())
+                        .for_each(|(sum, partial)| *sum += partial);
+                    sum
+                },
             );
-
-            // Scale the sum by the coefficient
-            sum.iter_mut().for_each(|s| *s *= *coefficient);
-
-            // Compute extrapolation values
-            let extrapolation = (0..self.poly.max_degree - products.len())
-                .into_iter()
+            sum.iter_mut().for_each(|sum| *sum *= coefficient);
+            let extraploation = (0..self.poly.max_degree - products.len())
+                .into_par_iter()
                 .map(|i| {
                     let (points, weights) = &self.extrapolation_aux[products.len() - 1];
                     let at = F::from((products.len() + 1 + i) as u64);
                     extrapolate(points, weights, &sum, &at)
                 })
                 .collect::<Vec<_>>();
-
-            // Accumulate into products_sum
             products_sum
                 .iter_mut()
-                .zip(sum.iter().chain(extrapolation.iter()))
-                .for_each(|(products_sum, s)| *products_sum += s);
+                .zip(sum.iter().chain(extraploation.iter()))
+                .for_each(|(products_sum, sum)| *products_sum += sum);
         });
+
         // update prover's state to the partial evaluated polynomial
         self.poly.flattened_multilinear_poly = flattened_multilinear_poly
             .iter()
-            .map(|x| x.clone())
+            .map(|x| Arc::new(x.clone()))
             .collect();
 
         Ok(SumCheckProverMessage {

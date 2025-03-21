@@ -942,6 +942,7 @@ dependencies = [
  "criterion",
  "fiat_shamir",
  "polynomial",
+ "rayon",
 ]
 
 [[package]]

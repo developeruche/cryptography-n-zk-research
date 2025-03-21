@@ -1,12 +1,13 @@
 use crate::multilinear::Multilinear;
 use ark_ff::PrimeField;
 use ark_std::rand::RngCore;
+use std::sync::Arc;
 
 pub fn random_mle_list<F: PrimeField, R: RngCore>(
     nv: usize,
     degree: usize,
     rng: &mut R,
-) -> (Vec<Multilinear<F>>, F) {
+) -> (Vec<Arc<Multilinear<F>>>, F) {
     let mut multiplicands = Vec::with_capacity(degree);
     for _ in 0..degree {
         multiplicands.push(Vec::with_capacity(1 << nv))
@@ -26,7 +27,7 @@ pub fn random_mle_list<F: PrimeField, R: RngCore>(
 
     let list = multiplicands
         .into_iter()
-        .map(|x| Multilinear::new(x, nv))
+        .map(|x| Arc::new(Multilinear::new(x, nv)))
         .collect();
 
     (list, sum)
@@ -36,7 +37,7 @@ pub fn random_zero_mle_list<F: PrimeField, R: RngCore>(
     nv: usize,
     degree: usize,
     rng: &mut R,
-) -> Vec<Multilinear<F>> {
+) -> Vec<Arc<Multilinear<F>>> {
     let mut multiplicands = Vec::with_capacity(degree);
     for _ in 0..degree {
         multiplicands.push(Vec::with_capacity(1 << nv))
@@ -50,17 +51,17 @@ pub fn random_zero_mle_list<F: PrimeField, R: RngCore>(
 
     let list = multiplicands
         .into_iter()
-        .map(|x| Multilinear::new(x, nv))
+        .map(|x| Arc::new(Multilinear::new(x, nv)))
         .collect();
 
     list
 }
 
-pub fn build_eq_x_r<F: PrimeField>(r: &[F]) -> Result<Multilinear<F>, anyhow::Error> {
+pub fn build_eq_x_r<F: PrimeField>(r: &[F]) -> Result<Arc<Multilinear<F>>, anyhow::Error> {
     let evals = build_eq_x_r_vec(r)?;
     let mle = Multilinear::new(evals, r.len());
 
-    Ok(mle)
+    Ok(Arc::new(mle))
 }
 
 pub fn build_eq_x_r_vec<F: PrimeField>(r: &[F]) -> Result<Vec<F>, anyhow::Error> {

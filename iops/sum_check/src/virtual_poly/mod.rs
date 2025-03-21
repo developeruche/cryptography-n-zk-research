@@ -1,10 +1,11 @@
 //! Implementing the sumcheck protocol of the virtual polynomial
 //! This sum check is heavily copied fron the implemenation done by Ezpressolabs
-
 use ark_ff::PrimeField;
-use fiat_shamir::FiatShamirTranscript;
+use fiat_shamir::{FiatShamirTranscript, TranscriptInterface};
 use polynomial::{multilinear::Multilinear, virtual_polynomial::VirtualPolynomial};
+use prover::VirtualProver;
 use std::{fmt::Debug, marker::PhantomData};
+use verifier::VirtualVerifier;
 pub mod prover;
 pub mod verifier;
 
@@ -140,6 +141,17 @@ pub struct VirtualPolySumCheck<F: PrimeField> {
     _marker: PhantomData<F>,
 }
 
+impl<F: PrimeField> SumCheckProverMessage<F> {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.evaluations.len().to_le_bytes());
+        for eval in &self.evaluations {
+            bytes.extend_from_slice(&eval.to_string().as_bytes());
+        }
+        bytes
+    }
+}
+
 impl<F: PrimeField> SumCheck<F> for VirtualPolySumCheck<F> {
     type VirtualPolynomial = VirtualPolynomial<F>;
     type VPAuxInfo = (usize, usize);
@@ -149,26 +161,249 @@ impl<F: PrimeField> SumCheck<F> for VirtualPolySumCheck<F> {
     type SumCheckSubClaim = SumCheckSubClaim<F>;
 
     fn extract_sum(proof: &Self::SumCheckProof) -> F {
-        todo!()
+        proof.proofs[0].evaluations[0] + proof.proofs[0].evaluations[1]
     }
 
     fn init_transcript() -> Self::Transcript {
-        todo!()
+        FiatShamirTranscript::default()
     }
 
     fn prove(
         poly: &Self::VirtualPolynomial,
         transcript: &mut Self::Transcript,
     ) -> Result<Self::SumCheckProof, anyhow::Error> {
-        todo!()
+        transcript.append_with_label(
+            "aux info",
+            vp_aux_info_to_bytes((poly.num_var, poly.max_degree)),
+        );
+
+        let mut prover_state = VirtualProver::prover_init(poly)?;
+        let mut challenge = None;
+        let mut prover_msgs = Vec::with_capacity(poly.num_var);
+        for _ in 0..poly.num_var {
+            let prover_msg =
+                VirtualProver::prove_round_and_update_state(&mut prover_state, &challenge)?;
+            transcript.append_with_label("prover msg", prover_msg.to_bytes());
+            prover_msgs.push(prover_msg);
+            challenge = Some(transcript.sample_as_field_element());
+            transcript.append(b"Internal round".to_vec());
+        }
+        // pushing the last challenge point to the state
+        if let Some(p) = challenge {
+            prover_state.challenges.push(p)
+        };
+
+        Ok(SumCheckProof {
+            point: prover_state.challenges,
+            proofs: prover_msgs,
+        })
     }
 
     fn verify(
-        sum: F,
+        claimed_sum: F,
         proof: &Self::SumCheckProof,
         aux_info: &Self::VPAuxInfo,
         transcript: &mut Self::Transcript,
     ) -> Result<Self::SumCheckSubClaim, anyhow::Error> {
-        todo!()
+        transcript.append_with_label("aux info", vp_aux_info_to_bytes((aux_info.0, aux_info.1)));
+
+        let mut verifier_state = VirtualVerifier::verifier_init(aux_info);
+        for i in 0..aux_info.0 {
+            let prover_msg = proof.proofs.get(i).expect("proof is incomplete");
+            transcript.append_with_label("prover msg", prover_msg.to_bytes());
+
+            VirtualVerifier::verify_round_and_update_state(
+                &mut verifier_state,
+                prover_msg,
+                transcript,
+            )?;
+        }
+
+        let res = VirtualVerifier::check_and_generate_subclaim(&verifier_state, &claimed_sum);
+        res
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use std::sync::Arc;
+
+    use super::*;
+    use anyhow::Ok;
+    use ark_ff::UniformRand;
+    use ark_std::test_rng;
+    use ark_test_curves::bls12_381::Fr;
+
+    fn test_sumcheck(
+        nv: usize,
+        num_multiplicands_range: (usize, usize),
+        num_products: usize,
+    ) -> Result<(), anyhow::Error> {
+        let mut rng = test_rng();
+        let mut transcript = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::init_transcript();
+
+        let (poly, asserted_sum) =
+            VirtualPolynomial::rand(nv, num_multiplicands_range, num_products, &mut rng)?;
+        let proof = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::prove(&poly, &mut transcript)?;
+        let poly_info = (poly.num_var, poly.max_degree);
+        let mut transcript = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::init_transcript();
+        let subclaim = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::verify(
+            asserted_sum,
+            &proof,
+            &poly_info,
+            &mut transcript,
+        )?;
+        assert!(
+            poly.evaluate(&subclaim.point).unwrap() == subclaim.expected_evaluation,
+            "wrong subclaim"
+        );
+        Ok(())
+    }
+
+    fn test_sumcheck_internal(
+        nv: usize,
+        num_multiplicands_range: (usize, usize),
+        num_products: usize,
+    ) -> Result<(), anyhow::Error> {
+        let mut rng = test_rng();
+        let (poly, asserted_sum) =
+            VirtualPolynomial::<Fr>::rand(nv, num_multiplicands_range, num_products, &mut rng)?;
+        let poly_info = (poly.num_var, poly.max_degree);
+        let mut prover_state = VirtualProver::prover_init(&poly)?;
+        let mut verifier_state = VirtualVerifier::verifier_init(&poly_info);
+        let mut challenge = None;
+        let mut transcript = FiatShamirTranscript::default();
+        transcript.append_with_label("testing", b"initializing transcript for testing".to_vec());
+        for _ in 0..poly.num_var {
+            let prover_message =
+                VirtualProver::prove_round_and_update_state(&mut prover_state, &challenge).unwrap();
+
+            challenge = Some(
+                VirtualVerifier::verify_round_and_update_state(
+                    &mut verifier_state,
+                    &prover_message,
+                    &mut transcript,
+                )
+                .unwrap(),
+            );
+        }
+        let subclaim = VirtualVerifier::check_and_generate_subclaim(&verifier_state, &asserted_sum)
+            .expect("fail to generate subclaim");
+        assert!(
+            poly.evaluate(&subclaim.point).unwrap() == subclaim.expected_evaluation,
+            "wrong subclaim"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_trivial_polynomial_vs() -> Result<(), anyhow::Error> {
+        let nv = 1;
+        let num_multiplicands_range = (4, 13);
+        let num_products = 5;
+
+        test_sumcheck(nv, num_multiplicands_range, num_products)?;
+        // test_sumcheck_internal(nv, num_multiplicands_range, num_products)
+        Ok(())
+    }
+    #[test]
+    #[ignore]
+    fn test_normal_polynomial() -> Result<(), anyhow::Error> {
+        let nv = 12;
+        let num_multiplicands_range = (4, 9);
+        let num_products = 5;
+
+        test_sumcheck(nv, num_multiplicands_range, num_products)?;
+        test_sumcheck_internal(nv, num_multiplicands_range, num_products)
+    }
+    #[test]
+    fn zero_polynomial_should_error() {
+        let nv = 0;
+        let num_multiplicands_range = (4, 13);
+        let num_products = 5;
+
+        assert!(test_sumcheck(nv, num_multiplicands_range, num_products).is_err());
+        assert!(test_sumcheck_internal(nv, num_multiplicands_range, num_products).is_err());
+    }
+
+    #[test]
+    fn test_extract_sum() -> Result<(), anyhow::Error> {
+        let mut rng = test_rng();
+        let mut transcript = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::init_transcript();
+        let (poly, asserted_sum) = VirtualPolynomial::<Fr>::rand(8, (3, 4), 3, &mut rng)?;
+
+        let proof = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::prove(&poly, &mut transcript)?;
+        assert_eq!(
+            <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::extract_sum(&proof),
+            asserted_sum
+        );
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    /// Test that the memory usage of shared-reference is linear to number of
+    /// unique MLExtensions instead of total number of multiplicands.
+    fn test_shared_reference() -> Result<(), anyhow::Error> {
+        let mut rng = test_rng();
+        let ml_extensions: Vec<_> = (0..5)
+            .map(|_| Arc::new(Multilinear::<Fr>::random(8)))
+            .collect();
+        let mut poly = VirtualPolynomial::new(8);
+        poly.add_mle_list(
+            vec![
+                ml_extensions[2].clone(),
+                ml_extensions[3].clone(),
+                ml_extensions[0].clone(),
+            ],
+            Fr::rand(&mut rng),
+        )?;
+        poly.add_mle_list(
+            vec![
+                ml_extensions[1].clone(),
+                ml_extensions[4].clone(),
+                ml_extensions[4].clone(),
+            ],
+            Fr::rand(&mut rng),
+        )?;
+        poly.add_mle_list(
+            vec![
+                ml_extensions[3].clone(),
+                ml_extensions[2].clone(),
+                ml_extensions[1].clone(),
+            ],
+            Fr::rand(&mut rng),
+        )?;
+        poly.add_mle_list(
+            vec![ml_extensions[0].clone(), ml_extensions[0].clone()],
+            Fr::rand(&mut rng),
+        )?;
+        poly.add_mle_list(vec![ml_extensions[4].clone()], Fr::rand(&mut rng))?;
+
+        assert_eq!(poly.flattened_multilinear_poly.len(), 5);
+
+        // test memory usage for prover
+        let prover = VirtualProver::<Fr>::prover_init(&poly).unwrap();
+        assert_eq!(prover.poly.flattened_multilinear_poly.len(), 5);
+        drop(prover);
+
+        let mut transcript = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::init_transcript();
+        let poly_info = (poly.num_var, poly.max_degree);
+        let proof = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::prove(&poly, &mut transcript)?;
+        let asserted_sum = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::extract_sum(&proof);
+
+        let mut transcript = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::init_transcript();
+        let subclaim = <VirtualPolySumCheck<Fr> as SumCheck<Fr>>::verify(
+            asserted_sum,
+            &proof,
+            &poly_info,
+            &mut transcript,
+        )?;
+        assert!(
+            poly.evaluate(&subclaim.point)? == subclaim.expected_evaluation,
+            "wrong subclaim"
+        );
+        Ok(())
     }
 }

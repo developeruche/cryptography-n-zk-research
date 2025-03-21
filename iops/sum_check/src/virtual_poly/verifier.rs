@@ -25,7 +25,7 @@ impl<F: PrimeField> SumCheckVerifier<F> for VirtualVerifier<F> {
 
     fn verifier_init(index_info: &Self::VPAuxInfo) -> Self {
         Self {
-            round: 0,
+            round: 1,
             num_vars: index_info.0,
             max_degree: index_info.1,
             finished: false,
@@ -43,8 +43,9 @@ impl<F: PrimeField> SumCheckVerifier<F> for VirtualVerifier<F> {
             return Err(anyhow::anyhow!("Verifier is finished"));
         }
 
-        transcript.append(b"Internal round".to_vec());
         let challenge: F = transcript.sample_as_field_element();
+        transcript.append(b"Internal round".to_vec());
+        self.challenges.push(challenge);
         self.polynomials_received
             .push(prover_msg.evaluations.to_vec());
 
@@ -210,4 +211,47 @@ fn field_factorial<F: PrimeField>(a: usize) -> F {
         res *= F::from(i as u64);
     }
     res
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use ark_std::{vec::Vec, UniformRand};
+    use ark_test_curves::bls12_381::Fr;
+    use polynomial::interface::PolynomialInterface;
+    use polynomial::univariant::UnivariantPolynomial;
+
+    #[test]
+    fn test_interpolation() -> Result<(), anyhow::Error> {
+        let mut prng = ark_std::test_rng();
+
+        // test a polynomial with 20 known points, i.e., with degree 19
+        let poly = UnivariantPolynomial::<Fr>::random(20 - 1);
+        let evals = (0..20)
+            .map(|i| poly.evaluate(&Fr::from(i)))
+            .collect::<Vec<Fr>>();
+        let query = Fr::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query)?);
+
+        // test a polynomial with 33 known points, i.e., with degree 32
+        let poly = UnivariantPolynomial::<Fr>::random(33 - 1);
+        let evals = (0..33)
+            .map(|i| poly.evaluate(&Fr::from(i)))
+            .collect::<Vec<Fr>>();
+        let query = Fr::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query)?);
+
+        // test a polynomial with 64 known points, i.e., with degree 63
+        let poly = UnivariantPolynomial::<Fr>::random(64 - 1);
+        let evals = (0..64)
+            .map(|i| poly.evaluate(&Fr::from(i)))
+            .collect::<Vec<Fr>>();
+        let query = Fr::rand(&mut prng);
+
+        assert_eq!(poly.evaluate(&query), interpolate_uni_poly(&evals, query)?);
+
+        Ok(())
+    }
 }
