@@ -702,11 +702,13 @@ dependencies = [
 name = "polynomial"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "ark-ff",
  "ark-serialize",
  "ark-std",
  "ark-test-curves",
  "digest",
+ "rand",
 ]
 
 [[package]]
@@ -933,11 +935,14 @@ dependencies = [
 name = "sum_check"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "ark-ff",
+ "ark-std",
  "ark-test-curves",
  "criterion",
  "fiat_shamir",
  "polynomial",
+ "rayon",
 ]
 
 [[package]]

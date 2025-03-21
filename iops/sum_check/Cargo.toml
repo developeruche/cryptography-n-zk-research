@@ -8,8 +8,9 @@ ark-ff.workspace = true
 ark-test-curves.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
-
-
+anyhow.workspace = true
+ark-std.workspace = true
+rayon = { version = "1.5.2" }
 
 
 [dev-dependencies]

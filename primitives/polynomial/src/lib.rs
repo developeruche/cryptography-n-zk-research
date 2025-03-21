@@ -7,3 +7,4 @@ pub mod multilinear;
 pub mod multivariate;
 pub mod univariant;
 pub mod utils;
+pub mod virtual_polynomial;
