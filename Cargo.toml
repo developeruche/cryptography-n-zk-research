@@ -16,10 +16,11 @@ members = [
     "arks/snarks/succinct_gkr_protocol", 
     "hash-functions/keccak256",
     "iops/zero_check", 
-    "iops/product_check", ]
+    "iops/product_check",]
 exclude = [
     "circom-groth16",
-    "frontends/halo2/do_nothing"
+    "frontends/halo2/do_nothing",
+    "frontends/plonky3/range_check",
 ]
 
 
