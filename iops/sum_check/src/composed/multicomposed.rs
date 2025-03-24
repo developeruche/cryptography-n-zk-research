@@ -250,6 +250,22 @@ mod tests {
     }
 
     #[test]
+    fn test_multi_composed_sum_check_proof_3() {
+        let poly1 = Multilinear::new(vec![Fr::from(0), Fr::from(0), Fr::from(0), Fr::from(2)], 2);
+        let poly2 = Multilinear::new(vec![Fr::from(0), Fr::from(3), Fr::from(0), Fr::from(3)], 2);
+
+        let composed_1 = ComposedMultilinear::new(vec![poly1.clone(), poly2.clone()]);
+        let composed_2 = ComposedMultilinear::new(vec![poly2.clone(), poly1.clone()]);
+
+        let multi_composed = vec![composed_1.clone(), composed_2.clone(), composed_1];
+        let sum = MultiComposedProver::calculate_sum(&multi_composed);
+
+        let (proof, _) = MultiComposedProver::sum_check_proof(&multi_composed, &sum);
+
+        assert!(MultiComposedVerifier::verify(&proof, &multi_composed));
+    }
+
+    #[test]
     fn test_multi_composed_sum_check_proof_2_on_gkr_example() {
         // f(a,b,c) = 2abc + 3b + 4
         let add_i = Multilinear::<Fr>::new(

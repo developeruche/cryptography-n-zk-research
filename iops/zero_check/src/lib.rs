@@ -38,8 +38,11 @@ impl<F: PrimeField> ZeroCheckInterface for ZeroCheck<F> {
 
         // f(x) = poly(x) * eq_poly(x)
         let f = poly.mul_by_mle(&eq_poly);
+        // let f = poly.clone();
 
         let (proof, _) = ComposedProver::sum_check_proof(&f, transcript, &F::ZERO);
+
+        println!("Moment of truth: {:?}", proof);
 
         Ok(proof)
     }
@@ -91,4 +94,24 @@ mod tests {
 
         assert!(ZeroCheck::verify(&proof, &zero_poly, &mut transcript_).is_err());
     }
+
+    #[test]
+    fn test_zero_check_non_zero_with_forge() {
+        let zero_poly = ComposedMultilinear::new(vec![
+            Multilinear::new(
+                vec![Fr::from(2), Fr::from(-2), Fr::from(-3), Fr::from(3)],
+                2,
+            ),
+            // Multilinear::new(vec![Fr::from(3), Fr::from(-3)], 1),
+        ]);
+        let mut transcript = FiatShamirTranscript::default();
+
+        let proof = ZeroCheck::prove(&zero_poly, &mut transcript).unwrap();
+        let mut transcript_ = FiatShamirTranscript::default();
+
+        assert!(ZeroCheck::verify(&proof, &zero_poly, &mut transcript_).is_err());
+    }
 }
+
+// Moment of truth: ComposedSumCheckProof { round_poly: [UnivariantPolynomial { coefficients: [BigInt([9513053741016308627, 14013673385104150722, 15273169087224392777, 2452500975974602579]), BigInt([17288017248473485751, 11353857497788216563, 1629993669510627043, 6897029815030488385]), BigInt([10671780561957407196, 8693975295854016461, 17334394316353537387, 3908988020408563546]), BigInt([17867380661091518684, 14900300785748884089, 10038368871610089329, 3448514907515244192])] }], sum: BigInt([0, 0, 0, 0]) }
+// Moment of truth: ComposedSumCheckProof { round_poly: [UnivariantPolynomial { coefficients: [BigInt([0, 0, 0, 0]), BigInt([0, 0, 0, 0]), BigInt([0, 0, 0, 0]), BigInt([0, 0, 0, 0])] }], sum: BigInt([0, 0, 0, 0]) }
