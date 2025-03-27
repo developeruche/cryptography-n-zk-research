@@ -4,7 +4,7 @@ use sum_check::composed::ComposedSumCheckProof;
 
 #[derive(Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct GKRProof<F: PrimeField> {
-    /// This is the list of sum check proofs gotten during this protocol
+    /// This is the list of sum check proofs gotten during this protocol, a sumcheck proof for all the layers of the circuit
     pub sum_check_proofs: Vec<ComposedSumCheckProof<F>>,
     /// This is a vector contain result of eval of w_i(b)
     pub w_i_b: Vec<F>,

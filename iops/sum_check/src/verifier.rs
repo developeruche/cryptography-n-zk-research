@@ -16,7 +16,6 @@ impl<F: PrimeField> VerifierInterface<F> for Verifier {
         // 4. append poly_1 to the transcript
         // 5. repeat step 3 and 4 until the last round
         // 6. check if the eval of the last poly at rand(last) is equal to the eval of the main poly at all rands()
-
         let mut transcript = FiatShamirTranscript::default();
         let mut all_rands = Vec::new();
 
