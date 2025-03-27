@@ -3,9 +3,8 @@ use std::sync::Arc;
 
 use super::{SumCheckProver, SumCheckProverMessage};
 use ark_ff::{batch_inversion, PrimeField};
-use ark_std::cfg_into_iter;
 use polynomial::{multilinear::Multilinear, virtual_polynomial::VirtualPolynomial};
-use rayon::iter::{IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[derive(Clone, Default, Debug)]
 pub struct VirtualProver<F: PrimeField> {

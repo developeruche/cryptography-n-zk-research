@@ -1,8 +1,7 @@
 //! This file contains utility functions for the product check protocol.
-use std::f64::consts::FRAC_1_PI;
 
 use ark_ff::{PrimeField, batch_inversion};
-use fiat_shamir::{FiatShamirTranscript, TranscriptInterface};
+use fiat_shamir::FiatShamirTranscript;
 use polynomial::{
     composed::{interfaces::ComposedMultilinearInterface, multilinear::ComposedMultilinear},
     interface::MultilinearPolynomialInterface,

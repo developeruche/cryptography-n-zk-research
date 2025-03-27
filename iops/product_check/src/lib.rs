@@ -131,7 +131,7 @@ impl<P: Pairing> ProductCheckInterface for ProductCheck<P> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ark_test_curves::bls12_381::{Bls12_381, Fr};
+    use ark_test_curves::bls12_381::Fr;
 
     // fn test_product_check(nv: usize) -> Result<(), PolyIOPErrors> {
     //     let mut rng = test_rng();
@@ -227,7 +227,7 @@ mod tests {
 
         let mut transcript = FiatShamirTranscript::default();
 
-        let (zero_check_proof, q_x) = perform_zero_check_protocol(
+        let (_zero_check_proof, _q_x) = perform_zero_check_protocol(
             &poly_1,
             &poly_2,
             &test_fractional_poly,
@@ -240,70 +240,70 @@ mod tests {
         // println!("q(x): {:?}", q_x);
     }
 
-    fn check_fractional_poly<P: Pairing>(
-        fractional_poly: &Multilinear<P::ScalarField>,
-        poly_1: &ComposedMultilinear<P::ScalarField>,
-        poly_2: &ComposedMultilinear<P::ScalarField>,
-    ) {
-        let mut flag = true;
-        let num_vars = fractional_poly.num_vars;
+    // fn check_fractional_poly<P: Pairing>(
+    //     fractional_poly: &Multilinear<P::ScalarField>,
+    //     poly_1: &ComposedMultilinear<P::ScalarField>,
+    //     poly_2: &ComposedMultilinear<P::ScalarField>,
+    // ) {
+    //     let mut flag = true;
+    //     let num_vars = fractional_poly.num_vars;
 
-        for i in 0..1 << num_vars {
-            let nom = poly_1
-                .polys
-                .iter()
-                .fold(P::ScalarField::one(), |acc, f| acc * f.evaluations[i]);
-            let denom = poly_2
-                .polys
-                .iter()
-                .fold(P::ScalarField::one(), |acc, f| acc * f.evaluations[i]);
+    //     for i in 0..1 << num_vars {
+    //         let nom = poly_1
+    //             .polys
+    //             .iter()
+    //             .fold(P::ScalarField::one(), |acc, f| acc * f.evaluations[i]);
+    //         let denom = poly_2
+    //             .polys
+    //             .iter()
+    //             .fold(P::ScalarField::one(), |acc, f| acc * f.evaluations[i]);
 
-            if denom * fractional_poly.evaluations[i] != nom {
-                flag = false;
-                break;
-            }
-        }
+    //         if denom * fractional_poly.evaluations[i] != nom {
+    //             flag = false;
+    //             break;
+    //         }
+    //     }
 
-        assert!(flag);
-    }
+    //     assert!(flag);
+    // }
 
-    fn test_product_check_helper<P: Pairing>(
-        poly_1: &ComposedMultilinear<P::ScalarField>,
-        poly_2: &ComposedMultilinear<P::ScalarField>,
-        poly_3: &ComposedMultilinear<P::ScalarField>,
-        srs: &MultiLinearSRS<P>,
-    ) {
-        let mut transcript = FiatShamirTranscript::default();
-        let (proof, product_poly, fractional_poly, q_x) =
-            ProductCheck::prove(poly_1, poly_2, srs, &mut transcript).unwrap();
+    // pub fn test_product_check_helper<P: Pairing>(
+    //     poly_1: &ComposedMultilinear<P::ScalarField>,
+    //     poly_2: &ComposedMultilinear<P::ScalarField>,
+    //     poly_3: &ComposedMultilinear<P::ScalarField>,
+    //     srs: &MultiLinearSRS<P>,
+    // ) {
+    //     let mut transcript = FiatShamirTranscript::default();
+    //     let (proof, product_poly, fractional_poly, q_x) =
+    //         ProductCheck::prove(poly_1, poly_2, srs, &mut transcript).unwrap();
 
-        check_fractional_poly::<P>(&fractional_poly, poly_1, poly_2);
+    //     check_fractional_poly::<P>(&fractional_poly, poly_1, poly_2);
 
-        let mut transcript_ = FiatShamirTranscript::default();
-        let (final_query, final_eval, _alpha) =
-            ProductCheck::verify(&proof, &q_x, &mut transcript_).unwrap();
+    //     let mut transcript_ = FiatShamirTranscript::default();
+    //     let (final_query, final_eval, _alpha) =
+    //         ProductCheck::verify(&proof, &q_x, &mut transcript_).unwrap();
 
-        assert_eq!(
-            product_poly.evaluate(&final_query).unwrap(),
-            final_eval,
-            "Wrong product detected"
-        );
+    //     assert_eq!(
+    //         product_poly.evaluate(&final_query).unwrap(),
+    //         final_eval,
+    //         "Wrong product detected"
+    //     );
 
-        // test bad poly case (poly_1 nd poly_3)
-        let mut transcript = FiatShamirTranscript::default();
-        let (proof, product_poly, fractional_poly, q_x) =
-            ProductCheck::prove(poly_1, poly_3, srs, &mut transcript).unwrap();
+    //     // test bad poly case (poly_1 nd poly_3)
+    //     let mut transcript = FiatShamirTranscript::default();
+    //     let (proof, product_poly, fractional_poly, q_x) =
+    //         ProductCheck::prove(poly_1, poly_3, srs, &mut transcript).unwrap();
 
-        let mut transcript_ = FiatShamirTranscript::default();
-        let (final_query, final_eval, _alpha) =
-            ProductCheck::verify(&proof, &q_x, &mut transcript_).unwrap();
+    //     let mut transcript_ = FiatShamirTranscript::default();
+    //     let (final_query, final_eval, _alpha) =
+    //         ProductCheck::verify(&proof, &q_x, &mut transcript_).unwrap();
 
-        assert_eq!(
-            product_poly.evaluate(&final_query).unwrap(),
-            final_eval,
-            "Can't detect wrong product"
-        );
+    //     assert_eq!(
+    //         product_poly.evaluate(&final_query).unwrap(),
+    //         final_eval,
+    //         "Can't detect wrong product"
+    //     );
 
-        check_fractional_poly::<P>(&fractional_poly, poly_1, poly_3);
-    }
+    //     check_fractional_poly::<P>(&fractional_poly, poly_1, poly_3);
+    // }
 }
