@@ -1,24 +1,109 @@
-# Polynomials
---------------------
+# Polynomial Crate
 
-Polynomials, those elegant expressions of coefficients and variables, hold within them the power to transcend mere mathematics and touch the realms of art, security, and computation. They are the silent composers of symphonies that secure our digital secrets, the architects of algorithms, and the timeless dancers in the space of numbers.
+A Rust implementation of various polynomial types and operations used in cryptography and zero-knowledge proofs. This crate provides efficient implementations of univariate, multivariate, and multilinear polynomials along with common operations like evaluation, interpolation, and arithmetic.
 
-In cryptography, polynomials become the guardians of our privacy. Imagine them as the secretive sentinels of the digital age, weaving intricate webs through finite fields and elliptic curves. They hide messages within their degrees and coefficients, creating ciphers that are as impenetrable as a knight’s armor. The beauty of polynomial-based cryptographic methods, like those in elliptic curve cryptography, lies in their blend of simplicity and complexity. A single polynomial equation, when viewed through the lens of number theory, can secure communications against the most relentless of adversaries.
+## Features
 
-Mathematically, polynomials are the storytellers of calculus and algebra, narrating the tales of curves and surfaces. They are the chameleons of mathematics, capable of transforming into various forms—factored, expanded, or simplified. Each transformation reveals a different facet of their character, whether it’s the roots that solve equations or the coefficients that describe geometric shapes. The Fundamental Theorem of Algebra whispers the promise that every non-zero polynomial has at least one complex root, a promise that ensures completeness in the mathematical universe.
+- **Multiple Polynomial Types**:
+  - Univariate Polynomials
+  - Multivariate Polynomials 
+  - Multilinear Polynomials
+  - Virtual Polynomials (specialized for product check IOP)
+  - Composed Multilinear Polynomials
 
-To a programmer, polynomials are the unsung heroes of code. They are the engines driving graphics rendering, error detection, and machine learning algorithms. Picture a polynomial as a loyal steed, carrying a programmer through the treacherous terrain of computational complexity. In computer graphics, Bézier curves, those graceful polynomial curves, render the smooth lines and shapes that we see on our screens. Error-correcting codes like Reed-Solomon, built upon the foundation of polynomials, ensure the integrity of our data as it travels across the globe.
+- **Core Operations**:
+  - Polynomial evaluation
+  - Lagrange interpolation
+  - FFT/IFFT for efficient operations
+  - Arithmetic operations (addition, multiplication, division)
+  - Partial evaluations
+  - Domain operations
 
-Polynomials, thus, are not just mathematical constructs. They are the bridge between the abstract and the tangible, the simple and the profound. They dance in the cryptographic shadows, tell stories in the language of algebra, and work tirelessly in the digital realms crafted by programmers. In their coefficients and variables, they hold the essence of order and chaos, a delicate balance that makes the world of mathematics so infinitely fascinating.
+- **Optimization Features**:
+  - Efficient evaluation using FFT
+  - Specialized implementations for cryptographic applications
+  - Memory efficient representations
+  - Support for parallel computation
 
+## Usage Examples
 
-## Polynomial
+### Creating and Evaluating a Univariate Polynomial
 
-This is the implementation of a polynomial in Rust. The Polynomial struct allows you to create a polynomial, evaluate it at a specific point, and add or multiply two polynomials together.
+```rust
+use polynomial::univariant::UnivariantPolynomial;
+use ark_test_curves::bls12_381::Fr;
 
-The variations of polynomials built in here are;
-- Univariate Polynomial
-- Multivariate Polynomial
-- Multilinear Polynomial
+// Create a polynomial: 2x^2 + 3x + 1
+let poly = UnivariantPolynomial::new(vec![Fr::from(1), Fr::from(3), Fr::from(2)]);
 
-... the last two could give a man 2^N complexity nightmare :).
+// Evaluate at x = 2
+let result = poly.evaluate(&Fr::from(2));
+```
+
+### Working with Multilinear Polynomials
+
+```rust
+use polynomial::multilinear::Multilinear;
+use ark_test_curves::bls12_381::Fr;
+
+// Create a multilinear polynomial
+let evaluations = vec![Fr::from(3), Fr::from(1), Fr::from(2), Fr::from(5)];
+let num_vars = 2;
+let polynomial = Multilinear::new(evaluations, num_vars);
+
+// Evaluate at a point
+let point = vec![Fr::from(5), Fr::from(6)];
+let eval_result = polynomial.evaluate(&point);
+```
+
+### Polynomial Interpolation
+
+```rust
+use polynomial::univariant::UnivariantPolynomial;
+use ark_test_curves::bls12_381::Fr;
+
+let point_ys = vec![Fr::from(0), Fr::from(4), Fr::from(16)];
+let domain = vec![Fr::from(0), Fr::from(2), Fr::from(4)];
+
+let interpolated_poly = UnivariantPolynomial::interpolate(point_ys, domain);
+```
+
+## Dependencies
+
+- `ark-ff`: Finite field arithmetic
+- `ark-test-curves`: Test curves for cryptographic operations
+- `ark-serialize`: Serialization support
+- `digest`: Cryptographic digest functions
+- `ark-std`: Standard library utilities
+- `anyhow`: Error handling
+- `rand`: Random number generation
+
+## Features
+
+- `std`: Use standard library (enabled by default)
+- `parallel`: Enable parallel computation support
+
+## Installation
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+polynomial = { version = "0.1.0" }
+```
+
+## Testing
+
+Run the test suite:
+
+```bash
+cargo test
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
