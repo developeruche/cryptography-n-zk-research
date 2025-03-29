@@ -1,0 +1,6 @@
+[package]
+name = "sumcheck201playground"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
