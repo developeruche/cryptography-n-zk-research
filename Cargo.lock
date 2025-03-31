@@ -952,6 +952,7 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-std",
+ "ark-test-curves",
  "fiat_shamir",
  "polynomial",
  "rand",
