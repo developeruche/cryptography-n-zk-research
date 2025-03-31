@@ -28,6 +28,27 @@ pub struct LinearLagrangeList<F: PrimeField> {
     pub list: Vec<LinearLagrange<F>>,
 }
 
+// A sumcheck proof contains all round polynomials
+pub struct SumcheckProof<F: PrimeField> {
+    pub num_vars: usize,
+    pub degree: usize,
+    pub round_polynomials: Vec<Vec<F>>,
+}
+
+/// Prover State
+pub struct ProverState<F: PrimeField> {
+    /// sampled randomness (for each round) given by the verifier
+    pub randomness: Vec<F>,
+    /// Stores a list of multilinear extensions
+    pub state_polynomials: Vec<LinearLagrangeList<F>>,
+    /// Number of variables
+    pub num_vars: usize,
+    /// Max number of multiplicands in a product
+    pub max_multiplicands: usize,
+    /// The current round number
+    pub round: usize,
+}
+
 impl<F: PrimeField> LinearLagrange<F> {
     /// Define a new LinearLagrange instance: p(0).(1-X) + p(1).X as
     /// $`[e, o] \equiv [p(0), p(1)]`$
