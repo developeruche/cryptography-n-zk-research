@@ -948,6 +948,14 @@ dependencies = [
 [[package]]
 name = "sumcheck201playground"
 version = "0.1.0"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-std",
+ "fiat_shamir",
+ "polynomial",
+ "rand",
+]
 
 [[package]]
 name = "syn"
