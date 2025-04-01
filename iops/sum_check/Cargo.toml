@@ -11,6 +11,7 @@ fiat_shamir.workspace = true
 anyhow.workspace = true
 ark-std.workspace = true
 rayon = { version = "1.5.2" }
+sumcheck201playground = { path = "../sumcheck201playground" }
 
 
 [dev-dependencies]

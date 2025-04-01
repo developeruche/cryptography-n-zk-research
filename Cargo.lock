@@ -943,6 +943,7 @@ dependencies = [
  "fiat_shamir",
  "polynomial",
  "rayon",
+ "sumcheck201playground",
 ]
 
 [[package]]
