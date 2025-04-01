@@ -23,11 +23,11 @@ pub fn bits2bytes(x: usize) -> usize {
     (x + 7) / 8
 }
 
-pub fn rol(value: u64, left: usize, bits: usize) -> u64 {
+fn rol(value: u64, left: usize, bits: usize) -> u64 {
     let mask = if bits < 64 { (1u64 << bits) - 1 } else { !0u64 };
-    let top = value >> (bits - left);
-    let bot = (value & ((1u64 << (bits - left)) - 1)) << left;
-    (bot | top) & mask
+    let top = value as u128 >> (bits - left);
+    let bot = (value as u128 & ((1u128 << (bits - left)) - 1)) << left;
+    (bot as u64 | top as u64) & mask
 }
 
 pub fn ror(value: u64, right: usize, bits: usize) -> u64 {

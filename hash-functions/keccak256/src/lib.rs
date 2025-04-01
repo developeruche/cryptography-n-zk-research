@@ -25,32 +25,11 @@ pub fn keccak512(initial_input: Option<&[u8]>) -> KeccakHash {
 mod tests {
     use super::*;
     
-    // #[test]
-    // fn test_keccak224() {
-    //     let input = b"Hello, world!";
-    //     let hash = keccak224(Some(input));
-    //     assert_eq!(hash.len(), 28);
-    // }
-    
     #[test]
     fn test_keccak256() {
         let mut hasher = keccak256(None);
-        hasher.update(b"Hello, world!");
+        hasher.update(b"hello hash");
         let digest = hasher.hexdigest();
-        println!("{}", digest);
+        assert_eq!("a06c4933962b145ac49be4d314c34aef46e63910355ea96160adcfb7a33c705d", digest)
     }
-    
-    // #[test]
-    // fn test_keccak384() {
-    //     let input = b"Hello, world!";
-    //     let hash = keccak384(Some(input));
-    //     assert_eq!(hash.len(), 48);
-    // }
-    
-    // #[test]
-    // fn test_keccak512() {
-    //     let input = b"Hello, world!";
-    //     let hash = keccak512(Some(input));
-    //     assert_eq!(hash.len(), 64);
-    // }
 }
