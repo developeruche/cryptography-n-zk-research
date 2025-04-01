@@ -1,4 +1,7 @@
-use crate::{constants::{H, W}, utils::{bits2bytes, keccak_f, multirate_padding}};
+use crate::{
+    constants::{H, W},
+    utils::{bits2bytes, keccak_f, multirate_padding},
+};
 
 #[derive(Debug, Clone)]
 pub struct KeccakState {
@@ -29,9 +32,7 @@ impl KeccakState {
     fn format(st: &Vec<Vec<u64>>) -> String {
         let mut rows = Vec::new();
         for y in 0..H {
-            let row: Vec<String> = (0..W)
-                .map(|x| format!("{:016x}", st[x][y]))
-                .collect();
+            let row: Vec<String> = (0..W).map(|x| format!("{:016x}", st[x][y])).collect();
             rows.push(row.join(" "));
         }
         rows.join("\n")
@@ -70,7 +71,7 @@ impl KeccakState {
 
         let mut extended_bb = bb.to_vec();
         extended_bb.extend(vec![0; bits2bytes(self.b - self.bitrate_bytes)]);
-        
+
         let mut i = 0;
         for y in 0..H {
             for x in 0..W {
@@ -115,10 +116,7 @@ impl std::fmt::Display for KeccakState {
 }
 
 impl KeccakSponge {
-    pub fn new(
-        bitrate: usize,
-        width: usize
-    ) -> Self {
+    pub fn new(bitrate: usize, width: usize) -> Self {
         KeccakSponge {
             state: KeccakState::new(bitrate, width),
             buffer: Vec::new(),
@@ -176,10 +174,7 @@ impl KeccakHash {
         assert!(output_bits % 8 == 0, "Output bits must be byte-aligned");
 
         KeccakHash {
-            sponge: KeccakSponge::new(
-                bitrate_bits,
-                bitrate_bits + capacity_bits
-            ),
+            sponge: KeccakSponge::new(bitrate_bits, bitrate_bits + capacity_bits),
             digest_size: bits2bytes(output_bits),
             block_size: bits2bytes(bitrate_bits),
         }
