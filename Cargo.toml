@@ -47,3 +47,4 @@ gkr = {path = "iops/gkr"}
 anyhow = "1.0.97"
 zero_check = {path = "iops/zero_check"}
 product_check = {path = "iops/product_check"}
+rayon = "1.10.0"

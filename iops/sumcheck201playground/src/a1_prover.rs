@@ -5,6 +5,8 @@ use crate::{
 use ark_ff::PrimeField;
 use ark_std::log2;
 use fiat_shamir::FiatShamirTranscript;
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 use std::marker::PhantomData;
 
 /// Interactive Proof for Multilinear Sumcheck
@@ -53,6 +55,68 @@ impl<F: PrimeField> IPForMLSumcheck<F> {
     /// Creates a sumcheck proof consisting of `n` round polynomials each of degree `d` using Algorithm 1.
     /// We allow for any function `combine_function` on a set of MLE polynomials.
     ///
+    #[cfg(not(feature = "parallel"))]
+    pub fn prove<C>(
+        prover_state: &mut ProverState<F>,
+        combine_function: &C,
+        transcript: &mut FiatShamirTranscript,
+    ) -> SumcheckProof<F>
+    where
+        C: Fn(&Vec<F>) -> F + Sync,
+    {
+        // Sequential implementation
+        <FiatShamirTranscript as TranscriptProtocol<F>>::sumcheck_proof_domain_sep(
+            transcript,
+            prover_state.num_vars as u64,
+            prover_state.max_multiplicands as u64,
+        );
+
+        let r_degree = prover_state.max_multiplicands;
+        let mut r_polys: Vec<Vec<F>> = (0..prover_state.num_vars)
+            .map(|_| vec![F::zero(); r_degree + 1])
+            .collect();
+
+        for round_index in 0..prover_state.num_vars {
+            let state_polynomial_len = prover_state.state_polynomials[0].list.len();
+            for k in 0..(r_degree + 1) {
+                for i in 0..state_polynomial_len {
+                    let evaluations_at_k = prover_state
+                        .state_polynomials
+                        .iter()
+                        .map(|state_poly| {
+                            let o = state_poly.list[i].odd;
+                            let e = state_poly.list[i].even;
+                            (F::one() - F::from(k as u32)) * e + F::from(k as u32) * o
+                        })
+                        .collect::<Vec<F>>();
+                    r_polys[round_index][k] += combine_function(&evaluations_at_k);
+                }
+            }
+
+            <FiatShamirTranscript as TranscriptProtocol<F>>::append_scalars(
+                transcript,
+                "r_poly",
+                &r_polys[round_index],
+            );
+
+            let alpha = <FiatShamirTranscript as TranscriptProtocol<F>>::challenge_scalar(
+                transcript,
+                b"challenge_nextround",
+            );
+
+            for j in 0..prover_state.state_polynomials.len() {
+                prover_state.state_polynomials[j].fold_in_half(alpha);
+            }
+        }
+
+        SumcheckProof {
+            num_vars: prover_state.num_vars,
+            degree: r_degree,
+            round_polynomials: r_polys,
+        }
+    }
+
+    #[cfg(feature = "parallel")]
     pub fn prove<C>(
         prover_state: &mut ProverState<F>,
         combine_function: &C,
@@ -76,22 +140,36 @@ impl<F: PrimeField> IPForMLSumcheck<F> {
 
         for round_index in 0..prover_state.num_vars {
             let state_polynomial_len = prover_state.state_polynomials[0].list.len();
-            for k in 0..(r_degree + 1) {
-                for i in 0..state_polynomial_len {
-                    let evaluations_at_k = prover_state
-                        .state_polynomials
-                        .iter()
-                        .map(|state_poly| {
-                            // evaluate given state polynomial at x_1 = k
-                            let o = state_poly.list[i].odd;
-                            let e = state_poly.list[i].even;
-                            (F::one() - F::from(k as u32)) * e + F::from(k as u32) * o
-                        })
-                        .collect::<Vec<F>>();
 
-                    // apply combine function
-                    r_polys[round_index][k] += combine_function(&evaluations_at_k);
-                }
+            // Parallelize the outer loop over k and collect results
+            let results: Vec<(usize, F)> = (0..(r_degree + 1))
+                .into_par_iter()
+                .map(|k| {
+                    let mut sum = F::zero();
+
+                    // Process each i sequentially within the parallel chunks
+                    for i in 0..state_polynomial_len {
+                        let evaluations_at_k: Vec<F> = prover_state
+                            .state_polynomials
+                            .par_iter() // Parallelize iteration over state polynomials
+                            .map(|state_poly| {
+                                let o = state_poly.list[i].odd;
+                                let e = state_poly.list[i].even;
+                                (F::one() - F::from(k as u32)) * e + F::from(k as u32) * o
+                            })
+                            .collect();
+
+                        // Apply combine function
+                        sum += combine_function(&evaluations_at_k);
+                    }
+
+                    (k, sum)
+                })
+                .collect();
+
+            // Update r_polys with collected results
+            for (k, sum) in results {
+                r_polys[round_index][k] = sum;
             }
 
             // append the round polynomial (i.e. prover message) to the transcript

@@ -11,3 +11,8 @@ rand.workspace = true
 polynomial.workspace = true
 fiat_shamir.workspace = true
 ark-test-curves.workspace = true
+rayon = {workspace = true, optional = true}
+
+
+[features]
+parallel = ["rayon"]

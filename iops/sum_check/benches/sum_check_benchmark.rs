@@ -39,8 +39,8 @@ fn normal_sum_check_benchmark(c: &mut Criterion) {
 }
 
 fn composed_sum_check_benchmark(c: &mut Criterion) {
-    let poly_1 = black_box(Multilinear::<Fr>::random(12));
-    let poly_2 = black_box(Multilinear::<Fr>::random(12));
+    let poly_1 = black_box(Multilinear::<Fr>::random(20));
+    let poly_2 = black_box(Multilinear::<Fr>::random(20));
     let composed_poly = black_box(ComposedMultilinear::new(vec![poly_1, poly_2]));
     let sum = ComposedProver::calculate_sum(&composed_poly);
 
@@ -64,8 +64,8 @@ fn combine_fn(data: &Vec<Fr>) -> Fr {
 }
 
 fn super_sum_check_benchmark(c: &mut Criterion) {
-    let poly_1 = black_box(Multilinear::<Fr>::random(12));
-    let poly_2 = black_box(Multilinear::<Fr>::random(12));
+    let poly_1 = black_box(Multilinear::<Fr>::random(20));
+    let poly_2 = black_box(Multilinear::<Fr>::random(20));
 
     let polynomials: Vec<LinearLagrangeList<Fr>> = vec![
         LinearLagrangeList::<Fr>::from(&poly_1),
@@ -117,9 +117,9 @@ fn multi_composed_sum_check_benchmark(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    multi_composed_sum_check_benchmark,
+    // multi_composed_sum_check_benchmark,
     composed_sum_check_benchmark,
-    normal_sum_check_benchmark,
+    // normal_sum_check_benchmark,
     super_sum_check_benchmark
 );
 
