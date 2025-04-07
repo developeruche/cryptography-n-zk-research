@@ -117,9 +117,9 @@ fn multi_composed_sum_check_benchmark(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    // multi_composed_sum_check_benchmark,
+    multi_composed_sum_check_benchmark,
     composed_sum_check_benchmark,
-    // normal_sum_check_benchmark,
+    normal_sum_check_benchmark,
     super_sum_check_benchmark
 );
 
