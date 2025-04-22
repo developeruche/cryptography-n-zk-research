@@ -125,7 +125,7 @@ impl MerklePatriciaTrie {
 
     /// Inserts or updates a key-value pair in the trie.
     /// Updates the trie's root hash.
-    /// Note: Inserting an empty value is currently disallowed as delete isn't implemented.
+    /// Note: Inserting an empty value is currently disallowed as delete isn't implemented. it is easilier to think of this way.
     pub fn put(&mut self, key: &[u8], value: Vec<u8>) {
         if value.is_empty() {
             // Ethereum MPT treats insertion of empty value as deletion.
@@ -143,7 +143,7 @@ impl MerklePatriciaTrie {
                 self.root_hash = new_root_hash;
             }
             Err(e) => {
-                // In a real application, propagate this error properly
+                // In a real application, propagate this error properly (I am quite lazy plus this is a PoC)
                 eprintln!("Error during put operation: {}", e);
             }
         }
