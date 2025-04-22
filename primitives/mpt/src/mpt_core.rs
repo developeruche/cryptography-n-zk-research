@@ -1,14 +1,16 @@
-use std::{collections::HashMap, sync::{Arc, RwLock}};
+use crate::utils::calculate_hash_internal;
 use lazy_static::lazy_static;
 use primitive_types::H256;
 use serde::{Deserialize, Serialize};
-use crate::utils::calculate_hash_internal;
+use std::{
+    collections::HashMap,
+    sync::{Arc, RwLock},
+};
 
 pub type Nibble = u8; // 0-15
 pub type NibblePath = Vec<Nibble>;
 /// Shared, mutable, thread-safe storage (Hash -> Serialized Node)
 pub type Db = Arc<RwLock<HashMap<H256, Vec<u8>>>>;
-
 
 // Represents the hash of an empty node/trie
 lazy_static! {
@@ -26,8 +28,14 @@ pub enum Node {
     /// Represents the end of a path that stores a value.
     Leaf { path: NibblePath, value: Vec<u8> },
     /// Represents a node that shares a common path prefix before diverging.
-    Extension { path: NibblePath, next_node_hash: H256 },
+    Extension {
+        path: NibblePath,
+        next_node_hash: H256,
+    },
     /// Represents a node where the path diverges into multiple possibilities (up to 16 children).
     /// Can optionally store a value if a key terminates at this branch.
-    Branch { children: [Option<H256>; 16], value: Option<Vec<u8>> },
+    Branch {
+        children: [Option<H256>; 16],
+        value: Option<Vec<u8>>,
+    },
 }

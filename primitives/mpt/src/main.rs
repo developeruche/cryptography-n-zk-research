@@ -4,7 +4,11 @@ fn main() {
     // Create a new trie instance
     let mut trie = MerklePatriciaTrie::new();
     println!("Initial Root Hash: {:?}", trie.root_hash());
-    assert_eq!(trie.root_hash(), *EMPTY_NODE_HASH, "Initial root should be empty hash");
+    assert_eq!(
+        trie.root_hash(),
+        *EMPTY_NODE_HASH,
+        "Initial root should be empty hash"
+    );
 
     // Insert some key-value pairs
     println!("\n--- Inserting Data ---");
@@ -20,7 +24,10 @@ fn main() {
 
     // Update an existing key
     trie.put(b"key1", b"value1_updated".to_vec());
-    println!("Updated 'key1': 'value1_updated'. New Root: {:?}", trie.root_hash());
+    println!(
+        "Updated 'key1': 'value1_updated'. New Root: {:?}",
+        trie.root_hash()
+    );
 
     // Insert keys demonstrating branch creation and extension splitting
     println!("\n--- Testing Prefixes ---");
@@ -31,25 +38,51 @@ fn main() {
     trie.put(b"doge", b"coin".to_vec()); // Should create a branch under 'dog'
     let r_doge = trie.root_hash();
     println!("Put 'doge': 'coin'. Root: {:?}", r_doge);
-    assert_ne!(r_dog, r_doge, "Root hash should change after inserting 'doge'");
+    assert_ne!(
+        r_dog, r_doge,
+        "Root hash should change after inserting 'doge'"
+    );
 
     trie.put(b"do", b"verb".to_vec()); // Should create branch at 'do', possibly involving extension
     let r_do = trie.root_hash();
     println!("Put 'do': 'verb'. Root: {:?}", r_do);
     assert_ne!(r_doge, r_do, "Root hash should change after inserting 'do'");
 
-
     // Print the final structure for visualization
     trie.print_structure();
 
     // --- Retrieve values ---
     println!("\n--- Retrieving Values ---");
-    println!("Get 'key1': {:?}", trie.get(b"key1").map(|v| String::from_utf8_lossy(&v).into_owned()));
-    println!("Get 'key2': {:?}", trie.get(b"key2").map(|v| String::from_utf8_lossy(&v).into_owned()));
-    println!("Get 'k': {:?}", trie.get(b"k").map(|v| String::from_utf8_lossy(&v).into_owned()));
-    println!("Get 'dog': {:?}", trie.get(b"dog").map(|v| String::from_utf8_lossy(&v).into_owned()));
-    println!("Get 'doge': {:?}", trie.get(b"doge").map(|v| String::from_utf8_lossy(&v).into_owned()));
-    println!("Get 'do': {:?}", trie.get(b"do").map(|v| String::from_utf8_lossy(&v).into_owned()));
+    println!(
+        "Get 'key1': {:?}",
+        trie.get(b"key1")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
+    println!(
+        "Get 'key2': {:?}",
+        trie.get(b"key2")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
+    println!(
+        "Get 'k': {:?}",
+        trie.get(b"k")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
+    println!(
+        "Get 'dog': {:?}",
+        trie.get(b"dog")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
+    println!(
+        "Get 'doge': {:?}",
+        trie.get(b"doge")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
+    println!(
+        "Get 'do': {:?}",
+        trie.get(b"do")
+            .map(|v| String::from_utf8_lossy(&v).into_owned())
+    );
     println!("Get 'nonexistent': {:?}", trie.get(b"nonexistent"));
 
     // --- Verify retrieved values ---

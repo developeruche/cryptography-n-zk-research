@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 use crate::composed::interfaces::ComposedMultilinearInterface;
 use crate::interface::MultilinearPolynomialInterface;
 use crate::multilinear::Multilinear;
