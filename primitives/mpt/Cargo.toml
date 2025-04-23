@@ -1,0 +1,12 @@
+[package]
+name = "mpt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sha3 = "0.10"
+hex = "0.4"
+primitive-types = {version = "0.12", features = ["serde"]} # For H256 type
+bincode = "1.3"          # For simplified node serialization
+serde = { version = "1.0", features = ["derive"] }
+lazy_static = "1.4" # Added lazy_static for EMPTY_NODE_HASH
