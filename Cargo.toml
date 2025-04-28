@@ -25,6 +25,7 @@ exclude = [
     "frontends/plonky3/range_check",
     "frontends/expander/example",
     "frontends/expander/dump",
+    "zk_vms/toy","zk_vms/sp1_evm_ex"
 ]
 
 
