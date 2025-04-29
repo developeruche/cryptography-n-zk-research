@@ -1,0 +1,9 @@
+[package]
+version = "0.1.0"
+name = "exec-program"
+edition = "2021"
+
+[dependencies]
+alloy-sol-types = { workspace = true }
+sp1-zkvm = "4.2.0"
+exec_ssaf_lib = { path = "../lib" }
