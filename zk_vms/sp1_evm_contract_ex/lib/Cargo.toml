@@ -1,0 +1,9 @@
+[package]
+name = "exec_ssaf_lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-sol-types = { workspace = true }
+revm = {version = "22.0.1", features = ["serde"]}
+revm-interpreter = "18.0.0"
