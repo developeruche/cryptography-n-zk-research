@@ -1,0 +1,15 @@
+[package]
+name = "libra"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+p3-field = "0.2.0"
+poly = {git="https://github.com/sublinearlabs/sl-core.git"}
+transcript = {git="https://github.com/sublinearlabs/sl-core.git"}
+sum_check = {git="https://github.com/sublinearlabs/sl-core.git"}
+circuits = {git="https://github.com/sublinearlabs/sl-core.git"}
+p3-challenger = "0.2.0"
+p3-mersenne-31 = "0.2.0"
+p3-goldilocks = "0.2.0"
+p3-keccak = "0.2.0"
