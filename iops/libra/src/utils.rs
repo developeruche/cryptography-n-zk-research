@@ -139,5 +139,80 @@ mod tests {
         let actual = var_6_poly.evaluate(&actual_complete_points);
 
         assert_eq!(actual, expected);
+
+        // Identity check;
+        // I(w, z) = 1; iff w = z for all w, z ∈ {0,1}^l
+
+        // when w = [0, 0]
+        let w_1_point = vec![E::from_wrapped_u32(0), E::from_wrapped_u32(0)];
+        let i_wz_1 = MultilinearPoly::new_from_vec(
+            2,
+            (generate_igz::<F, E>(&w_1_point).iter())
+                .map(|&x| Fields::<F, E>::Extension(x))
+                .collect(),
+        );
+        assert_eq!(
+            i_wz_1.evaluate(
+                &w_1_point
+                    .iter()
+                    .map(|&x| Fields::<F, E>::Extension(x))
+                    .collect::<Vec<_>>()
+            ),
+            Fields::<F, E>::Extension(E::one())
+        );
+
+        // when w = [1, 1]
+        let w_2_point = vec![E::from_wrapped_u32(1), E::from_wrapped_u32(1)];
+        let i_wz_2 = MultilinearPoly::new_from_vec(
+            2,
+            (generate_igz::<F, E>(&w_2_point).iter())
+                .map(|&x| Fields::<F, E>::Extension(x))
+                .collect(),
+        );
+        assert_eq!(
+            i_wz_2.evaluate(
+                &w_2_point
+                    .iter()
+                    .map(|&x| Fields::<F, E>::Extension(x))
+                    .collect::<Vec<_>>()
+            ),
+            Fields::<F, E>::Extension(E::one())
+        );
+
+        // when w = [0, 1]
+        let w_3_point = vec![E::from_wrapped_u32(0), E::from_wrapped_u32(1)];
+        let i_wz_3 = MultilinearPoly::new_from_vec(
+            2,
+            (generate_igz::<F, E>(&w_3_point).iter())
+                .map(|&x| Fields::<F, E>::Extension(x))
+                .collect(),
+        );
+        assert_eq!(
+            i_wz_3.evaluate(
+                &w_3_point
+                    .iter()
+                    .map(|&x| Fields::<F, E>::Extension(x))
+                    .collect::<Vec<_>>()
+            ),
+            Fields::<F, E>::Extension(E::one())
+        );
+
+        // when w = [1, 0]
+        let w_4_point = vec![E::from_wrapped_u32(1), E::from_wrapped_u32(0)];
+        let i_wz_4 = MultilinearPoly::new_from_vec(
+            2,
+            (generate_igz::<F, E>(&w_4_point).iter())
+                .map(|&x| Fields::<F, E>::Extension(x))
+                .collect(),
+        );
+        assert_eq!(
+            i_wz_4.evaluate(
+                &w_4_point
+                    .iter()
+                    .map(|&x| Fields::<F, E>::Extension(x))
+                    .collect::<Vec<_>>()
+            ),
+            Fields::<F, E>::Extension(E::one())
+        );
     }
 }
