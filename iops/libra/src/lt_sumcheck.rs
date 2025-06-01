@@ -5,4 +5,5 @@
 pub trait LinearTimeSumCheck {
     fn phase_one();
     fn phase_two();
+    fn sum_check();
 }
