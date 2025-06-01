@@ -1,5 +1,6 @@
 //! Utility functions for Libra.
 use p3_field::{ExtensionField, Field};
+use poly::Fields;
 
 pub(crate) fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<E> {
     let mut res = vec![E::one()];
@@ -14,6 +15,12 @@ pub(crate) fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<
     }
 
     res
+}
+
+pub(crate) fn product_combined_fn<F: Field, E: ExtensionField<F>>(
+    values: &[Fields<F, E>],
+) -> Fields<F, E> {
+    Fields::Extension(values[0].to_extension_field() * values[1].to_extension_field())
 }
 
 #[cfg(test)]
@@ -39,10 +46,6 @@ mod tests {
         }
 
         new_evaluations
-    }
-
-    fn combined_fn(values: &[Fields<F, E>]) -> Fields<F, E> {
-        Fields::Extension(values[0].to_extension_field() * values[1].to_extension_field())
     }
 
     #[test]
@@ -91,7 +94,7 @@ mod tests {
             vec![igz_6_var_mle, var_6_poly.clone()],
             2,
             6,
-            Rc::new(combined_fn),
+            Rc::new(product_combined_fn),
         );
 
         let sum_1 = v_poly.partial_evaluate(

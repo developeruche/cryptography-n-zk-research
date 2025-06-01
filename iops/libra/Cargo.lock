@@ -88,6 +88,7 @@ checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 name = "libra"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "circuits",
  "p3-challenger",
  "p3-field",
