@@ -12,7 +12,7 @@ use crate::{
 };
 
 type PartialSumCheckProof<F, E> = (Vec<Vec<Fields<F, E>>>, Vec<E>);
-type SumCheckProof<F, E> = Vec<Vec<Fields<F, E>>>;
+type LinearSumCheckProof<F, E> = Vec<Vec<Fields<F, E>>>;
 
 /// A trait for a linear time sum check protocol.
 pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
@@ -54,7 +54,7 @@ pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
         f_2_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
-    ) -> Result<SumCheckProof<F, E>, anyhow::Error>;
+    ) -> Result<LinearSumCheckProof<F, E>, anyhow::Error>;
 }
 
 /// A struct for a linear time sum check protocol.
@@ -123,7 +123,7 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
         f_2_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
-    ) -> Result<SumCheckProof<F, E>, anyhow::Error> {
+    ) -> Result<LinearSumCheckProof<F, E>, anyhow::Error> {
         let (phase_one_round_polys, u) = Self::phase_one(f_1, f_2_3, i_gz, transcript)?;
 
         let i_uz = generate_igz::<F, E>(&u);
@@ -142,4 +142,20 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
 
         Ok([phase_one_round_polys, phase_two_round_polys].concat())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use p3_field::{AbstractExtensionField, extension::BinomialExtensionField};
+    use p3_mersenne_31::Mersenne31;
+    use sum_check::primitives::SumCheckProof;
+
+    use super::*;
+
+    type F = Mersenne31;
+    type E = BinomialExtensionField<Mersenne31, 3>;
+    type Mle = VPoly<F, E>;
+
+    #[test]
+    fn test_linear_time_sum_check() {}
 }
