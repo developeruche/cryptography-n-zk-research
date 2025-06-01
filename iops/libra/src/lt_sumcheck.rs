@@ -73,8 +73,6 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
         let a_hg = initialize_phase_1(f_1, f_2_3, i_gz);
         let num_var = (a_hg.len() as f64).log2() as usize;
 
-        println!("Number of variables: {}", num_var);
-
         let a_hg_mle = MultilinearPoly::new_from_vec(
             num_var,
             a_hg.iter()
@@ -150,7 +148,7 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
 
 #[cfg(test)]
 mod tests {
-    use p3_field::{AbstractExtensionField, AbstractField, extension::BinomialExtensionField};
+    use p3_field::{AbstractField, extension::BinomialExtensionField};
     use p3_mersenne_31::Mersenne31;
     use sum_check::primitives::SumCheckProof;
 

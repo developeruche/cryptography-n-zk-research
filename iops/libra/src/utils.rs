@@ -28,7 +28,7 @@ mod tests {
     use std::rc::Rc;
 
     use super::*;
-    use p3_field::{AbstractExtensionField, AbstractField, extension::BinomialExtensionField};
+    use p3_field::{AbstractField, extension::BinomialExtensionField};
     use p3_mersenne_31::Mersenne31;
     use poly::{Fields, MultilinearExtension, mle::MultilinearPoly, vpoly::VPoly};
 
