@@ -1,6 +1,13 @@
 //! Utility functions for Libra.
-use p3_field::{ExtensionField, Field};
+use p3_field::{ExtensionField, Field, PrimeField32};
 use poly::Fields;
+use sum_check::primitives::SumCheckProof;
+use transcript::Transcript;
+
+use crate::{
+    LinearTimeSumCheck, LinearTimeSumCheckTr,
+    libra::primitives::{LibraSumCheckChallenges, LibraSumCheckProof},
+};
 
 type Mle<F, E> = Vec<Fields<F, E>>;
 
@@ -51,6 +58,52 @@ pub fn merge_sumcheck_proofs<F: Field, E: ExtensionField<F>>(
     }
 
     out
+}
+
+/// This function performs sum_check on add_i_x, add_i_y, mul_i and returns this proofs and random challenges
+pub fn perform_libra_sumcheck<F: Field + PrimeField32, E: ExtensionField<F>>(
+    add_i: &Vec<(usize, usize, usize)>,
+    mul_i: &Vec<(usize, usize, usize)>,
+    w_i_plus_one: &[F],
+    w_i_plus_one_iden: &[F],
+    i_gz: &[E],
+    claimed_sum: &Fields<F, E>,
+    transcript: &mut Transcript<F, E>,
+) -> Result<(LibraSumCheckProof<F, E>, LibraSumCheckChallenges<E>), anyhow::Error> {
+    let (add_i_x_proof, add_i_x_challenges) = LinearTimeSumCheck::sum_check(
+        &add_i,
+        &w_i_plus_one,
+        &w_i_plus_one_iden,
+        &i_gz,
+        transcript,
+    )?;
+    let add_i_x_proof = SumCheckProof::new(*claimed_sum, add_i_x_proof);
+
+    let (add_i_y_proof, add_i_y_challenges) = LinearTimeSumCheck::sum_check(
+        &add_i,
+        &w_i_plus_one_iden,
+        &w_i_plus_one,
+        &i_gz,
+        transcript,
+    )?;
+    let add_i_y_proof = SumCheckProof::new(*claimed_sum, add_i_y_proof);
+
+    let (mul_i_proof, mul_i_challenges) =
+        LinearTimeSumCheck::sum_check(&mul_i, &w_i_plus_one, &w_i_plus_one, &i_gz, transcript)?;
+    let mul_i_proof = SumCheckProof::new(*claimed_sum, mul_i_proof);
+
+    Ok((
+        LibraSumCheckProof {
+            add_i_x_proof,
+            add_i_y_proof,
+            mul_i_proof,
+        },
+        LibraSumCheckChallenges {
+            add_i_x_challenges,
+            add_i_y_challenges,
+            mul_i_challenges,
+        },
+    ))
 }
 
 pub fn add_vec_of_mle<F: Field, E: ExtensionField<F>>(mles: Vec<Mle<F, E>>) -> Vec<Fields<F, E>> {
