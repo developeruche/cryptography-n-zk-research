@@ -1,4 +1,6 @@
 mod algos;
 mod libra;
 mod lt_sumcheck;
-mod utils;
+pub mod utils;
+
+pub use lt_sumcheck::{LinearTimeSumCheck, LinearTimeSumCheckTr};

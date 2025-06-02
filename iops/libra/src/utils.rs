@@ -2,7 +2,7 @@
 use p3_field::{ExtensionField, Field};
 use poly::Fields;
 
-pub(crate) fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<E> {
+pub fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<E> {
     let mut res = vec![E::one()];
 
     for point in points {
@@ -17,7 +17,7 @@ pub(crate) fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<
     res
 }
 
-pub(crate) fn product_combined_fn<F: Field, E: ExtensionField<F>>(
+pub fn product_combined_fn<F: Field, E: ExtensionField<F>>(
     values: &[Fields<F, E>],
 ) -> Fields<F, E> {
     Fields::Extension(values[0].to_extension_field() * values[1].to_extension_field())

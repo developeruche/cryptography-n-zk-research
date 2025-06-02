@@ -14,3 +14,10 @@ p3-mersenne-31 = "0.2.0"
 p3-goldilocks = "0.2.0"
 p3-keccak = "0.2.0"
 anyhow = "1.0.98"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "sumcheck_benchmarks"
+harness = false

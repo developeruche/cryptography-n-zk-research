@@ -11,7 +11,7 @@ use crate::{
     utils::{generate_igz, product_combined_fn},
 };
 
-type PartialSumCheckProof<F, E> = (Vec<Vec<Fields<F, E>>>, Vec<E>);
+pub type PartialSumCheckProof<F, E> = (Vec<Vec<Fields<F, E>>>, Vec<E>);
 
 /// A trait for a linear time sum check protocol.
 pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
@@ -57,7 +57,7 @@ pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
 }
 
 /// A struct for a linear time sum check protocol.
-pub(crate) struct LinearTimeSumCheck<F: Field, E: ExtensionField<F>> {
+pub struct LinearTimeSumCheck<F: Field, E: ExtensionField<F>> {
     _marker: std::marker::PhantomData<(F, E)>,
 }
 
