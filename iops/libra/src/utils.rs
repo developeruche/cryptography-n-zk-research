@@ -2,6 +2,8 @@
 use p3_field::{ExtensionField, Field};
 use poly::Fields;
 
+type Mle<F, E> = Vec<Fields<F, E>>;
+
 pub fn generate_igz<F: Field, E: ExtensionField<F>>(points: &[E]) -> Vec<E> {
     let mut res = vec![E::one()];
 
@@ -23,16 +25,55 @@ pub fn product_combined_fn<F: Field, E: ExtensionField<F>>(
     Fields::Extension(values[0].to_extension_field() * values[1].to_extension_field())
 }
 
-pub fn merge_sumcheck_proofs<T>(vecs: Vec<Vec<T>>) -> Option<Vec<T>>
-where
-    T: std::ops::Add<Output = T> + Copy,
-{
-    vecs.into_iter().reduce(|acc, v| {
-        acc.into_iter()
-            .zip(v.into_iter())
-            .map(|(a, b)| a + b)
-            .collect()
-    })
+pub fn merge_sumcheck_proofs<F: Field, E: ExtensionField<F>>(
+    data: Vec<Vec<Mle<F, E>>>,
+) -> Vec<Vec<Fields<F, E>>> {
+    assert!(data.len() > 0, "Data must not be empty");
+    assert!(
+        data.iter().all(|x| x.len() > 0),
+        "Each vector must not be empty"
+    );
+    assert!(
+        data.iter().all(|x| x.len() == data[0].len()),
+        "All vectors must have the same length"
+    );
+
+    let mut out = vec![];
+
+    for i in 0..data[0].len() {
+        let mut out_i = vec![];
+
+        for j in 0..data.len() {
+            out_i.push(data[j][i].clone())
+        }
+
+        out.push(add_vec_of_mle(out_i));
+    }
+
+    out
+}
+
+pub fn add_vec_of_mle<F: Field, E: ExtensionField<F>>(mles: Vec<Mle<F, E>>) -> Vec<Fields<F, E>> {
+    // Handle empty input
+    if mles.is_empty() {
+        return Vec::new();
+    }
+
+    let first_len = mles[0].len();
+
+    // Verify all MLEs have the same length
+    assert!(
+        mles.iter().all(|mle| mle.len() == first_len),
+        "All MLE vectors must have the same length"
+    );
+
+    // Create the result by summing at each position
+    (0..first_len)
+        .map(|pos| {
+            mles.iter()
+                .fold(Fields::<F, E>::Base(F::zero()), |acc, mle| acc + mle[pos])
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -49,60 +90,46 @@ mod tests {
 
     #[test]
     fn test_merge_sumcheck_proofs() {
-        // Test with u32 vectors
-        let vec1 = vec![1u32, 2, 3];
-        let vec2 = vec![4u32, 5, 6];
-        let vec3 = vec![7u32, 8, 9];
-
-        let vecs = vec![vec1, vec2, vec3];
-        let merged = merge_sumcheck_proofs(vecs).unwrap();
-
-        assert_eq!(merged, vec![12, 15, 18]);
-
-        // Test with empty vector list
-        let empty_vecs: Vec<Vec<u32>> = vec![];
-        assert!(merge_sumcheck_proofs(empty_vecs).is_none());
-
-        // Test with single vector
-        let single_vec = vec![vec![10, 20, 30]];
-        let merged_single = merge_sumcheck_proofs(single_vec).unwrap();
-        assert_eq!(merged_single, vec![10, 20, 30]);
-
-        // Test with Fields<F, E>
-        let f_vec1 = vec![
-            Fields::<F, E>::Base(F::new(1)),
-            Fields::<F, E>::Base(F::new(2)),
+        let mle_1 = vec![
+            Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+        ];
+        let mle_2 = vec![
+            Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(5)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(6)),
         ];
 
-        let f_vec2 = vec![
-            Fields::<F, E>::Base(F::new(3)),
-            Fields::<F, E>::Base(F::new(4)),
+        let mle_3 = vec![
+            Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(8)),
+        ];
+        let mle_4 = vec![
+            Fields::<F, E>::Base(F::from_wrapped_u32(10)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(12)),
+            Fields::<F, E>::Base(F::from_wrapped_u32(14)),
         ];
 
-        let f_vecs = vec![f_vec1, f_vec2];
-        let f_merged = merge_sumcheck_proofs(f_vecs).unwrap();
+        let mle = vec![vec![mle_1, mle_2], vec![mle_3, mle_4]];
 
-        assert_eq!(f_merged[0], Fields::<F, E>::Base(F::new(4))); // 1 + 3 = 4
-        assert_eq!(f_merged[1], Fields::<F, E>::Base(F::new(6))); // 2 + 4 = 6
+        let mle = merge_sumcheck_proofs(mle);
 
-        // Test with Vec<Vec<Fields<F, E>>> (similar to sumcheck proofs)
-        let inner1 = vec![
-            Fields::<F, E>::Base(F::new(1)),
-            Fields::<F, E>::Base(F::new(2)),
+        let expected = vec![
+            vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(11)),
+            ],
+            vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(14)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(17)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(20)),
+            ],
         ];
 
-        let inner2 = vec![
-            Fields::<F, E>::Base(F::new(3)),
-            Fields::<F, E>::Base(F::new(4)),
-        ];
-
-        let proof = vec![inner1.clone(), inner2.clone()];
-
-        let merged_proofs = merge_sumcheck_proofs::<Fields<F, E>>(proof).unwrap();
-
-        assert_eq!(merged_proofs.len(), 2);
-        assert_eq!(merged_proofs[0], Fields::<F, E>::Base(F::new(4))); // 1 + 3 = 4
-        assert_eq!(merged_proofs[1], Fields::<F, E>::Base(F::new(6))); // 2 + 4 = 6
+        assert_eq!(mle, expected);
     }
 
     fn extend_with_new_variables(evals: &Vec<E>, num_of_new_variables: usize) -> Vec<E> {
@@ -287,5 +314,402 @@ mod tests {
             ),
             Fields::<F, E>::Extension(E::one())
         );
+    }
+
+    #[test]
+    fn test_add_vec_of_mle() {
+        // Test case 1: Basic addition of two MLEs with Base fields
+        let mle1 = vec![
+            Fields::<F, E>::Base(F::new(1)),
+            Fields::<F, E>::Base(F::new(2)),
+            Fields::<F, E>::Base(F::new(3)),
+        ];
+
+        let mle2 = vec![
+            Fields::<F, E>::Base(F::new(4)),
+            Fields::<F, E>::Base(F::new(5)),
+            Fields::<F, E>::Base(F::new(6)),
+        ];
+
+        let result = add_vec_of_mle(vec![mle1.clone(), mle2.clone()]);
+
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0], Fields::<F, E>::Base(F::new(5))); // 1 + 4
+        assert_eq!(result[1], Fields::<F, E>::Base(F::new(7))); // 2 + 5
+        assert_eq!(result[2], Fields::<F, E>::Base(F::new(9))); // 3 + 6
+
+        // Test case 2: Addition of three MLEs
+        let mle3 = vec![
+            Fields::<F, E>::Base(F::new(7)),
+            Fields::<F, E>::Base(F::new(8)),
+            Fields::<F, E>::Base(F::new(9)),
+        ];
+
+        let result = add_vec_of_mle(vec![mle1.clone(), mle2.clone(), mle3.clone()]);
+
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0], Fields::<F, E>::Base(F::new(12))); // 1 + 4 + 7
+        assert_eq!(result[1], Fields::<F, E>::Base(F::new(15))); // 2 + 5 + 8
+        assert_eq!(result[2], Fields::<F, E>::Base(F::new(18))); // 3 + 6 + 9
+
+        // Test case 3: Addition of MLEs with Extension fields
+        let ext_mle1 = vec![
+            Fields::<F, E>::Extension(E::from_wrapped_u32(1)),
+            Fields::<F, E>::Extension(E::from_wrapped_u32(2)),
+        ];
+
+        let ext_mle2 = vec![
+            Fields::<F, E>::Extension(E::from_wrapped_u32(3)),
+            Fields::<F, E>::Extension(E::from_wrapped_u32(4)),
+        ];
+
+        let result = add_vec_of_mle(vec![ext_mle1.clone(), ext_mle2.clone()]);
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0], Fields::<F, E>::Extension(E::from_wrapped_u32(4))); // 1 + 3
+        assert_eq!(result[1], Fields::<F, E>::Extension(E::from_wrapped_u32(6))); // 2 + 4
+
+        // Test case 4: Addition of MLEs with mixed Base and Extension fields
+        let mixed_mle1 = vec![
+            Fields::<F, E>::Base(F::new(1)),
+            Fields::<F, E>::Extension(E::from_wrapped_u32(2)),
+        ];
+
+        let mixed_mle2 = vec![
+            Fields::<F, E>::Extension(E::from_wrapped_u32(3)),
+            Fields::<F, E>::Base(F::new(4)),
+        ];
+
+        let result = add_vec_of_mle(vec![mixed_mle1.clone(), mixed_mle2.clone()]);
+
+        assert_eq!(result.len(), 2);
+        // First element: Base(1) + Extension(3) = Extension(4)
+        assert_eq!(result[0].to_extension_field(), E::from_wrapped_u32(4));
+        // Second element: Extension(2) + Base(4) = Extension(6)
+        assert_eq!(result[1].to_extension_field(), E::from_wrapped_u32(6));
+
+        // Test case 5: Single MLE
+        let result = add_vec_of_mle(vec![mle1.clone()]);
+
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0], Fields::<F, E>::Base(F::new(1)));
+        assert_eq!(result[1], Fields::<F, E>::Base(F::new(2)));
+        assert_eq!(result[2], Fields::<F, E>::Base(F::new(3)));
+
+        // Test case 6: Empty input
+        let result = add_vec_of_mle(Vec::<Mle<F, E>>::new());
+        assert_eq!(result.len(), 0);
+
+        // Test case 7: MLEs with different lengths (should panic)
+        let short_mle = vec![
+            Fields::<F, E>::Base(F::new(1)),
+            Fields::<F, E>::Base(F::new(2)),
+        ];
+
+        let long_mle = vec![
+            Fields::<F, E>::Base(F::new(3)),
+            Fields::<F, E>::Base(F::new(4)),
+            Fields::<F, E>::Base(F::new(5)),
+        ];
+
+        // This should panic with "All MLE vectors must have the same length"
+        let result =
+            std::panic::catch_unwind(|| add_vec_of_mle(vec![short_mle.clone(), long_mle.clone()]));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_merge_sumcheck_proofs_comprehensive() {
+        // Basic case: Standard 2x2 structure with Base fields
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let mle_3 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(5)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)),
+            ];
+            let mle_4 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(7)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(8)),
+            ];
+
+            let data = vec![vec![mle_1, mle_2], vec![mle_3, mle_4]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(6)), // 1 + 5
+                    Fields::<F, E>::Base(F::from_wrapped_u32(8)), // 2 + 6
+                ],
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(10)), // 3 + 7
+                    Fields::<F, E>::Base(F::from_wrapped_u32(12)), // 4 + 8
+                ],
+            ];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 1: Single row, multiple columns
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let data = vec![vec![mle_1, mle_2]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                    Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+                ],
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                    Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+                ],
+            ];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 2: Multiple rows, single column
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let data = vec![vec![mle_1], vec![mle_2]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)), // 1 + 3
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)), // 2 + 4
+            ]];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 3: Minimum valid input - single element
+        {
+            let mle = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+
+            let data = vec![vec![mle]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ]];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 4: Mix of Base and Extension fields
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Extension(E::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Extension(E::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let mle_3 = vec![
+                Fields::<F, E>::Extension(E::from_wrapped_u32(5)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)),
+            ];
+            let mle_4 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(7)),
+                Fields::<F, E>::Extension(E::from_wrapped_u32(8)),
+            ];
+
+            let data = vec![vec![mle_1, mle_2], vec![mle_3, mle_4]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            // Check first result: Element 1 + Element 3
+            assert_eq!(result[0][0].to_extension_field(), E::from_wrapped_u32(6)); // 1 + 5 
+            assert_eq!(result[0][1].to_extension_field(), E::from_wrapped_u32(8)); // 2 + 6
+
+            // Check second result: Element 2 + Element 4
+            assert_eq!(result[1][0].to_extension_field(), E::from_wrapped_u32(10)); // 3 + 7
+            assert_eq!(result[1][1].to_extension_field(), E::from_wrapped_u32(12)); // 4 + 8
+        }
+
+        // Edge case 5: Zero values
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::zero()),
+                Fields::<F, E>::Base(F::zero()),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::zero()),
+                Fields::<F, E>::Base(F::zero()),
+            ];
+
+            let mle_3 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_4 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let data = vec![vec![mle_1, mle_2], vec![mle_3, mle_4]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                    Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+                ],
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                    Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+                ],
+            ];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 6: Rectangular structure (not square)
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+            let mle_3 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(5)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)),
+            ];
+
+            let mle_4 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(7)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(8)),
+            ];
+            let mle_5 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(9)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(10)),
+            ];
+            let mle_6 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(11)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(12)),
+            ];
+
+            let data = vec![vec![mle_1, mle_2, mle_3], vec![mle_4, mle_5, mle_6]];
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(8)),  // 1 + 7
+                    Fields::<F, E>::Base(F::from_wrapped_u32(10)), // 2 + 8
+                ],
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(12)), // 3 + 9
+                    Fields::<F, E>::Base(F::from_wrapped_u32(14)), // 4 + 10
+                ],
+                vec![
+                    Fields::<F, E>::Base(F::from_wrapped_u32(16)), // 5 + 11
+                    Fields::<F, E>::Base(F::from_wrapped_u32(18)), // 6 + 12
+                ],
+            ];
+
+            assert_eq!(result, expected);
+        }
+
+        // Edge case 7: Many rows
+        {
+            let mle = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+
+            // Create 10 rows with the same MLE
+            let data = (0..10).map(|_| vec![mle.clone()]).collect::<Vec<_>>();
+
+            let result = merge_sumcheck_proofs(data);
+
+            let expected = vec![vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(10)), // 1 * 10
+                Fields::<F, E>::Base(F::from_wrapped_u32(20)), // 2 * 10
+            ]];
+
+            assert_eq!(result, expected);
+        }
+
+        // Error case 1: Empty input
+        {
+            let empty_data: Vec<Vec<Mle<F, E>>> = Vec::new();
+
+            let result = std::panic::catch_unwind(|| merge_sumcheck_proofs(empty_data));
+
+            assert!(result.is_err());
+        }
+
+        // Error case 2: Empty inner vector
+        {
+            let empty_inner: Vec<Mle<F, E>> = Vec::new();
+            let data = vec![empty_inner];
+
+            let result = std::panic::catch_unwind(|| merge_sumcheck_proofs(data));
+
+            assert!(result.is_err());
+        }
+
+        // Error case 3: Inconsistent dimensions
+        {
+            let mle_1 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(1)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(2)),
+            ];
+            let mle_2 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(3)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(4)),
+            ];
+
+            let mle_3 = vec![
+                Fields::<F, E>::Base(F::from_wrapped_u32(5)),
+                Fields::<F, E>::Base(F::from_wrapped_u32(6)),
+            ];
+            // This row has only one element, but the first row has two
+            let data = vec![vec![mle_1, mle_2], vec![mle_3]];
+
+            let result = std::panic::catch_unwind(|| merge_sumcheck_proofs(data));
+
+            assert!(result.is_err());
+        }
     }
 }

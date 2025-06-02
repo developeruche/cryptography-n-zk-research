@@ -5,7 +5,7 @@
 // use primitives::LibraProof;
 // use transcript::Transcript;
 
-// use crate::{utils::generate_igz, LinearTimeSumCheck, LinearTimeSumCheckTr};
+// use crate::{utils::{generate_igz, merge_sumcheck_proofs}, LinearTimeSumCheck, LinearTimeSumCheckTr};
 // pub mod primitives;
 
 // /// Interface for the Libra protocol.
@@ -67,6 +67,8 @@
 //         let (layer_1_mul_i_proof, _) = LinearTimeSumCheck::sum_check(&mul_i, &w_i_plus_one_poly, &w_i_plus_one_poly, &i_gz, &mut transcript)?;
 //         let (layer_1_add_i_x_proof, _) = LinearTimeSumCheck::sum_check(&add_i, &w_i_plus_one_poly, &w_i_plus_one_poly_iden, &i_gz, &mut transcript)?;
 //         let (layer_1_add_i_y_proof, _) = LinearTimeSumCheck::sum_check(&add_i, &w_i_plus_one_poly_iden, &w_i_plus_one_poly, &i_gz, &mut transcript)?;
+
+//         let layer_proof = merge_sumcheck_proofs(vec![layer_1_mul_i_proof, layer_1_add_i_x_proof, layer_1_add_i_y_proof]);
 
 //         todo!()
 //     }
