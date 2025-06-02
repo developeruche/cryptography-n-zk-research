@@ -77,6 +77,7 @@ fn bench_prove_comparison(c: &mut Criterion) {
                 LinearTimeSumCheck::<F, E>::sum_check(
                     &f_1_sparse,
                     &f2_x_f2_y_vec,
+                    &f2_x_f2_y_vec,
                     &ig_z,
                     &mut transcript,
                 )
@@ -123,6 +124,7 @@ fn bench_verify_comparison(c: &mut Criterion) {
         let mut transcript = Transcript::init();
         let (round_polys, _) = LinearTimeSumCheck::<F, E>::sum_check(
             &f_1_sparse,
+            &f2_x_f2_y_vec,
             &f2_x_f2_y_vec,
             &ig_z,
             &mut transcript,
@@ -207,6 +209,7 @@ fn bench_scaling_comparison(c: &mut Criterion) {
                     LinearTimeSumCheck::<F, E>::sum_check(
                         &f_1_sparse,
                         &f2_vec,
+                        &f2_vec,
                         &ig_z,
                         &mut transcript,
                     )
@@ -254,6 +257,7 @@ fn bench_full_protocol_comparison(c: &mut Criterion) {
             let mut transcript = Transcript::init();
             let (round_polys, _) = LinearTimeSumCheck::<F, E>::sum_check(
                 &f_1_sparse,
+                &f2_x_f2_y_vec,
                 &f2_x_f2_y_vec,
                 &ig_z,
                 &mut transcript,

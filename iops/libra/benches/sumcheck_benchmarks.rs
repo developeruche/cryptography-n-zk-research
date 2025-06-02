@@ -90,6 +90,7 @@ fn bench_linear_time_sum_check(c: &mut Criterion) {
                 LinearTimeSumCheck::<F, E>::sum_check(
                     &f_1_sparse,
                     &f2_x_f2_y_vec,
+                    &f2_x_f2_y_vec,
                     &ig_z,
                     &mut transcript,
                 )
@@ -112,6 +113,7 @@ fn bench_linear_time_sum_check(c: &mut Criterion) {
         let mut transcript = Transcript::init();
         let (round_polys, _) = LinearTimeSumCheck::<F, E>::sum_check(
             &f_1_sparse,
+            &f2_x_f2_y_vec,
             &f2_x_f2_y_vec,
             &ig_z,
             &mut transcript,
@@ -192,6 +194,7 @@ fn bench_sum_check_scaling(c: &mut Criterion) {
                 black_box(
                     LinearTimeSumCheck::<F, E>::sum_check(
                         &f_1_sparse,
+                        &f2_vec,
                         &f2_vec,
                         &ig_z,
                         &mut transcript,

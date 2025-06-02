@@ -25,7 +25,7 @@ pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
     /// i_gz: &[E] :> This is the i(g,z) table generated from `g`.
     fn phase_one(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error>;
@@ -40,17 +40,19 @@ pub trait LinearTimeSumCheckTr<F: Field + PrimeField32, E: ExtensionField<F>> {
     /// i_uz: &[E] :> This is the i(u,z) table generated from `u`.
     fn phase_two(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_2: &[F],
+        f_3: &[F],
         i_gz: &[E],
         i_uz: &[E],
-        f2_u: &E,
+        u: &[Fields<F, E>],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error>;
 
     /// Sum-check a combination of two phases.
     fn sum_check(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_2: &[F],
+        f_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error>;
@@ -66,11 +68,11 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
 {
     fn phase_one(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error> {
-        let a_hg = initialize_phase_1(f_1, f_2_3, i_gz);
+        let a_hg = initialize_phase_1(f_1, f_3, i_gz);
         let num_var = (a_hg.len() as f64).log2() as usize;
 
         let a_hg_mle = MultilinearPoly::new_from_vec(
@@ -79,12 +81,12 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
                 .map(|&x| Fields::Extension(x))
                 .collect::<Vec<_>>(),
         );
-        let f_2_3_mle = MultilinearPoly::new_from_vec(
+        let f_3_mle = MultilinearPoly::new_from_vec(
             num_var,
-            f_2_3.iter().map(|&x| Fields::Base(x)).collect::<Vec<_>>(),
+            f_3.iter().map(|&x| Fields::Base(x)).collect::<Vec<_>>(),
         );
         let product_poly = VPoly::new(
-            vec![a_hg_mle, f_2_3_mle],
+            vec![a_hg_mle, f_3_mle],
             2,
             num_var,
             Rc::new(product_combined_fn),
@@ -95,18 +97,25 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
 
     fn phase_two(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_2: &[F],
+        f_3: &[F],
         i_gz: &[E],
         i_uz: &[E],
-        f2_u: &E,
+        u: &[Fields<F, E>],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error> {
         let a_f_1 = initialize_phase_2(f_1, i_gz, i_uz);
         let num_var = (a_f_1.len() as f64).log2() as usize;
 
-        let f_2_3_vec = &f_2_3.to_vec();
-        let f_2_3_mle: MultilinearPoly<F, E> = f_2_3_vec.into();
-        let f3_y_mul_f2_u = f_2_3_mle * Fields::<F, E>::Extension(*f2_u);
+        let f_3_vec = &f_3.to_vec();
+        let f_3_mle: MultilinearPoly<F, E> = f_3_vec.into();
+
+        let f_2_vec = &f_2.to_vec();
+        let f_2_mle: MultilinearPoly<F, E> = f_2_vec.into();
+
+        let f2_u = f_2_mle.evaluate(u);
+
+        let f3_y_mul_f2_u = f_3_mle * Fields::<F, E>::Extension(f2_u.to_extension_field());
         let product_poly = VPoly::new(
             vec![a_f_1.into(), f3_y_mul_f2_u],
             2,
@@ -119,29 +128,23 @@ impl<F: Field + PrimeField32, E: ExtensionField<F>> LinearTimeSumCheckTr<F, E>
 
     fn sum_check(
         f_1: &[(usize, usize, usize)],
-        f_2_3: &[F],
+        f_2: &[F],
+        f_3: &[F],
         i_gz: &[E],
         transcript: &mut Transcript<F, E>,
     ) -> Result<PartialSumCheckProof<F, E>, anyhow::Error> {
-        let (phase_one_round_polys, u) = Self::phase_one(f_1, f_2_3, i_gz, transcript)?;
+        let (phase_one_round_polys, u) = Self::phase_one(f_1, f_3, i_gz, transcript)?;
 
         let i_uz = generate_igz::<F, E>(&u);
-        let f2_vec = &f_2_3.to_vec();
-        let f2: MultilinearPoly<F, E> = f2_vec.into();
-        let f2_u = f2.evaluate(&u.iter().map(|&x| Fields::Extension(x)).collect::<Vec<_>>());
 
-        let (phase_two_round_polys, v) = Self::phase_two(
-            f_1,
-            f_2_3,
-            i_gz,
-            &i_uz,
-            &f2_u.to_extension_field(),
-            transcript,
-        )?;
+        let u_as_fields = u.iter().map(|&x| Fields::Extension(x)).collect::<Vec<_>>();
+
+        let (phase_two_round_polys, v) =
+            Self::phase_two(f_1, f_2, f_3, i_gz, &i_uz, &u_as_fields, transcript)?;
 
         Ok((
-            [phase_one_round_polys, phase_two_round_polys].concat(),
-            [u, v].concat(),
+            [phase_one_round_polys, phase_two_round_polys].concat(), // round polys
+            [u, v].concat(),                                         // challenge
         ))
     }
 }
@@ -228,9 +231,14 @@ mod tests {
         let ig_z = generate_igz::<F, E>(&[g]);
 
         let mut transcript = Transcript::init();
-        let (round_polys, challenges) =
-            LinearTimeSumCheck::sum_check(&f_1_sparse, &f2_x_f2_y_vec, &ig_z, &mut transcript)
-                .unwrap();
+        let (round_polys, challenges) = LinearTimeSumCheck::sum_check(
+            &f_1_sparse,
+            &f2_x_f2_y_vec,
+            &f2_x_f2_y_vec,
+            &ig_z,
+            &mut transcript,
+        )
+        .unwrap();
 
         let claimed_sum = Fields::Base(F::new(2147483645));
 
