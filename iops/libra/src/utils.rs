@@ -23,6 +23,18 @@ pub fn product_combined_fn<F: Field, E: ExtensionField<F>>(
     Fields::Extension(values[0].to_extension_field() * values[1].to_extension_field())
 }
 
+pub fn merge_sumcheck_proofs<T>(vecs: Vec<Vec<T>>) -> Option<Vec<T>>
+where
+    T: std::ops::Add<Output = T> + Copy,
+{
+    vecs.into_iter().reduce(|acc, v| {
+        acc.into_iter()
+            .zip(v.into_iter())
+            .map(|(a, b)| a + b)
+            .collect()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
@@ -34,6 +46,64 @@ mod tests {
 
     type F = Mersenne31;
     type E = BinomialExtensionField<Mersenne31, 3>;
+
+    #[test]
+    fn test_merge_sumcheck_proofs() {
+        // Test with u32 vectors
+        let vec1 = vec![1u32, 2, 3];
+        let vec2 = vec![4u32, 5, 6];
+        let vec3 = vec![7u32, 8, 9];
+
+        let vecs = vec![vec1, vec2, vec3];
+        let merged = merge_sumcheck_proofs(vecs).unwrap();
+
+        assert_eq!(merged, vec![12, 15, 18]);
+
+        // Test with empty vector list
+        let empty_vecs: Vec<Vec<u32>> = vec![];
+        assert!(merge_sumcheck_proofs(empty_vecs).is_none());
+
+        // Test with single vector
+        let single_vec = vec![vec![10, 20, 30]];
+        let merged_single = merge_sumcheck_proofs(single_vec).unwrap();
+        assert_eq!(merged_single, vec![10, 20, 30]);
+
+        // Test with Fields<F, E>
+        let f_vec1 = vec![
+            Fields::<F, E>::Base(F::new(1)),
+            Fields::<F, E>::Base(F::new(2)),
+        ];
+
+        let f_vec2 = vec![
+            Fields::<F, E>::Base(F::new(3)),
+            Fields::<F, E>::Base(F::new(4)),
+        ];
+
+        let f_vecs = vec![f_vec1, f_vec2];
+        let f_merged = merge_sumcheck_proofs(f_vecs).unwrap();
+
+        assert_eq!(f_merged[0], Fields::<F, E>::Base(F::new(4))); // 1 + 3 = 4
+        assert_eq!(f_merged[1], Fields::<F, E>::Base(F::new(6))); // 2 + 4 = 6
+
+        // Test with Vec<Vec<Fields<F, E>>> (similar to sumcheck proofs)
+        let inner1 = vec![
+            Fields::<F, E>::Base(F::new(1)),
+            Fields::<F, E>::Base(F::new(2)),
+        ];
+
+        let inner2 = vec![
+            Fields::<F, E>::Base(F::new(3)),
+            Fields::<F, E>::Base(F::new(4)),
+        ];
+
+        let proof = vec![inner1.clone(), inner2.clone()];
+
+        let merged_proofs = merge_sumcheck_proofs::<Fields<F, E>>(proof).unwrap();
+
+        assert_eq!(merged_proofs.len(), 2);
+        assert_eq!(merged_proofs[0], Fields::<F, E>::Base(F::new(4))); // 1 + 3 = 4
+        assert_eq!(merged_proofs[1], Fields::<F, E>::Base(F::new(6))); // 2 + 4 = 6
+    }
 
     fn extend_with_new_variables(evals: &Vec<E>, num_of_new_variables: usize) -> Vec<E> {
         let repeat_length = 1 << num_of_new_variables;

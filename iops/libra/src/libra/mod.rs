@@ -63,7 +63,10 @@
 
 //         // at this point we've got all we need to run the 3 sum check protocols
 //         // one
-//         let layer_1_mul_i_proof = LinearTimeSumCheck::sum_check(&mul_i, &w_i_plus_one_poly, &i_gz, &mut transcript)?;
+//         let w_i_plus_one_poly_iden = vec![F::from_canonical_u32(1); w_i_plus_one_poly.len()];
+//         let (layer_1_mul_i_proof, _) = LinearTimeSumCheck::sum_check(&mul_i, &w_i_plus_one_poly, &w_i_plus_one_poly, &i_gz, &mut transcript)?;
+//         let (layer_1_add_i_x_proof, _) = LinearTimeSumCheck::sum_check(&add_i, &w_i_plus_one_poly, &w_i_plus_one_poly_iden, &i_gz, &mut transcript)?;
+//         let (layer_1_add_i_y_proof, _) = LinearTimeSumCheck::sum_check(&add_i, &w_i_plus_one_poly_iden, &w_i_plus_one_poly, &i_gz, &mut transcript)?;
 
 //         todo!()
 //     }
