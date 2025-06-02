@@ -21,3 +21,7 @@ criterion = "0.5"
 [[bench]]
 name = "sumcheck_benchmarks"
 harness = false
+
+[[bench]]
+name = "sumcheck_benchmarks_plots"
+harness = false
