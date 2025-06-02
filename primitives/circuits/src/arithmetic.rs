@@ -274,7 +274,7 @@ mod tests {
 
         let circuit = Circuit::new(vec![layer_0, layer_1, layer_2]);
 
-        let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<Fr>(1);
+        let (add_mle, mul_mle) = circuit.get_add_n_mul_mle::<Fr>(0);
 
         // there is one mul gate in layer 0, the mul mle should be non-zero
         assert_eq!(mul_mle.is_zero(), false);

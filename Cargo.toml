@@ -16,7 +16,7 @@ members = [
     "arks/snarks/succinct_gkr_protocol", 
     "hash-functions/keccak256",
     "iops/zero_check", 
-    "iops/product_check", "iops/sumcheck201playground", "primitives/mpt", ]
+    "iops/product_check", "iops/sumcheck201playground", "primitives/mpt", "iops/libra", ]
     
     
 exclude = [
@@ -30,26 +30,33 @@ exclude = [
 
 
 [workspace.dependencies]
+# source (workspace)
 polynomial = { path = "primitives/polynomial" }
 circuits = { path = "primitives/circuits" }
+fiat_shamir = {path = "primitives/transcripts/fiat_shamir"}
+sum_check = {path = "iops/sum_check"}
+plonk_protocol = { path = "arks/snarks/plonk/protocol" }
+plonk_core = { path = "arks/snarks/plonk/core" }
+plonk_compiler = { path = "arks/snarks/plonk/compiler" }
+zero_check = {path = "iops/zero_check"}
+product_check = {path = "iops/product_check"}
+pcs = {path = "pcs"}
+gkr = {path = "iops/gkr"}
+
+
+# arkworks
 ark-std = "0.4.0"
-rand = "0.8.5"
-field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
 ark-ff = "0.4.2"
 ark-ec = "0.4.2"
 ark-bls12-381 = "0.4.0"
 ark-test-curves = {version = "0.4.2", features = ["bls12_381_scalar_field", "bls12_381_curve", "ed_on_bls12_381", "secp256k1"]}
-hex-literal = "0.4.1"
-fiat_shamir = {path = "primitives/transcripts/fiat_shamir"}
-sum_check = {path = "iops/sum_check"}
-pcs = {path = "pcs"}
 ark-serialize = "0.4.2"
+
+
+# misc 
+field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
+rand = "0.8.5"
+hex-literal = "0.4.1"
 digest = "0.10.7"
-plonk_protocol = { path = "arks/snarks/plonk/protocol" }
-plonk_core = { path = "arks/snarks/plonk/core" }
-plonk_compiler = { path = "arks/snarks/plonk/compiler" }
-gkr = {path = "iops/gkr"}
 anyhow = "1.0.97"
-zero_check = {path = "iops/zero_check"}
-product_check = {path = "iops/product_check"}
 rayon = "1.10.0"

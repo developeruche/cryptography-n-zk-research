@@ -238,7 +238,7 @@ mod tests {
     type Fot = Ft<4, Fr>;
 
     #[test]
-    fn test_gkr_protocol() {
+    fn test_4_layer_circuit_gkr_protocol() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
         let layer_1 = CircuitLayer::new(vec![
             Gate::new(GateType::Mul, [0, 1]),
@@ -295,6 +295,21 @@ mod tests {
     fn test_gkr_protocol_random_circuit() {
         let circuit = Circuit::random(8);
         let input = (0u64..256)
+            .into_iter()
+            .map(|x| Fr::from(x))
+            .collect::<Vec<Fr>>();
+
+        let evaluation = circuit.evaluate(&input);
+
+        let proof = GKRProtocol::prove(&circuit, &evaluation);
+
+        assert!(GKRProtocol::verify(&circuit, &input, &proof));
+    }
+
+    #[test]
+    fn test_gkr_protocol_small_random_circuit() {
+        let circuit = Circuit::random(3);
+        let input = (0u64..8)
             .into_iter()
             .map(|x| Fr::from(x))
             .collect::<Vec<Fr>>();

@@ -1,0 +1,27 @@
+[package]
+name = "libra"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+p3-field = "0.2.0"
+poly = {git="https://github.com/sublinearlabs/sl-core.git", branch = "main"}
+transcript = {git="https://github.com/sublinearlabs/sl-core.git", branch = "main"}
+sum_check = {git="https://github.com/sublinearlabs/sl-core.git", branch = "main"}
+circuits = {git="https://github.com/sublinearlabs/sl-core.git", branch = "main"}
+p3-challenger = "0.2.0"
+p3-mersenne-31 = "0.2.0"
+p3-goldilocks = "0.2.0"
+p3-keccak = "0.2.0"
+anyhow = "1.0.98"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "sumcheck_benchmarks"
+harness = false
+
+[[bench]]
+name = "sumcheck_benchmarks_plots"
+harness = false
