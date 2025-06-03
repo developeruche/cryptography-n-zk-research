@@ -712,4 +712,13 @@ mod tests {
         println!("Poly RANDOM ->  {:?}", poly);
         let _ = poly.evaluate(&vec![Fr::from(1), Fr::from(2), Fr::from(3)]);
     }
+
+    #[test]
+    fn test_mul_distinct_log() {
+        let poly_1 = Multilinear::new(vec![Fr::from(1), Fr::from(2), Fr::from(3), Fr::from(4)], 2);
+
+        let result = poly_1.mul_distinct(&poly_1);
+
+        println!("MulDistinct {:?}", result);
+    }
 }

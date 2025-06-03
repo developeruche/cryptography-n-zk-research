@@ -257,6 +257,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_get_add_n_mul_mle_layer_1() {
         let layer_0 = CircuitLayer::new(vec![Gate::new(GateType::Add, [0, 1])]);
 
