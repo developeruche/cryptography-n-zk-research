@@ -27,6 +27,10 @@ exclude = [
     "frontends/expander/keccak",
     "zk_vms/toy","zk_vms/sp1_evm_contract_ex",
     "iops/libra",
+    "zk_vms_frameworks/zisk/sha_hasher",
+    "zk_vms_frameworks/zisk/fibonacci",
+    "zk_vms_frameworks/zisk/keccak",
+    "zk_vms_frameworks/zisk/exec_eth_block",
 ]
 
 
