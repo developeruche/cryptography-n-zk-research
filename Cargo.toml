@@ -16,7 +16,7 @@ members = [
     "arks/snarks/succinct_gkr_protocol", 
     "hash-functions/keccak256",
     "iops/zero_check", 
-    "iops/product_check", "iops/sumcheck201playground", "primitives/mpt", ]
+    "iops/product_check", "iops/sumcheck201playground", "primitives/mpt" ]
     
     
 exclude = [
@@ -24,7 +24,7 @@ exclude = [
     "frontends/halo2/do_nothing",
     "frontends/plonky3/range_check",
     "frontends/expander/example",
-    "frontends/expander/dump",
+    "frontends/expander/keccak",
     "zk_vms/toy","zk_vms/sp1_evm_contract_ex",
     "iops/libra",
 ]

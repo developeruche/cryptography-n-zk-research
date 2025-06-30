@@ -1,0 +1,9 @@
+[package]
+name = "keccak"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+expander_compiler = { git = "https://github.com/developeruche/ExpanderCompilerCollection.git", branch = "expander-mpi" }
+rand = "0.8.5"
+tiny-keccak = { version = "2.0", features = ["keccak"] }
