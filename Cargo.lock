@@ -1115,6 +1115,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha2"
+version = "0.10.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
+]
+
+[[package]]
 name = "sha256-hash-function"
 version = "0.1.0"
 
@@ -1127,6 +1138,10 @@ dependencies = [
  "digest",
  "keccak",
 ]
+
+[[package]]
+name = "stark101"
+version = "0.1.0"
 
 [[package]]
 name = "static_assertions"
@@ -1455,6 +1470,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "63d3fcd9bba44b03821e7d699eeee959f3126dcc4aa8e4ae18ec617c2a5cea10"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "winternitz-ots"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "sha2",
 ]
 
 [[package]]
