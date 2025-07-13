@@ -1,5 +1,5 @@
 # Digital Signatures Implementations
-This repository contains implementations of popular digital signature algorithms in Rust, including ECDSA and Schnorr signatures.
+This repository contains implementations of popular digital signature algorithms in Rust, including ECDSA, Schnorr signatures, and Winternitz One-Time Signatures.
 
 ## Overview
 Digital signatures are cryptographic schemes that provide:
@@ -50,14 +50,37 @@ let signature = sign(key_pair.private_key, message.clone());
 let is_valid = signature.verify(message, key_pair.public_key);
 ```
 
+### Winternitz One-Time Signature (WOTS)
+Located in `winternitz-ots/`, implements:
+- Post-quantum secure one-time signature scheme
+- Hash-based signature using SHA-256
+- Key generation, signing, and verification
+- Configurable Winternitz parameter
+
+Example usage:
+```rust
+// Generate keypair
+let priv_key = WotsPrivateKey::new();
+let pub_key = priv_key.to_public();
+
+// Hash and sign a message
+let message_hash = hash_message("This is a test message");
+let signature = priv_key.sign(&message_hash);
+
+// Verify the signature
+let is_valid = pub_key.verify(&message_hash, &signature);
+```
+
 ## Project Structure
 ```
 digital-signatures/
-├── ecdsa-rust/          # ECDSA implementation
-│   ├── ec-core/         # Core EC operations
+├── ecdsa-rust/         # ECDSA implementation
+│   ├── ec-core/        # Core EC operations
 │   └── ecdsa/          # ECDSA signing/verification
 │
-└── schnorr/            # Schnorr signature implementation
+├── schnorr/           # Schnorr signature implementation
+│
+└── winternitz-ots/    # Winternitz One-Time Signature implementation
 ```
 
 ## Getting Started
@@ -78,19 +101,13 @@ cargo test
 - Production use requires security review
 - Use secure random number generation
 - Follow best practices for key management
+- The Winternitz OTS scheme is a one-time signature scheme - each private key should only be used once
+
+## Post-Quantum Considerations
+The Winternitz One-Time Signature scheme is resistant to quantum computing attacks, unlike traditional digital signature schemes like ECDSA and Schnorr which are vulnerable to Shor's algorithm. WOTS relies solely on the security of cryptographic hash functions, which are believed to remain secure even with quantum computers.
 
 ## License
 MIT
 
 ## Contributing
 Contributions welcome! Please feel free to submit issues and pull requests.
-```
-
-This README provides:
-1. High-level overview of digital signatures
-2. Details on each implementation 
-3. Code examples
-4. Project structure
-5. Setup instructions
-6. Security considerations
-7. License and contribution info
