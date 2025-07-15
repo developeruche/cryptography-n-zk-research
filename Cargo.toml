@@ -16,7 +16,12 @@ members = [
     "arks/snarks/succinct_gkr_protocol", 
     "hash-functions/keccak256",
     "iops/zero_check", 
-    "iops/product_check", "iops/sumcheck201playground", "primitives/mpt" , "arks/starks/stark101", "digitial-signatures/winternitz-ots"]
+    "iops/product_check", 
+    "iops/sumcheck201playground", 
+    "primitives/mpt" , 
+    "arks/starks/stark101", 
+    "digitial-signatures/winternitz-ots"
+]
     
     
 exclude = [
@@ -31,6 +36,7 @@ exclude = [
     "zk_vms_frameworks/zisk/fibonacci",
     "zk_vms_frameworks/zisk/keccak",
     "zk_vms_frameworks/zisk/exec_eth_block",
+    "zk_vms_frameworks/misc/exec-block"
 ]
 
 
