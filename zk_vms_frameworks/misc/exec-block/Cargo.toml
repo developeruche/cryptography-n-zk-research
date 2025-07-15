@@ -1,0 +1,28 @@
+[package]
+name = "exec-block"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+reth-stateless = { git = "https://github.com/kevaundray/reth", rev = "03364a836774c72f4e354de924330fee6a41be68" }
+reth-ethereum-primitives = { git = "https://github.com/kevaundray/reth", rev = "03364a836774c72f4e354de924330fee6a41be68", features = [
+    "serde",
+    "serde-bincode-compat",
+] }
+reth-primitives-traits = { git = "https://github.com/kevaundray/reth", rev = "03364a836774c72f4e354de924330fee6a41be68", features = [
+    "serde",
+    "serde-bincode-compat",
+] }
+reth-evm-ethereum = { git = "https://github.com/kevaundray/reth", rev = "03364a836774c72f4e354de924330fee6a41be68" }
+reth-chainspec = { git = "https://github.com/kevaundray/reth", rev = "03364a836774c72f4e354de924330fee6a41be68" }
+
+revm = { version = "26.0.1", default-features = false, features = [
+    "kzg-rs",
+    "bn",
+] }
+alloy-primitives = { version = "1.2.0", default-features = false, features = [
+    "map-foldhash",
+    "serde",
+    "sha3-keccak",
+] }
+serde_json = "1.0"
