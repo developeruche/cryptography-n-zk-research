@@ -51,7 +51,9 @@ impl WotsPrivateKey {
     /// Generates the corresponding public key from this private key.
     /// Each public key fragment is created by hashing the private key fragment `W` times.
     pub fn to_public(&self) -> WotsPublicKey {
-        let pub_keys = self.keys.iter()
+        let pub_keys = self
+            .keys
+            .iter()
             .map(|priv_key_fragment| hash_chain(priv_key_fragment, W))
             .collect();
         WotsPublicKey { keys: pub_keys }
@@ -59,13 +61,18 @@ impl WotsPrivateKey {
 
     /// Signs a message hash with the private key.
     pub fn sign(&self, message_hash: &Fragment) -> WotsSignature {
-        let signature_keys = self.keys.iter().zip(message_hash.iter())
+        let signature_keys = self
+            .keys
+            .iter()
+            .zip(message_hash.iter())
             .map(|(priv_key_fragment, &msg_byte)| {
                 let iterations = W - (msg_byte as u16);
                 hash_chain(priv_key_fragment, iterations)
             })
             .collect();
-        WotsSignature { keys: signature_keys }
+        WotsSignature {
+            keys: signature_keys,
+        }
     }
 }
 
@@ -75,7 +82,10 @@ impl WotsPublicKey {
     /// then checking if it matches the known public key.
     pub fn verify(&self, message_hash: &Fragment, signature: &WotsSignature) -> bool {
         // Re-calculate the public key from the signature and message hash.
-        let recovered_keys: Vec<Fragment> = signature.keys.iter().zip(message_hash.iter())
+        let recovered_keys: Vec<Fragment> = signature
+            .keys
+            .iter()
+            .zip(message_hash.iter())
             .map(|(sig_fragment, &msg_byte)| {
                 let iterations = msg_byte as u16;
                 hash_chain(sig_fragment, iterations)
@@ -100,7 +110,6 @@ fn hash_chain(start: &Fragment, iterations: u16) -> Fragment {
     result
 }
 
-
 // --- Tests ---
 #[cfg(test)]
 mod tests {
@@ -124,7 +133,10 @@ mod tests {
         let signature = priv_key.sign(&message_hash);
 
         // 3. Verify the signature
-        assert!(pub_key.verify(&message_hash, &signature), "Signature should be valid");
+        assert!(
+            pub_key.verify(&message_hash, &signature),
+            "Signature should be valid"
+        );
     }
 
     #[test]
@@ -139,7 +151,10 @@ mod tests {
         let signature = priv_key2.sign(&message_hash);
 
         // 3. Verify against the correct public key (should fail)
-        assert!(!pub_key1.verify(&message_hash, &signature), "Verification should fail for a signature from a different key");
+        assert!(
+            !pub_key1.verify(&message_hash, &signature),
+            "Verification should fail for a signature from a different key"
+        );
     }
 
     #[test]
@@ -156,7 +171,10 @@ mod tests {
         let signature = priv_key.sign(&original_message_hash);
 
         // 4. Try to verify the signature against the tampered message (should fail)
-        assert!(!pub_key.verify(&tampered_message_hash, &signature), "Verification should fail for a tampered message");
+        assert!(
+            !pub_key.verify(&tampered_message_hash, &signature),
+            "Verification should fail for a tampered message"
+        );
     }
 
     #[test]
@@ -166,11 +184,17 @@ mod tests {
 
         let pub_key1 = priv_key.to_public();
         let pub_key2 = priv_key.to_public();
-        assert_eq!(pub_key1, pub_key2, "Public key generation should be deterministic");
+        assert_eq!(
+            pub_key1, pub_key2,
+            "Public key generation should be deterministic"
+        );
 
         let signature1 = priv_key.sign(&message_hash);
         let signature2 = priv_key.sign(&message_hash);
-        assert_eq!(signature1, signature2, "Signature generation should be deterministic");
+        assert_eq!(
+            signature1, signature2,
+            "Signature generation should be deterministic"
+        );
     }
 
     #[test]
@@ -182,6 +206,9 @@ mod tests {
         let signature1 = priv_key.sign(&message_hash1);
         let signature2 = priv_key.sign(&message_hash2);
 
-        assert_ne!(signature1, signature2, "Different messages should produce different signatures");
+        assert_ne!(
+            signature1, signature2,
+            "Different messages should produce different signatures"
+        );
     }
 }
