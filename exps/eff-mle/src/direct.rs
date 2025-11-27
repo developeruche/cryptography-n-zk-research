@@ -76,4 +76,21 @@ mod tests {
         let result = mle_eval_direct(&points, &evals);
         assert_eq!(result, Fr::from(136));
     }
+
+    #[test]
+    fn test_direct_mle_eval_0() {
+        let evals = vec![
+            Fr::from(1),
+            Fr::from(2),
+            Fr::from(3),
+            Fr::from(4),
+            Fr::from(5),
+            Fr::from(6),
+            Fr::from(7),
+            Fr::from(8),
+        ];
+        let points = vec![Fr::from(2), Fr::from(3), Fr::from(4)];
+        let result = mle_eval_direct(&points, &evals);
+        assert_eq!(result, Fr::from(19));
+    }
 }
