@@ -7,3 +7,4 @@ edition = "2024"
 ark-ff = "0.4.2"
 field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
 ark-test-curves.workspace = true
+ark-std.workspace = true

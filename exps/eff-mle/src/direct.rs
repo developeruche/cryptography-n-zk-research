@@ -48,7 +48,7 @@ pub fn eq_funcs<F: Field>(points: &[F]) -> Vec<F> {
     evals
 }
 
-pub fn mle_eval<F: Field>(points: &[F], evals: &[F]) -> F {
+pub fn mle_eval_direct<F: Field>(points: &[F], evals: &[F]) -> F {
     let m = points.len();
     assert_eq!(evals.len(), 1 << m, "Evaluations size must match 2^m");
 
@@ -73,7 +73,7 @@ mod tests {
     fn test_direct_mle_eval() {
         let evals = vec![Fr::from(3), Fr::from(1), Fr::from(2), Fr::from(5)];
         let points = vec![Fr::from(5), Fr::from(6)];
-        let result = mle_eval(&points, &evals);
+        let result = mle_eval_direct(&points, &evals);
         assert_eq!(result, Fr::from(136));
     }
 }

@@ -443,6 +443,7 @@ name = "eff-mle"
 version = "0.1.0"
 dependencies = [
  "ark-ff",
+ "ark-std",
  "ark-test-curves",
  "field-tracker",
 ]
