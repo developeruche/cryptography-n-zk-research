@@ -1,0 +1,17 @@
+[package]
+name = "eff-mle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ark-ff = "0.4.2"
+field-tracker = { git = "https://github.com/sublinearlabs/field-tracker", branch = "main"}
+ark-test-curves.workspace = true
+ark-std.workspace = true
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "mle_bench"
+harness = false
