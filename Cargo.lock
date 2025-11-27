@@ -445,6 +445,7 @@ dependencies = [
  "ark-ff",
  "ark-std",
  "ark-test-curves",
+ "criterion",
  "field-tracker",
 ]
 

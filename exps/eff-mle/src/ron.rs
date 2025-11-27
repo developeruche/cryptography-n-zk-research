@@ -78,10 +78,13 @@ mod tests {
 
     use super::*;
     use ark_test_curves::bls12_381::Fr;
-    
+
     fn create_rand_vec<F: Field>(num_vars: u32) -> Vec<F> {
         let rand_engine = &mut ark_std::test_rng();
-        (0..num_vars).into_iter().map(|_| F::rand(rand_engine)).collect()
+        (0..num_vars)
+            .into_iter()
+            .map(|_| F::rand(rand_engine))
+            .collect()
     }
 
     #[test]
@@ -92,7 +95,7 @@ mod tests {
         let result = mle_eval_ron_optimized(&evals, &points);
         assert_eq!(result, Fr::from(136));
     }
-    
+
     #[test]
     fn test_ron_vs_direct() {
         const NUM_VAR: u32 = 10;
