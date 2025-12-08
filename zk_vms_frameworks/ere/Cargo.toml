@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ere-zkvm-interface = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-zkvm-interface" }
-ere-platform-trait = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c" }
-ere-dockerized = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-dockerized" }
-ere-io = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-io" }
+ere-zkvm-interface = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6", package = "ere-zkvm-interface" }
+ere-platform-trait = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6" }
+ere-dockerized = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6", package = "ere-dockerized" }
+ere-io = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6", package = "ere-io" }
+ere-sp1 = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6", default-features = false, features = ["compiler", "zkvm"] }

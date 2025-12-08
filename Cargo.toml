@@ -37,7 +37,8 @@ exclude = [
     "zk_vms_frameworks/zisk/keccak",
     "zk_vms_frameworks/zisk/exec_eth_block",
     "zk_vms_frameworks/misc/exec-block",
-    "zk_vms_frameworks/ere/guest-programs/sp1"
+    "zk_vms_frameworks/ere/guest-programs/sp1",
+    "zk_vms_frameworks/ere/"
 ]
 
 
