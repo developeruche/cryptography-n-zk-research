@@ -1,0 +1,10 @@
+[package]
+name = "ere-play"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ere-zkvm-interface = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-zkvm-interface" }
+ere-platform-trait = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c" }
+ere-dockerized = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-dockerized" }
+ere-io = { git = "https://github.com/eth-applied-research-group/ere", rev = "6266b242edad2d315b753155a6538ea900be2b9c", package = "ere-io" }
