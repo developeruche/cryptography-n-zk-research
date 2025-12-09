@@ -1,0 +1,15 @@
+[package]
+name = "ere-sp1"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reth-stateless = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
+ere-platform-sp1 = { git = "https://github.com/eth-applied-research-group/ere", rev = "2ede04de0d5993aa505624ab18dfcb810637c2d6", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+reth-chainspec = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
+reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
+reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
+sparsestate = { git = "https://github.com/eth-act/zkvm-ethereum-mpt.git", tag = "v0.4.0" }
+sha2 = { version = "0.10.9", default-features = false }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
