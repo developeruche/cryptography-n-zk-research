@@ -5,6 +5,7 @@ pub mod evaluation;
 pub mod interface;
 pub mod multilinear;
 pub mod multivariate;
+pub mod stacked_mle;
 pub mod univariant;
 pub mod utils;
 pub mod virtual_polynomial;
