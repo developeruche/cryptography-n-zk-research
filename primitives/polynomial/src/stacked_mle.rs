@@ -67,18 +67,6 @@ impl<F: Field> StackedMle<F> {
     }
 }
 
-fn to_bits<F: Field>(val: usize, len: usize) -> Vec<F> {
-    let mut bits = Vec::with_capacity(len);
-    for i in 0..len {
-        if (val >> i) & 1 == 1 {
-            bits.push(F::one());
-        } else {
-            bits.push(F::zero());
-        }
-    }
-    bits
-}
-
 pub fn eq_1_func<F: Field>(z_i: F, b_i: F) -> F {
     z_i * b_i + (F::one() - z_i) * (F::one() - b_i)
 }
