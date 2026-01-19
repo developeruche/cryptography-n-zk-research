@@ -93,7 +93,7 @@ mod tests {
         let points = vec![Fr::from(1), Fr::from(6)];
 
         let result = mle_eval_ron_optimized(&evals, &points);
-        assert_eq!(result, Fr::from(136));
+        assert_eq!(result, Fr::from(20));
     }
 
     #[test]

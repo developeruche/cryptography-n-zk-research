@@ -21,7 +21,7 @@ members = [
     "primitives/mpt" , 
     "arks/starks/stark101", 
     "digitial-signatures/winternitz-ots"
-, "exps/eff-mle"]
+, "exps/eff-mle", "primitives/m_tree"]
     
     
 exclude = [
