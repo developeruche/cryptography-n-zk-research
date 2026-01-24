@@ -1162,6 +1162,9 @@ dependencies = [
 [[package]]
 name = "stark101"
 version = "0.1.0"
+dependencies = [
+ "polynomial",
+]
 
 [[package]]
 name = "static_assertions"
