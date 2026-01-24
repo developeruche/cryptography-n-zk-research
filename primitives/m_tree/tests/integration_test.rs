@@ -47,15 +47,17 @@ fn test_merkle_proof_verification() {
     
     // m_tree
     let my_tree = MerkleTree::<MySha256>::from_leaves(&leaves);
-    let my_proof = my_tree.proof(&indices);
     
-    // Verify using my proof logic
-    let leaf_hashes: Vec<[u8; 32]> = indices.iter().map(|&i| leaves[i]).collect();
-    let valid = my_proof.verify(rs_root, &indices, &leaf_hashes, leaves.len());
-    
-    assert!(valid, "Proof should be valid");
-    
-    // Verify root calculation matches
-    let calculated_root = my_proof.root(&indices, &leaf_hashes, leaves.len()).unwrap();
-    assert_eq!(calculated_root, rs_root, "Calculated root from proof should match");
+    // Verify using my proof logic for each index individually
+    for &index in &indices {
+        let my_proof = my_tree.proof(index).expect("Proof generation should succeed");
+        let leaf_hash = leaves[index];
+        let valid = my_proof.verify(rs_root, index, leaf_hash, leaves.len());
+        
+        assert!(valid, "Proof should be valid for index {}", index);
+        
+        // Verify root calculation matches
+        let calculated_root = my_proof.root(index, leaf_hash, leaves.len()).unwrap();
+        assert_eq!(calculated_root, rs_root, "Calculated root from proof should match for index {}", index);
+    }
 }
