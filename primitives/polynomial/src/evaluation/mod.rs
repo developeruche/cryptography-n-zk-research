@@ -12,6 +12,8 @@ pub struct Domain<F: FftField> {
     pub(crate) size: u64,
     /// This is the generator of the domain, ofter regarded as the root of unity (omega)
     pub(crate) generator: F,
+    /// This is the offset of the domain (multiplicative coset factor)
+    pub(crate) offset: F,
     /// This is the inverse of the group generator
     pub(crate) group_gen_inverse: F,
     /// This is the inverse of the group size
@@ -23,8 +25,8 @@ impl<F: PrimeField> std::fmt::Display for Domain<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Domain: size = {}, generator = {}, group_gen_inverse = {}",
-            self.size, self.generator, self.group_gen_inverse
+            "Domain: size = {}, generator = {}, offset = {}, group_gen_inverse = {}",
+            self.size, self.generator, self.offset, self.group_gen_inverse
         )
     }
 }
@@ -46,31 +48,30 @@ impl<F: PrimeField> Domain<F> {
         Domain {
             size,
             generator,
+            offset: F::one(),
             group_gen_inverse,
             group_size_inverse,
         }
     }
 
     /// This function is used to obtain the coset of the domain
-    pub fn get_coset(&self, offest: usize) -> Self {
-        let generator = self.generator * F::from(offest as u64);
-        let group_gen_inverse = generator.inverse().unwrap();
-
+    pub fn get_coset(&self, offset: F) -> Self {
         Domain {
             size: self.size,
-            generator,
-            group_gen_inverse,
+            generator: self.generator,
+            offset: self.offset * offset,
+            group_gen_inverse: self.group_gen_inverse,
             group_size_inverse: self.group_size_inverse,
         }
     }
 
-    /// This function returns the roots of unity
+    /// This function returns the roots of unity (elements of the domain)
     pub fn get_roots_of_unity(&self) -> Vec<F> {
         // Initialize a vector to store the roots of unity
         let mut roots = Vec::with_capacity(self.size as usize);
 
-        // Start with the first root of unity (which is always 1)
-        let mut current = F::one();
+        // Start with the offset (which is 1 for the base domain)
+        let mut current = self.offset;
 
         // Get the generator (root of unity) omega
         let omega = self.generator;
@@ -89,8 +90,8 @@ impl<F: PrimeField> Domain<F> {
         // Initialize a vector to store the roots of unity
         let mut roots = Vec::with_capacity(self.size as usize);
 
-        // Start with the first root of unity (which is always 1)
-        let mut current = F::one();
+        // Start with the inverse of the offset
+        let mut current = self.offset.inverse().unwrap();
 
         // Get the generator (root of unity) omega
         let omega = self.group_gen_inverse;
@@ -123,6 +124,16 @@ impl<F: PrimeField> Domain<F> {
 
     pub fn fft_internal(&self, coeffs: &mut Vec<F>) {
         coeffs.resize(self.size as usize, F::zero());
+        
+        // If offset is not 1, we need to multiply by offset^i before FFT
+        if self.offset != F::one() {
+            let mut offset_pow = F::one();
+            for coeff in coeffs.iter_mut() {
+                *coeff *= offset_pow;
+                offset_pow *= self.offset;
+            }
+        }
+        
         serial_fft(coeffs, self.generator, self.size.trailing_zeros());
     }
 
@@ -131,9 +142,23 @@ impl<F: PrimeField> Domain<F> {
         serial_fft(evals, self.group_gen_inverse, self.size.trailing_zeros());
 
         // scaling down the resulting coefficients
-        evals
-            .iter_mut()
-            .for_each(|eval| *eval *= self.group_size_inverse); //TODO: This can be parallelized!
+        let scaling_factor = self.group_size_inverse;
+        
+        // If offset is not 1, we need to divide by offset^i (multiply by offset^-i)
+        // and also scale by group_size_inverse
+        if self.offset != F::one() {
+             let offset_inv = self.offset.inverse().unwrap();
+             let mut offset_pow_inv = F::one();
+             
+             for eval in evals.iter_mut() {
+                 *eval *= scaling_factor * offset_pow_inv;
+                 offset_pow_inv *= offset_inv;
+             }
+        } else {
+             evals
+                .iter_mut()
+                .for_each(|eval| *eval *= scaling_factor); //TODO: This can be parallelized!
+        }
     }
 
     pub fn size(&self) -> u64 {
@@ -147,11 +172,16 @@ impl<F: PrimeField> Domain<F> {
     pub fn group_gen_inverse(&self) -> F {
         self.group_gen_inverse
     }
+
+    pub fn offset(&self) -> F {
+        self.offset
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ark_ff::One;
     use ark_test_curves::bls12_381::Fr;
 
     #[test]
@@ -170,5 +200,27 @@ mod tests {
                 "26753076894533791554649012143113393549300550745003194222677083919072199473480"
             )
         );
+    }
+
+    #[test]
+    fn test_coset_properties() {
+        let domain = Domain::<Fr>::new(8);
+        assert_eq!(domain.offset, Fr::one());
+
+        // Create a coset with offset g (generator)
+        let offset = domain.generator;
+        let coset = domain.get_coset(offset);
+
+        assert_eq!(coset.offset, offset);
+        assert_eq!(coset.size, domain.size);
+        assert_eq!(coset.generator, domain.generator);
+
+        let roots = domain.get_roots_of_unity();
+        let coset_roots = coset.get_roots_of_unity();
+
+        // Verify coset roots are shifted: coset_root[i] = root[i] * offset
+        for (r, cr) in roots.iter().zip(coset_roots.iter()) {
+             assert_eq!(*cr, *r * offset);
+        }
     }
 }
