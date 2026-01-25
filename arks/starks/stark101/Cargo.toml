@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 polynomial.workspace = true
+ark-test-curves.workspace = true
+ark-ff.workspace = true
+m_tree.workspace = true

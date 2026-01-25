@@ -5,6 +5,7 @@
 //! and verification using custom hashers.
 
 use std::marker::PhantomData;
+pub use sha2::{Digest, Sha256};
 
 /// Trait for hashers used in the Merkle Tree.
 /// Implement this to define custom hashing logic.
@@ -116,6 +117,21 @@ pub struct MerkleProof<H: Hasher> {
     leaves_count: usize,
     _phantom: PhantomData<H>,
 }
+
+#[derive(Clone)]
+pub struct DefaultHasher;
+
+impl Hasher for DefaultHasher {
+    type Hash = [u8; 32];
+
+    fn hash(data: &[u8]) -> Self::Hash {
+        let mut hasher = Sha256::new();
+        hasher.update(data);
+        hasher.finalize().into()
+    }
+}
+
+pub type DefaultMerkleTree = MerkleTree<DefaultHasher>;
 
 impl<H: Hasher> MerkleProof<H> {
     /// Calculate the root from the proof and a leaf.
