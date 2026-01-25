@@ -41,6 +41,11 @@ impl<H: Hasher> MerkleTree<H> {
         self.layers.last().and_then(|layer| layer.first().cloned())
     }
 
+    /// Get the Merkle Root of the tree as a hex string.
+    pub fn root_to_hex(&self) -> Option<String> {
+        self.root().map(|r| hex::encode(r))
+    }
+
     /// Generate a Merkle proof for the given leaf index.
     pub fn proof(&self, index: usize) -> Option<MerkleProof<H>> {
         if index >= self.leaves.len() {

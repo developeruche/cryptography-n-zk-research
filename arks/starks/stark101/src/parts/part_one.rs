@@ -6,8 +6,20 @@ use polynomial::{ark_ff::PrimeField, interface::{PolynomialInterface, Univariant
 use ark_ff::BigInteger;
 
 
+    pub struct PartOneOutput<F: PrimeField> {
+        pub a: Vec<F>,
+        pub g: F,
+        pub G: Vec<F>,
+        pub h: F,
+        pub H: Vec<F>,
+        pub eval_domain: Vec<F>,
+        pub f: UnivariantPolynomial<F>,
+        pub f_eval: Vec<F>,
+        pub f_merkle: DefaultMerkleTree,
+    }
 
-pub fn part_one<F: PrimeField>() {
+
+pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
     // Trace of the computation
     // a_0, a_1, a_2, a_3,..., a_n
     // 1, g, g^2, g^3,..., g^n
@@ -50,9 +62,33 @@ pub fn part_one<F: PrimeField>() {
             DefaultHasher::hash(&bytes)
         })
         .collect::<Vec<[u8; 32]>>();
-    let commitment = DefaultMerkleTree::from_leaves(&low_degree_extension_leaves);
+    let merkle_tree = DefaultMerkleTree::from_leaves(&low_degree_extension_leaves);
     
-    println!("Commitment: {:?}", commitment.root());
+    println!("Commitment: {:?}", merkle_tree.root_to_hex());
+
+
+    // should return;
+    // 1. a --> trace
+    // 2. g --> g
+    // 3. G --> domain
+    // 4. h --> coset_factor
+    // 5. H --> h_s
+    // 6. eval_domain --> ext_domain
+    // 7. f --> f_of_g
+    // 8. f_eval --> low_degree_extension
+    // 9. f_merkle --> merkle_tree
+
+    PartOneOutput {
+        a: trace,
+        g,
+        G: domain,
+        h: coset_factor,
+        H: h_s,
+        eval_domain: ext_domain,
+        f: f_of_g,
+        f_eval: low_degree_extension,
+        f_merkle: merkle_tree,
+    }
 }
 
 
