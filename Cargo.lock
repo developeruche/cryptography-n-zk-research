@@ -1160,6 +1160,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "simple-lean-sig"
+version = "0.1.0"
+
+[[package]]
 name = "stark101"
 version = "0.1.0"
 dependencies = [
