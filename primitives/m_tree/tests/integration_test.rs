@@ -1,4 +1,4 @@
-use m_tree::{MerkleTree, Hasher};
+use m_tree::{Hasher, MerkleTree};
 use rs_merkle::{MerkleTree as RSMerkleTree, algorithms::Sha256 as RSSha256};
 use sha2::{Digest, Sha256};
 
@@ -17,13 +17,7 @@ impl Hasher for MySha256 {
 
 #[test]
 fn test_merkle_tree_root_compatibility() {
-    let leaves: Vec<[u8; 32]> = vec![
-        [1u8; 32],
-        [2u8; 32],
-        [3u8; 32],
-        [4u8; 32],
-        [5u8; 32],
-    ];
+    let leaves: Vec<[u8; 32]> = vec![[1u8; 32], [2u8; 32], [3u8; 32], [4u8; 32], [5u8; 32]];
 
     // rs_merkle
     let rs_tree = RSMerkleTree::<RSSha256>::from_leaves(&leaves);
@@ -44,20 +38,26 @@ fn test_merkle_proof_verification() {
     let rs_tree = RSMerkleTree::<RSSha256>::from_leaves(&leaves);
     let rs_root = rs_tree.root().unwrap();
     let indices = vec![1, 3, 4];
-    
+
     // m_tree
     let my_tree = MerkleTree::<MySha256>::from_leaves(&leaves);
-    
+
     // Verify using my proof logic for each index individually
     for &index in &indices {
-        let my_proof = my_tree.proof(index).expect("Proof generation should succeed");
+        let my_proof = my_tree
+            .proof(index)
+            .expect("Proof generation should succeed");
         let leaf_hash = leaves[index];
         let valid = my_proof.verify(rs_root, index, leaf_hash, leaves.len());
-        
+
         assert!(valid, "Proof should be valid for index {}", index);
-        
+
         // Verify root calculation matches
         let calculated_root = my_proof.root(index, leaf_hash, leaves.len()).unwrap();
-        assert_eq!(calculated_root, rs_root, "Calculated root from proof should match for index {}", index);
+        assert_eq!(
+            calculated_root, rs_root,
+            "Calculated root from proof should match for index {}",
+            index
+        );
     }
 }

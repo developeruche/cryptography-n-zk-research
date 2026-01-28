@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+rand = "0.9"
+anyhow = { workspace = true }
+
+[dev-dependencies]
+leansig = { git = "https://github.com/leanEthereum/leanSig.git", rev = "73bedc26ed961b110df7ac2e234dc11361a4bf25" }

@@ -1,23 +1,25 @@
 //! Part One of the Stark101 course
 //! - Low degree Extension
 //! - Commitment
-use m_tree::{DefaultMerkleTree, DefaultHasher, Hasher};
-use polynomial::{ark_ff::PrimeField, interface::{PolynomialInterface, UnivariantPolynomialInterface}, univariant::UnivariantPolynomial};
 use ark_ff::BigInteger;
+use m_tree::{DefaultHasher, DefaultMerkleTree, Hasher};
+use polynomial::{
+    ark_ff::PrimeField,
+    interface::{PolynomialInterface, UnivariantPolynomialInterface},
+    univariant::UnivariantPolynomial,
+};
 
-
-    pub struct PartOneOutput<F: PrimeField> {
-        pub a: Vec<F>,
-        pub g: F,
-        pub G: Vec<F>,
-        pub h: F,
-        pub H: Vec<F>,
-        pub eval_domain: Vec<F>,
-        pub f: UnivariantPolynomial<F>,
-        pub f_eval: Vec<F>,
-        pub f_merkle: DefaultMerkleTree,
-    }
-
+pub struct PartOneOutput<F: PrimeField> {
+    pub a: Vec<F>,
+    pub g: F,
+    pub G: Vec<F>,
+    pub h: F,
+    pub H: Vec<F>,
+    pub eval_domain: Vec<F>,
+    pub f: UnivariantPolynomial<F>,
+    pub f_eval: Vec<F>,
+    pub f_merkle: DefaultMerkleTree,
+}
 
 pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
     // Trace of the computation
@@ -37,7 +39,7 @@ pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
         let next = trace[trace.len() - 1].square() + trace[trace.len() - 2].square();
         trace.push(next);
     }
-    
+
     // print first 5 and last 5 elements of the trace
     for i in 0..5 {
         println!("trace[{}] = {}", i, trace[i]);
@@ -51,10 +53,15 @@ pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
     let domain = (0..1024).map(|i| g.pow([i as u64])).collect::<Vec<F>>();
     let f_of_g = UnivariantPolynomial::interpolate(trace.clone(), domain.clone());
     let root_of_unity = F::GENERATOR;
-    let coset_factor = root_of_unity.pow([t/8192]);
-    let h_s = (0..8192).map(|i| coset_factor.pow([i as u64])).collect::<Vec<F>>();
+    let coset_factor = root_of_unity.pow([t / 8192]);
+    let h_s = (0..8192)
+        .map(|i| coset_factor.pow([i as u64]))
+        .collect::<Vec<F>>();
     let ext_domain = h_s.iter().map(|h| *h * g).collect::<Vec<F>>();
-    let low_degree_extension = ext_domain.iter().map(|x| f_of_g.evaluate(x)).collect::<Vec<F>>();
+    let low_degree_extension = ext_domain
+        .iter()
+        .map(|x| f_of_g.evaluate(x))
+        .collect::<Vec<F>>();
     let low_degree_extension_leaves = low_degree_extension
         .iter()
         .map(|x| {
@@ -63,9 +70,8 @@ pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
         })
         .collect::<Vec<[u8; 32]>>();
     let merkle_tree = DefaultMerkleTree::from_leaves(&low_degree_extension_leaves);
-    
-    println!("Commitment: {:?}", merkle_tree.root_to_hex());
 
+    println!("Commitment: {:?}", merkle_tree.root_to_hex());
 
     // should return;
     // 1. a --> trace
@@ -90,14 +96,3 @@ pub fn part_one<F: PrimeField>() -> PartOneOutput<F> {
         f_merkle: merkle_tree,
     }
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -124,7 +124,7 @@ impl<F: PrimeField> Domain<F> {
 
     pub fn fft_internal(&self, coeffs: &mut Vec<F>) {
         coeffs.resize(self.size as usize, F::zero());
-        
+
         // If offset is not 1, we need to multiply by offset^i before FFT
         if self.offset != F::one() {
             let mut offset_pow = F::one();
@@ -133,7 +133,7 @@ impl<F: PrimeField> Domain<F> {
                 offset_pow *= self.offset;
             }
         }
-        
+
         serial_fft(coeffs, self.generator, self.size.trailing_zeros());
     }
 
@@ -143,21 +143,19 @@ impl<F: PrimeField> Domain<F> {
 
         // scaling down the resulting coefficients
         let scaling_factor = self.group_size_inverse;
-        
+
         // If offset is not 1, we need to divide by offset^i (multiply by offset^-i)
         // and also scale by group_size_inverse
         if self.offset != F::one() {
-             let offset_inv = self.offset.inverse().unwrap();
-             let mut offset_pow_inv = F::one();
-             
-             for eval in evals.iter_mut() {
-                 *eval *= scaling_factor * offset_pow_inv;
-                 offset_pow_inv *= offset_inv;
-             }
+            let offset_inv = self.offset.inverse().unwrap();
+            let mut offset_pow_inv = F::one();
+
+            for eval in evals.iter_mut() {
+                *eval *= scaling_factor * offset_pow_inv;
+                offset_pow_inv *= offset_inv;
+            }
         } else {
-             evals
-                .iter_mut()
-                .for_each(|eval| *eval *= scaling_factor); //TODO: This can be parallelized!
+            evals.iter_mut().for_each(|eval| *eval *= scaling_factor); //TODO: This can be parallelized!
         }
     }
 
@@ -220,7 +218,7 @@ mod tests {
 
         // Verify coset roots are shifted: coset_root[i] = root[i] * offset
         for (r, cr) in roots.iter().zip(coset_roots.iter()) {
-             assert_eq!(*cr, *r * offset);
+            assert_eq!(*cr, *r * offset);
         }
     }
 }

@@ -3,15 +3,11 @@ use sha2::{Digest, Sha256 as RustSha256};
 
 #[test]
 fn test_rs_merkle_odd_nodes() {
-    let leaves: Vec<[u8; 32]> = vec![
-        [1u8; 32],
-        [2u8; 32],
-        [3u8; 32],
-    ];
+    let leaves: Vec<[u8; 32]> = vec![[1u8; 32], [2u8; 32], [3u8; 32]];
 
     let tree = RSMerkleTree::<Sha256>::from_leaves(&leaves);
     let root = tree.root();
-    
+
     // Calculate manually
     // H(a,b)
     let mut h = RustSha256::new();
