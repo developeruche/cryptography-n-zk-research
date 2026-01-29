@@ -1,19 +1,27 @@
 use rand::RngCore;
 use sha2::{Digest, Sha256};
 
-// --- Constants & Type Aliases ---
+/// The output size of the hash function (SHA-256), in bytes.
+const HASH_SIZE: usize = 32;
 
-/// The number of fragments in a key, determined by the hash output size.
-/// For SHA-256, this is 32 bytes.
-const L: usize = 32;
+/// The number of message chunks (bytes) in the input hash.
+const L1: usize = 32;
+
+/// The number of checksum chunks needed.
+/// Max checksum value = L1 * (W - 1) approx 8160.
+/// 8160 fits in 2 bytes (base 256).
+const L2: usize = 2;
+
+/// The total number of fragments in a key (message parts + checksum parts).
+const L: usize = L1 + L2;
+
 /// The Winternitz parameter, representing the number of possible values for each message chunk.
 /// Using `w=8` bits per chunk, so `W = 2^8 = 256`.
 const W: u16 = 256;
 
 /// A type alias for a single key fragment or a message hash.
-type Fragment = [u8; L];
+type Fragment = [u8; HASH_SIZE];
 
-// --- Structs ---
 
 /// Represents a WOTS private key, composed of L randomly generated fragments.
 #[derive(Debug, Default)]
@@ -33,7 +41,6 @@ pub struct WotsSignature {
     keys: Vec<Fragment>,
 }
 
-// --- Implementations ---
 
 impl WotsPrivateKey {
     /// Generates a new random private key.
@@ -41,7 +48,7 @@ impl WotsPrivateKey {
         let mut rng = rand::thread_rng();
         let mut keys = Vec::with_capacity(L);
         for _ in 0..L {
-            let mut key_fragment = [0u8; L];
+            let mut key_fragment = [0u8; HASH_SIZE];
             rng.fill_bytes(&mut key_fragment);
             keys.push(key_fragment);
         }
@@ -61,10 +68,12 @@ impl WotsPrivateKey {
 
     /// Signs a message hash with the private key.
     pub fn sign(&self, message_hash: &Fragment) -> WotsSignature {
+        let cs = checksum(message_hash);
+
         let signature_keys = self
             .keys
             .iter()
-            .zip(message_hash.iter())
+            .zip(message_hash.iter().chain(cs.iter()))
             .map(|(priv_key_fragment, &msg_byte)| {
                 let iterations = W - (msg_byte as u16);
                 hash_chain(priv_key_fragment, iterations)
@@ -81,11 +90,18 @@ impl WotsPublicKey {
     /// It works by "recovering" the public key from the signature and message,
     /// then checking if it matches the known public key.
     pub fn verify(&self, message_hash: &Fragment, signature: &WotsSignature) -> bool {
+        if signature.keys.len() != L {
+            return false;
+        }
+
+        // Calculate the checksum from the MESSAGE, not the signature.
+        let cs = checksum(message_hash);
+
         // Re-calculate the public key from the signature and message hash.
         let recovered_keys: Vec<Fragment> = signature
             .keys
             .iter()
-            .zip(message_hash.iter())
+            .zip(message_hash.iter().chain(cs.iter()))
             .map(|(sig_fragment, &msg_byte)| {
                 let iterations = msg_byte as u16;
                 hash_chain(sig_fragment, iterations)
@@ -97,7 +113,6 @@ impl WotsPublicKey {
     }
 }
 
-// --- Private Helper Functions ---
 
 /// Performs a hash chain operation: `H(H(...H(start)...))` for `iterations` times.
 fn hash_chain(start: &Fragment, iterations: u16) -> Fragment {
@@ -110,7 +125,18 @@ fn hash_chain(start: &Fragment, iterations: u16) -> Fragment {
     result
 }
 
-// --- Tests ---
+/// Calculates the checksum for a given message.
+/// C = Sum(W - msg_byte) for all bytes in the message.
+/// Returns the checksum as big-endian bytes (base W / 256).
+fn checksum(msg: &[u8]) -> Vec<u8> {
+    let mut c: u16 = 0;
+    for &byte in msg {
+        c += W - (byte as u16);
+    }
+    // Convert to 2 bytes (big-endian)
+    vec![(c >> 8) as u8, (c & 0xFF) as u8]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -124,15 +150,12 @@ mod tests {
 
     #[test]
     fn signature_verification_success() {
-        // 1. Generate key pair
         let priv_key = WotsPrivateKey::new();
         let pub_key = priv_key.to_public();
 
-        // 2. Create and sign a message
         let message_hash = hash_message("This is a test message");
         let signature = priv_key.sign(&message_hash);
 
-        // 3. Verify the signature
         assert!(
             pub_key.verify(&message_hash, &signature),
             "Signature should be valid"
@@ -141,16 +164,13 @@ mod tests {
 
     #[test]
     fn signature_verification_fail_wrong_key() {
-        // 1. Generate two different key pairs
         let priv_key1 = WotsPrivateKey::new();
         let pub_key1 = priv_key1.to_public(); // The "correct" public key
         let priv_key2 = WotsPrivateKey::new(); // Used to generate the signature
 
-        // 2. Sign message with the wrong private key
         let message_hash = hash_message("Another message");
         let signature = priv_key2.sign(&message_hash);
 
-        // 3. Verify against the correct public key (should fail)
         assert!(
             !pub_key1.verify(&message_hash, &signature),
             "Verification should fail for a signature from a different key"
@@ -159,18 +179,14 @@ mod tests {
 
     #[test]
     fn signature_verification_fail_wrong_message() {
-        // 1. Generate key pair
         let priv_key = WotsPrivateKey::new();
         let pub_key = priv_key.to_public();
 
-        // 2. Create two different messages
         let original_message_hash = hash_message("Original message");
         let tampered_message_hash = hash_message("Tampered message!");
 
-        // 3. Sign the original message
         let signature = priv_key.sign(&original_message_hash);
 
-        // 4. Try to verify the signature against the tampered message (should fail)
         assert!(
             !pub_key.verify(&tampered_message_hash, &signature),
             "Verification should fail for a tampered message"
@@ -210,5 +226,24 @@ mod tests {
             signature1, signature2,
             "Different messages should produce different signatures"
         );
+    }
+
+    #[test]
+    fn test_checksum_calculation() {
+        // Case 1: Message of all zeros (max checksum)
+        // Each byte contributes W - 0 = 256
+        // Total = 32 * 256 = 8192
+        // 8192 in hex is 0x2000 -> [0x20, 0x00]
+        let msg_zeros = [0u8; L1];
+        let cs_zeros = checksum(&msg_zeros);
+        assert_eq!(cs_zeros, vec![0x20, 0x00], "Checksum for all zeros should be 8192");
+
+        // Case 2: Message of all 255s (min checksum)
+        // Each byte contributes W - 255 = 1
+        // Total = 32 * 1 = 32
+        // 32 in hex is 0x0020 -> [0x00, 0x20]
+        let msg_ones = [255u8; L1];
+        let cs_ones = checksum(&msg_ones);
+        assert_eq!(cs_ones, vec![0x00, 0x20], "Checksum for all 255s should be 32");
     }
 }
