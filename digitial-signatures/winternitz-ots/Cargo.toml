@@ -4,5 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-rand = "0.8"
+p3-field = "0.4.2"
+p3-goldilocks = "0.4.2"
+p3-mds = "0.4.2"
+p3-poseidon2 = "0.4.2"
+p3-symmetric = "0.4.2"
+rand = "0.9"
 sha2 = "0.10.8"
