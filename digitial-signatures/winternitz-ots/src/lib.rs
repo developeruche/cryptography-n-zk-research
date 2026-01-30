@@ -1,6 +1,8 @@
 use rand::RngCore;
 use sha2::{Digest, Sha256};
 
+pub mod poseidon2;
+
 /// The output size of the hash function (SHA-256), in bytes.
 const HASH_SIZE: usize = 32;
 
@@ -45,7 +47,7 @@ pub struct WotsSignature {
 impl WotsPrivateKey {
     /// Generates a new random private key.
     pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut keys = Vec::with_capacity(L);
         for _ in 0..L {
             let mut key_fragment = [0u8; HASH_SIZE];
