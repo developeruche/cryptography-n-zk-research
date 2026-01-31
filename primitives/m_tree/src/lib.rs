@@ -4,8 +4,8 @@
 //! This library provides efficient tree construction, multi-proof generation,
 //! and verification using custom hashers.
 
-use std::marker::PhantomData;
 pub use sha2::{Digest, Sha256};
+use std::marker::PhantomData;
 
 /// Trait for hashers used in the Merkle Tree.
 /// Implement this to define custom hashing logic.
@@ -140,7 +140,12 @@ pub type DefaultMerkleTree = MerkleTree<DefaultHasher>;
 
 impl<H: Hasher> MerkleProof<H> {
     /// Calculate the root from the proof and a leaf.
-    pub fn root(&self, index: usize, leaf_hash: H::Hash, total_leaves_count: usize) -> Option<H::Hash> {
+    pub fn root(
+        &self,
+        index: usize,
+        leaf_hash: H::Hash,
+        total_leaves_count: usize,
+    ) -> Option<H::Hash> {
         if index >= total_leaves_count || total_leaves_count != self.leaves_count {
             return None;
         }
@@ -176,7 +181,13 @@ impl<H: Hasher> MerkleProof<H> {
     }
 
     /// Verify the proof against a known root.
-    pub fn verify(&self, root: H::Hash, index: usize, leaf_hash: H::Hash, total_leaves_count: usize) -> bool {
+    pub fn verify(
+        &self,
+        root: H::Hash,
+        index: usize,
+        leaf_hash: H::Hash,
+        total_leaves_count: usize,
+    ) -> bool {
         self.root(index, leaf_hash, total_leaves_count) == Some(root)
     }
 }
