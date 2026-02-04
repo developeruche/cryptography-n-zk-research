@@ -21,7 +21,7 @@ members = [
     "primitives/mpt" , 
     "arks/starks/stark101", 
     "digitial-signatures/winternitz-ots"
-, "exps/eff-mle", "primitives/m_tree"]
+, "exps/eff-mle", "primitives/m_tree", "digitial-signatures/xmss-sha256"]
     
     
 exclude = [
@@ -57,6 +57,8 @@ product_check = {path = "iops/product_check"}
 pcs = {path = "pcs"}
 gkr = {path = "iops/gkr"}
 m_tree = {path = "primitives/m_tree"}
+winternitz-ots = {path = "digitial-signatures/winternitz-ots"}
+
 
 
 # arkworks

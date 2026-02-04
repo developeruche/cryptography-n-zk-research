@@ -1822,6 +1822,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "xmss-sha256"
+version = "0.1.0"
+dependencies = [
+ "m_tree",
+ "winternitz-ots",
+]
+
+[[package]]
 name = "zero_check"
 version = "0.1.0"
 dependencies = [

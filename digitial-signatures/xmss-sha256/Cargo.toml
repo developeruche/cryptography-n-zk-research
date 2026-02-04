@@ -1,0 +1,8 @@
+[package]
+name = "xmss-sha256"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+winternitz-ots.workspace = true
+m_tree.workspace = true

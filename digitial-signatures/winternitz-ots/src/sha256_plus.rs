@@ -1,5 +1,5 @@
 use rand::RngCore;
-use sha2::{Digest, Sha256};
+pub use sha2::{Digest, Sha256};
 
 /// The output size of the hash function (SHA-256), in bytes.
 const HASH_SIZE: usize = 32;
@@ -117,7 +117,7 @@ impl WotsPrivateKey {
     /// Iterates through `ctr` from 0 to `max_attempts` to find a counter value
     /// that results in a message digest (message || ctr) which minimizes verification cost.
     /// Returns the signature and the selected counter.
-    pub fn sign_optimized(&self, message: &[u8], max_attempts: u8) -> (WotsSignature, u8) {
+    pub fn sign_optimized(&self, message: &[u8], max_attempts: u32) -> (WotsSignature, u32) {
         let mut best_ctr = 0;
         let mut best_score = 0;
         let mut best_digest = [0u8; HASH_SIZE];
@@ -128,7 +128,7 @@ impl WotsPrivateKey {
 
         for ctr in 0..=max_attempts {
             let mut hasher = base_hasher.clone();
-            hasher.update(&[ctr]);
+            hasher.update(&ctr.to_be_bytes());
             let digest: Fragment = hasher.finalize().into();
 
             let cs = checksum(&digest);
@@ -184,6 +184,16 @@ impl WotsPublicKey {
             .collect();
 
         self.keys == recovered_keys
+    }
+
+    /// Hash the public key
+    pub fn hash(&self) -> Fragment {
+        let mut hasher = Sha256::new();
+        for key in &self.keys {
+            hasher.update(key);
+        }
+        hasher.update(&self.pub_seed);
+        hasher.finalize().into()
     }
 }
 
@@ -330,7 +340,7 @@ mod tests {
         // Reconstruct the message hash used in signing: H(message || ctr)
         let mut hasher = Sha256::new();
         hasher.update(message);
-        hasher.update(&[ctr]);
+        hasher.update(&ctr.to_be_bytes());
         let message_hash: Fragment = hasher.finalize().into();
 
         // Verify using the standard verify method
@@ -349,7 +359,7 @@ mod tests {
         // 1. Calculate score for default counter (ctr=0) for comparison
         let mut hasher = Sha256::new();
         hasher.update(message);
-        hasher.update(&[0]);
+        hasher.update(&0u32.to_be_bytes());
         let default_digest: Fragment = hasher.finalize().into();
 
         let default_cs = checksum(&default_digest);
@@ -366,7 +376,7 @@ mod tests {
         // We need to recover the digest used
         let mut hasher = Sha256::new();
         hasher.update(message);
-        hasher.update(&[ctr]);
+        hasher.update(&ctr.to_be_bytes());
         let opt_digest: Fragment = hasher.finalize().into();
 
         let opt_cs = checksum(&opt_digest);

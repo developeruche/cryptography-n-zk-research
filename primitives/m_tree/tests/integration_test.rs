@@ -48,12 +48,12 @@ fn test_merkle_proof_verification() {
             .proof(index)
             .expect("Proof generation should succeed");
         let leaf_hash = leaves[index];
-        let valid = my_proof.verify(rs_root, index, leaf_hash, leaves.len());
+        let valid = my_proof.verify(&rs_root, index, &leaf_hash, leaves.len());
 
         assert!(valid, "Proof should be valid for index {}", index);
 
         // Verify root calculation matches
-        let calculated_root = my_proof.root(index, leaf_hash, leaves.len()).unwrap();
+        let calculated_root = my_proof.root(index, &leaf_hash, leaves.len()).unwrap();
         assert_eq!(
             calculated_root, rs_root,
             "Calculated root from proof should match for index {}",

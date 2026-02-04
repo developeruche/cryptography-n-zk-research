@@ -123,7 +123,7 @@ pub struct MerkleProof<H: Hasher> {
     _phantom: PhantomData<H>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DefaultHasher;
 
 impl Hasher for DefaultHasher {
@@ -143,14 +143,14 @@ impl<H: Hasher> MerkleProof<H> {
     pub fn root(
         &self,
         index: usize,
-        leaf_hash: H::Hash,
+        leaf_hash: &H::Hash,
         total_leaves_count: usize,
     ) -> Option<H::Hash> {
         if index >= total_leaves_count || total_leaves_count != self.leaves_count {
             return None;
         }
 
-        let mut current_hash = leaf_hash;
+        let mut current_hash = leaf_hash.clone();
         let mut current_index = index;
         let mut proof_iter = self.proof_hashes.iter();
         let mut cur_len = total_leaves_count;
@@ -183,11 +183,11 @@ impl<H: Hasher> MerkleProof<H> {
     /// Verify the proof against a known root.
     pub fn verify(
         &self,
-        root: H::Hash,
+        root: &H::Hash,
         index: usize,
-        leaf_hash: H::Hash,
+        leaf_hash: &H::Hash,
         total_leaves_count: usize,
     ) -> bool {
-        self.root(index, leaf_hash, total_leaves_count) == Some(root)
+        self.root(index, leaf_hash, total_leaves_count) == Some(root.clone())
     }
 }
