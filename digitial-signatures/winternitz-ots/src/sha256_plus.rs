@@ -111,6 +111,46 @@ impl WotsPrivateKey {
             keys: signature_keys,
         }
     }
+
+    /// Signs a message using the "Rapid Verification" optimization.
+    ///
+    /// Iterates through `ctr` from 0 to `max_attempts` to find a counter value
+    /// that results in a message digest (message || ctr) which minimizes verification cost.
+    /// Returns the signature and the selected counter.
+    pub fn sign_optimized(&self, message: &[u8], max_attempts: u8) -> (WotsSignature, u8) {
+        let mut best_ctr = 0;
+        let mut best_score = 0;
+        let mut best_digest = [0u8; HASH_SIZE];
+
+        // Pre-compute the hash state with the message
+        let mut base_hasher = Sha256::new();
+        base_hasher.update(message);
+
+        for ctr in 0..=max_attempts {
+            let mut hasher = base_hasher.clone();
+            hasher.update(&[ctr]);
+            let digest: Fragment = hasher.finalize().into();
+
+            let cs = checksum(&digest);
+
+            // Calculate score: Sum of all chain values (v_i)
+            // Verification cost is proportional to sum(W - 1 - v_i).
+            // Maximizing sum(v_i) minimizes verification cost.
+            let score: u32 = digest.iter().chain(cs.iter()).map(|&x| x as u32).sum();
+
+            if score > best_score {
+                best_score = score;
+                best_ctr = ctr;
+                best_digest = digest;
+            }
+        }
+
+        // If max_attempts is 0 (or loop didn't run effectively for some reason),
+        // ensure we have a valid digest for the initial case.
+        // The loop above executes at least once for 0..=0, so best_digest is always set.
+
+        (self.sign(&best_digest), best_ctr)
+    }
 }
 
 impl WotsPublicKey {
@@ -275,5 +315,75 @@ mod tests {
         assert_ne!(r1, r2);
         assert_ne!(r1, r3);
         assert_ne!(r2, r3);
+    }
+
+    #[test]
+    fn test_sign_optimized() {
+        let priv_key = WotsPrivateKey::new();
+        let pub_key = priv_key.to_public();
+        let message = b"Optimize this message for rapid verification";
+        let max_attempts = 255;
+
+        // Perform optimized signing
+        let (signature, ctr) = priv_key.sign_optimized(message, max_attempts);
+
+        // Reconstruct the message hash used in signing: H(message || ctr)
+        let mut hasher = Sha256::new();
+        hasher.update(message);
+        hasher.update(&[ctr]);
+        let message_hash: Fragment = hasher.finalize().into();
+
+        // Verify using the standard verify method
+        assert!(
+            pub_key.verify(&message_hash, &signature),
+            "Optimized signature verification failed"
+        );
+    }
+
+    #[test]
+    fn test_optimization_gain() {
+        let priv_key = WotsPrivateKey::new();
+        let message = b"Benchmark optimization gain";
+        let max_attempts = 255;
+
+        // 1. Calculate score for default counter (ctr=0) for comparison
+        let mut hasher = Sha256::new();
+        hasher.update(message);
+        hasher.update(&[0]);
+        let default_digest: Fragment = hasher.finalize().into();
+
+        let default_cs = checksum(&default_digest);
+        let default_score: u32 = default_digest
+            .iter()
+            .chain(default_cs.iter())
+            .map(|&x| x as u32)
+            .sum();
+
+        // 2. Perform optimization
+        let (_signature, ctr) = priv_key.sign_optimized(message, max_attempts);
+
+        // 3. Calculate optimized score
+        // We need to recover the digest used
+        let mut hasher = Sha256::new();
+        hasher.update(message);
+        hasher.update(&[ctr]);
+        let opt_digest: Fragment = hasher.finalize().into();
+
+        let opt_cs = checksum(&opt_digest);
+        let opt_score: u32 = opt_digest
+            .iter()
+            .chain(opt_cs.iter())
+            .map(|&x| x as u32)
+            .sum();
+
+        println!("Default score (ctr=0): {}", default_score);
+        println!("Optimized score (ctr={}): {}", ctr, opt_score);
+
+        // The optimized score should be greater than or equal to the default score
+        // (It could be equal if 0 happened to be the best, or if max_attempts is 0)
+        assert!(
+            opt_score >= default_score,
+            "Optimization failed to improve score"
+        );
     }
 }
